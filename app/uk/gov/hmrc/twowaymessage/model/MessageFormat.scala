@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.twowaymessage.model
 
-import play.api.libs.json.Json
-import reactivemongo.bson.BSONObjectID
+import play.api.libs.json._
 
-case class TwoWayMessage(recipient: Recipient,
-                         subject: String,
-                         content: Option[String] = None
-                        ) {
+object MessageFormat {
 
-  //{
-  // "recipient":{
-  //   "taxIdentifier":{
-  //     "name":"HMRC_ID",
-  //     "value":"AB123456C"
-  //   },
-  //   "email":"someEmail@test.com"
-  // },
-  // "subject":"QUESTION",
-  // "content":"Some base64-encoded HTML",
-  //}
+  import uk.gov.hmrc.twowaymessage.model.CommonFormats._
+
+  implicit val externalRefWrites: OWrites[ExternalRef] = Json.writes[ExternalRef]
+
+  implicit val detailsWrites: OWrites[Details] =  Json.writes[Details]
+
+  implicit val messageWrites: OWrites[Message] = Json.writes[Message]
+
 }
+
+case class Message(externalRef: ExternalRef, recipient: Recipient, messageType: String, subject: String, content: String, details: Details)
+
+case class ExternalRef(id: String, source: String)
+
+case class Details(formId: String)

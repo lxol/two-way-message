@@ -16,6 +16,38 @@
 
 package uk.gov.hmrc.twowaymessage.model
 
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+object CommonFormats {
+
+  implicit val taxIdentifierReads: Reads[TaxIdentifier] =
+    ((__ \ "name").read[String] and
+      (__ \ "value").read[String].filter(_.matches("[A-Z]{2}[0-9]{6}[A-Z]{1}"))
+      ) {
+      (name, value) =>
+        TaxIdentifier(
+          name,
+          value
+        )
+    }
+  implicit val taxIdentifierWrites: Writes[TaxIdentifier] = Json.writes[TaxIdentifier]
+
+  implicit val recipientReads: Reads[Recipient] = Json.reads[Recipient]
+
+  implicit val recipientWrites: Writes[Recipient] = Json.writes[Recipient]
+
+  implicit val errorWrites: Writes[Error] = Json.writes[Error]
+
+}
 case class Recipient(taxIdentifier: TaxIdentifier, email: String)
 
 case class TaxIdentifier(name: String, value: String)
+
+case class Error(error: Int, message: String)
+
+
+
+
+
+

@@ -15,27 +15,37 @@
  */
 
 package uk.gov.hmrc.twowaymessage.controllers
-import com.google.inject.Inject
-import play.api.libs.json.{JsValue, Json, Reads}
+
+import javax.inject.Inject
+import play.api.Logger
+import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController, BaseController}
+import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
+import uk.gov.hmrc.twowaymessage.model.MessageFormat._
+import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessage
-import scala.concurrent.ExecutionContext.Implicits.global._
+import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
+
 import scala.concurrent.{ExecutionContext, Future}
 
-class TwoWayMessageController @Inject()(cc: ControllerComponents, executionContext: ExecutionContext) extends BackendController(cc){
-  def createMessage(queueId: String):Action[JsValue] = Action.async(parse.json) {
+class TwoWayMessageController @Inject()(twms: TwoWayMessageService)
+                                       (implicit ec: ExecutionContext) extends InjectedController with WithJsonBody {
+
+  private val logger = Logger(this.getClass)
+
+
+  def createMessage(queueId: String): Action[JsValue] = Action.async(parse.json) {
+        logger.debug("Queue ID:" + queueId)
     implicit request =>
-      withJsonBody[TwoWayMessage] { twoWayMessage => {
-        Future {
-          Created(Json.obj("id" -> "57bac7e90b0000490000b7cf"))
-        }
-      }
-
-      }
+      validate(request.body)
   }
 
-  override protected def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]): Future[Result] = {
-  ???
+  def validate(requestBody: JsValue): Future[Result] = {
+    requestBody.validate[TwoWayMessage] match {
+      case s: JsSuccess[_] => twms.post(requestBody.as[TwoWayMessage])
+      case e: JsError => Future.successful(BadRequest(Json.obj("error" -> "OK", "message" -> JsError.toJson(e))))
+    }
   }
+
+
 }
