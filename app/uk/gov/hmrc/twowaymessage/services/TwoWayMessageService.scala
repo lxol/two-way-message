@@ -18,13 +18,14 @@ package uk.gov.hmrc.twowaymessage.services
 
 import java.util.UUID
 import java.util.UUID.randomUUID
+import java.util.concurrent.TimeUnit
 
 import com.google.inject.Inject
 import play.api.http.Status._
 import play.api.libs.json._
-import play.api.mvc.Result
+import play.api.mvc.{Result, Results}
 import play.api.mvc.Results._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model.CommonFormats._
 import uk.gov.hmrc.twowaymessage.model.Error
@@ -36,30 +37,45 @@ class TwoWayMessageService @Inject()(messageConnector: MessageConnector)(implici
 
   implicit val hc = HeaderCarrier()
 
-  def createJsonBody(twoWayMessage: TwoWayMessage): Message = {
+  def post(twoWayMessage: TwoWayMessage): Future[Result] = {
+    val body = createJsonForMessage(randomUUID.toString, twoWayMessage)
+    messageConnector.postMessage(body) map handleResponse
+  }
+
+  def postReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String): Future[Result] = {
+    for {
+      metadata <- messageConnector.getMessageMetadata(replyTo)
+      body = createJsonForReply(randomUUID.toString, metadata, twoWayMessageReply, replyTo)
+      response <- messageConnector.postMessage(body)
+    } yield handleResponse(response)
+  }
+
+  def handleResponse(response: HttpResponse): Result = response.status match {
+    case CREATED => Created(Json.parse(response.body))
+    case _ => BadGateway(Json.toJson(Error(response.status, response.body)))
+  }
+
+  def createJsonForMessage(id: String, twoWayMessage: TwoWayMessage): Message =
     Message(
-      ExternalRef(
-        randomUUID.toString(),
-        "2WSM-CUSTOMER"
-        ),
+      ExternalRef(id, "2WSM"),
       twoWayMessage.recipient,
-      "2WSM-customer",
+      "2wsm-customer",
       twoWayMessage.subject,
       twoWayMessage.content.getOrElse(""),
-      Details(
-        "2WSM-question"
-      )
+      Details("2WSM-question", None)
+    )
+
+  def createJsonForReply(id: String, metadata: MessageMetadata, reply: TwoWayMessageReply, replyTo: String): Message = {
+    Message(
+      ExternalRef(id, "2WSM"),
+      Recipient(
+        TaxIdentifier(metadata.recipient.identifier.name, metadata.recipient.identifier.value),
+        metadata.recipient.email.getOrElse("")
+      ),
+      "2wsm-advisor",
+      s"RE: ${metadata.subject}",
+      reply.content,
+      Details("2WSM-reply", Some(replyTo))
     )
   }
-
-  def post(twoWayMessage: TwoWayMessage): Future[Result] = {
-    val body = createJsonBody(twoWayMessage)
-    messageConnector.postMessage(body) map (
-      response =>
-        response.status match {
-          case OK => Created(Json.toJson("id" -> body.externalRef.id))
-          case _ => BadGateway(Json.toJson(Error(response.status,response.body)))
-      })
-  }
-
 }

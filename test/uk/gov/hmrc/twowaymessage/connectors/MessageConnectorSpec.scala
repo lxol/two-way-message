@@ -62,15 +62,15 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
       "someEmail@test.com"
     ),
     "2wsm-customer",
-    "QUESTION",
+    "SUBJECT",
     "SGVsbG8gV29ybGQ=",
     Details("2WSM-question")
   )
 
   "POST message connector" should {
-    "return 201" in {
 
-      val usedJson =
+    "return 201" in {
+      val jsonResponseBody =
         """
           |{
           |   "externalRef":{
@@ -85,7 +85,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
           |      "email":"someEmail@test.com"
           |   },
           |   "messageType":"2wsm-customer",
-          |   "subject":"QUESTION",
+          |   "subject":"SUBJECT",
           |   "content":"SGVsbG8gV29ybGQ=",
           |   "details":{
           |      "formId":"2WSM-question"
@@ -94,11 +94,9 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
         """.stripMargin
 
       givenThat(
-        post(urlEqualTo("/messages")).
-          withRequestBody(equalToJson(usedJson)).
-          willReturn(aResponse().
-            withStatus(Status.CREATED)
-          ))
+        post(urlEqualTo("/messages"))
+          .withRequestBody(equalToJson(jsonResponseBody))
+          .willReturn(aResponse().withStatus(Status.CREATED)))
 
       val result = await(messageConnector.postMessage(messageExample)(new HeaderCarrier()))
       result.status shouldBe(201)
@@ -106,6 +104,41 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
     SharedMetricRegistries.clear
   }
 
+  "GET message metadata via message connector" should {
+
+    "returns 200 successfully for a valid replyTo message identifier" in {
+      val jsonResponseBody =
+        """
+          |{
+          |   "id": "5c18eb166f0000110204b160",
+          |   "recipient": {
+          |      "regime": "REGIME",
+          |      "identifier": {
+          |         "name":"HMRC-NI",
+          |         "value":"AB123456C"
+          |      },
+          |      "email":"someEmail@test.com"
+          |   },
+          |   "subject":"SUBJECT"
+          |}
+        """.stripMargin
+
+      val replyTo = "replyToId"
+      givenThat(
+        get(urlEqualTo(s"/messages/${replyTo}/original"))
+          .willReturn(aResponse()
+            .withStatus(Status.OK)
+            .withBody(jsonResponseBody)))
+
+      val result = await(messageConnector.getMessageMetadata(replyTo)(new HeaderCarrier()))
+      result.id shouldBe "5c18eb166f0000110204b160"
+      result.recipient.identifier shouldBe TaxIdWithName("HMRC-NI","AB123456C")
+      result.recipient.email shouldBe Some("someEmail@test.com")
+      result.recipient.regime shouldBe "REGIME"
+      result.subject shouldBe "SUBJECT"
+    }
+    SharedMetricRegistries.clear
+  }
 }
 
 trait WithWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {

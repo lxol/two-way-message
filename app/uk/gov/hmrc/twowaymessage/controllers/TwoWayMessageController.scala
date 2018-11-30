@@ -16,36 +16,44 @@
 
 package uk.gov.hmrc.twowaymessage.controllers
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
-import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
-import uk.gov.hmrc.twowaymessage.model.TwoWayMessage
+import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class TwoWayMessageController @Inject()(twms: TwoWayMessageService)
                                        (implicit ec: ExecutionContext) extends InjectedController with WithJsonBody {
 
   private val logger = Logger(this.getClass)
 
-
+  // Customer creating a two-way message
   def createMessage(queueId: String): Action[JsValue] = Action.async(parse.json) {
-        logger.debug("Queue ID:" + queueId)
-    implicit request =>
-      validate(request.body)
+    implicit request => validateAndPostMessage(request.body)
   }
 
-  def validate(requestBody: JsValue): Future[Result] = {
+  // Validates the customer's response payload and then posts the message
+  def validateAndPostMessage(requestBody: JsValue): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
-      case s: JsSuccess[_] => twms.post(requestBody.as[TwoWayMessage])
+      case _: JsSuccess[_] => twms.post(requestBody.as[TwoWayMessage])
       case e: JsError => Future.successful(BadRequest(Json.obj("error" -> "OK", "message" -> JsError.toJson(e))))
-    }
   }
 
+  // Advisor replying to a customer message
+  def createAdvisorResponse(replyTo: String): Action[JsValue] = Action.async(parse.json) {
+    implicit request => validateAndPostAdvisorResponse(request.body, replyTo)
+  }
 
+  // Validates the advisor response payload and then posts the reply
+  def validateAndPostAdvisorResponse(requestBody: JsValue, replyTo: String): Future[Result] =
+    requestBody.validate[TwoWayMessageReply] match {
+      case _: JsSuccess[_] => twms.postReply(requestBody.as[TwoWayMessageReply], replyTo)
+      case e: JsError => Future.successful(BadRequest(Json.obj("error" -> "OK", "message" -> JsError.toJson(e))))
+  }
 }

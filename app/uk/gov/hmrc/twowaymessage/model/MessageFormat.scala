@@ -26,12 +26,29 @@ object MessageFormat {
 
   implicit val detailsWrites: OWrites[Details] =  Json.writes[Details]
 
+  implicit val externalRef: Reads[ExternalRef] = Json.reads[ExternalRef]
+
+  implicit val details: Reads[Details] = Json.reads[Details]
+
+  implicit val messageReads: Reads[Message] = Json.reads[Message]
+
   implicit val messageWrites: OWrites[Message] = Json.writes[Message]
 
+  implicit val taxIdWithNameReads: Reads[TaxIdWithName] = Json.reads[TaxIdWithName]
+
+  implicit val taxEntityReads: Reads[TaxEntity] = Json.reads[TaxEntity]
+
+  implicit val messageMetadataReads: Reads[MessageMetadata] = Json.reads[MessageMetadata]
 }
 
 case class Message(externalRef: ExternalRef, recipient: Recipient, messageType: String, subject: String, content: String, details: Details)
 
 case class ExternalRef(id: String, source: String)
 
-case class Details(formId: String)
+case class Details(formId: String, replyTo: Option[String] = None)
+
+final case class TaxIdWithName(name: String, value: String)
+
+final case class TaxEntity(regime: String, identifier: TaxIdWithName, email: Option[String] = None)
+
+final case class MessageMetadata(id: String, recipient: TaxEntity, subject: String)

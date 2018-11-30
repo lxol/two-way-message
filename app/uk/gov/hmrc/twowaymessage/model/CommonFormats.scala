@@ -45,9 +45,3 @@ case class Recipient(taxIdentifier: TaxIdentifier, email: String)
 case class TaxIdentifier(name: String, value: String)
 
 case class Error(error: Int, message: String)
-
-
-
-
-
-
