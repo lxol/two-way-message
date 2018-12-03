@@ -12,13 +12,13 @@ Example JSON body in POST request:
 { 
     "recipient":{
         "taxIdentifier":{
-            "name":"HMRC_ID",
+            "name":"nino",
             "value":"AB123456C"
         },
         "email":"someEmail@test.com"
     },
     "subject":"QUESTION",
-    "content":"Some base64-encoded HTML",
+    "content":"SGVsbG8gV29ybGQ=",
 }
 ```
 
