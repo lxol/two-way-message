@@ -51,7 +51,7 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
       |    {
       |      "recipient":{
       |        "taxIdentifier":{
-      |          "name":"HMRC_ID",
+      |          "name":"nino",
       |          "value":"AB123456C"
       |        },
       |        "email":"someEmail@test.com"
@@ -65,7 +65,7 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
       |       {
       |        "recipient":{
       |        "taxIdentifier":{
-      |          "name":"HMRC_ID",
+      |          "name":"nino",
       |          "value":"abc"
       |        },
       |        "email":"someEmail@test.com"

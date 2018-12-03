@@ -55,7 +55,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
   val twoWayMessageExample = TwoWayMessage(
     Recipient(
       TaxIdentifier(
-        "HMRC_ID",
+        "nino",
         "AB123456C"
       ),
       "someEmail@test.com"

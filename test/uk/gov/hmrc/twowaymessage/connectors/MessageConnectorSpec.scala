@@ -79,7 +79,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
           |   },
           |   "recipient":{
           |      "taxIdentifier":{
-          |         "name":"HMRC-NI",
+          |         "name":"nino",
           |         "value":"AB123456C"
           |      },
           |      "email":"someEmail@test.com"
