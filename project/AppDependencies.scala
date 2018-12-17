@@ -33,7 +33,7 @@ object AppDependencies {
 
   val test = Set(
     "uk.gov.hmrc" %% "hmrctest" % "3.2.0" % "test,it",
-    "uk.gov.hmrc" %% "service-integration-test" % "0.3.0" % "test,it",
+    "uk.gov.hmrc" %% "service-integration-test" % "0.4.0-play-26-SNAPSHOT" % "test,it",
     "org.scalatest" %% "scalatest" % "3.0.5" % "test",
     "com.typesafe.play" %% "play-test" % current % "test",
     "org.mockito" % "mockito-core" % "2.23.4" % "test",
