@@ -40,6 +40,6 @@ class MessageConnector @Inject()(httpClient: HttpClient, servicesConfig: Service
 
   def getMessageMetadata(replyTo: String)(implicit hc: HeaderCarrier): Future[MessageMetadata] = {
     import MessageMetadata._
-    httpClient.GET[MessageMetadata](s"$messageBaseUrl/messages/${replyTo}/original")
+    httpClient.GET[MessageMetadata](s"$messageBaseUrl/messages/${replyTo}/metadata")
   }
 }

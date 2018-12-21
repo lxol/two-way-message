@@ -125,7 +125,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
 
       val replyTo = "replyToId"
       givenThat(
-        get(urlEqualTo(s"/messages/${replyTo}/original"))
+        get(urlEqualTo(s"/messages/${replyTo}/metadata"))
           .willReturn(aResponse()
             .withStatus(Status.OK)
             .withBody(jsonResponseBody)))
