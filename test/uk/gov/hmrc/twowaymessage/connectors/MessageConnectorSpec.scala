@@ -26,13 +26,13 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Mode
 import play.api.http.Status
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import play.api.test.Helpers._
 import uk.gov.hmrc.twowaymessage.model._
-import play.api.inject.bind
 
 import scala.concurrent.ExecutionContext
 

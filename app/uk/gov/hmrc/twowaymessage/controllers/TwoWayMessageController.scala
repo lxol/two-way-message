@@ -20,6 +20,10 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.retrieve.Retrievals
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
 import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
@@ -28,14 +32,45 @@ import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TwoWayMessageController @Inject()(twms: TwoWayMessageService)
-                                       (implicit ec: ExecutionContext) extends InjectedController with WithJsonBody {
+class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConnector: AuthConnector)
+                                       (implicit ec: ExecutionContext) extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
   private val logger = Logger(this.getClass)
 
   // Customer creating a two-way message
   def createMessage(queueId: String): Action[JsValue] = Action.async(parse.json) {
-    implicit request => validateAndPostMessage(request.body)
+    implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    authorised().retrieve(Retrievals.nino) {
+      case Some(id) => {
+        val taxIdfromAuth = Json.parse(s"""
+        | {
+        |   "taxIdentifier":{
+        |      "name":"nino",
+        |      "value":"${id}"
+        |      }
+        | }""".stripMargin).as[JsObject]
+
+        val updatedBody = request.body.transform((__ \ 'recipient \ 'taxIdentifier).json.prune
+          andThen (__ \ 'recipient).json.update(
+            __.read[JsObject].map { o => o ++ taxIdfromAuth }
+          )).get
+        validateAndPostMessage(updatedBody)
+      }
+      case _ => {
+        Logger.debug("Can not retrieve user's nino, returning Forbidden - Not Authorised Error")
+        Future.successful(Forbidden(Json.toJson("Not authorised")))
+      }
+
+    } recover {
+      case _: NoActiveSession =>
+        Logger.debug("Request did not have an Active Session, returning Unauthorised - Unauthenticated Error")
+        Unauthorized(Json.toJson("Not authenticated"))
+
+      case _ =>
+        Logger.debug("Request has an active session but was not authorised, returning Forbidden - Not Authorised Error")
+        Forbidden(Json.toJson("Not authorised"))
+    }
   }
 
   // Validates the customer's message payload and then posts the message

@@ -25,7 +25,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-health" % "3.8.0-play-26",
     "com.google.inject" % "guice" % "4.2.0",
     "com.kenshoo" %% "metrics-play" % "2.6.6_0.6.2",
-    "com.typesafe.play" %% "play" % "2.6.20",
+    "com.typesafe.play" %% "play" % "2.6.10",
     "com.typesafe.play" %% "play-functional" % "2.6.10",
     "com.typesafe.play" %% "play-json" % "2.6.10",
     "javax.inject" % "javax.inject" % "1"
@@ -33,6 +33,7 @@ object AppDependencies {
 
   val test = Set(
     "uk.gov.hmrc" %% "hmrctest" % "3.2.0" % "test,it",
+    "uk.gov.hmrc" %% "auth-test" % "999-SNAPSHOT" % "it",
     "uk.gov.hmrc" %% "service-integration-test" % "0.4.0-play-26" % "test,it",
     "org.scalatest" %% "scalatest" % "3.0.5" % "test",
     "com.typesafe.play" %% "play-test" % current % "test",

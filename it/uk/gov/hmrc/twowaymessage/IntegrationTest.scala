@@ -1,28 +1,44 @@
 package uk.gov.hmrc.twowaymessage
 
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSClient
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.integration.ServiceSpec
+import uk.gov.hmrc.test.it.CanCreateAuthority
 
-class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
-  def externalServices: Seq[String] = Seq("datastream", "auth", "message")
+class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
+  def externalServices: Seq[String] = Seq("datastream", "auth", "message", "auth-login-api")
 
+  implicit val defaultTimeout: FiniteDuration = Duration(15, TimeUnit.SECONDS)
+
+  override def authResource(r: String) = externalResource("auth-login-api", r)
+
+  override def httpClient = app.injector.instanceOf[WSClient]
   override def additionalConfig: Map[String, _] = Map("auditing.consumer.baseUri.port" -> externalServicePorts("datastream"))
 
+  val nino = Nino("CE100000D")
+
+  val authHeader =
+    governmentGatewayAuthority()
+      .withNino(nino)
+      .bearerTokenHeader()
 
   "Creating a message" should {
-    "Should be successful given valid json" in {
-      val wsClient = app.injector.instanceOf[WSClient]
+    "be successful given valid json" in {
+      // val wsClient = app.injector.instanceOf[WSClient]
       val content = UUID.randomUUID().toString
+
       val jsonString =
         s"""
            | {
-           |   "recipient": { "taxIdentifier" : { "name" : "sautr", "value" : "AB012345A"}, "email": "test@test.com"},
+           |   "recipient": { "email": "test@test.com"},
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"
@@ -30,48 +46,55 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
     """.stripMargin
 
       val message = Json.parse(jsonString).as[JsObject]
-      val response = wsClient.url(resource("/two-way-message/message/customer/0/submit")).post(message).futureValue
+      val response = httpClient.url(resource("/two-way-message/message/customer/0/submit")).withHeaders(authHeader).post(message).futureValue
 
       response.status shouldBe 201
     }
-  }
 
-  "Should fail given invalid json" in {
-    val wsClient = app.injector.instanceOf[WSClient]
-    val content = UUID.randomUUID().toString
-    val jsonString =
-      s"""
+    "fail given invalid json" in {
+      val content = UUID.randomUUID().toString
+      val jsonString =
+        s"""
          | {
-         |   "recipient": { "taxIdentifier" : { "name" : "sautr", "value" : "AB012345A"}, "email": "test@test.com"},
+         |   "recipient": { "email": "test@test.com"},
          |   "content": "$content",
          |   "replyTo": "replyTo"
          | }
     """.stripMargin
 
-    val message = Json.parse(jsonString).as[JsObject]
-    val response = wsClient.url(resource("/two-way-message/message/customer/0/submit")).post(message).futureValue
+      val message = Json.parse(jsonString).as[JsObject]
+      val response = httpClient.url(resource("/two-way-message/message/customer/0/submit")).withHeaders(authHeader).post(message).futureValue
 
-    response.status shouldBe 400
+      response.status shouldBe 400
+    }
   }
-
 }
 
-class IntegrationTestWithoutMessage extends WordSpec with Matchers with ServiceSpec  {
+class IntegrationTestWithoutMessage extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
-  def externalServices: Seq[String] = Seq("datastream", "auth")
+  def externalServices: Seq[String] = Seq("datastream", "auth", "auth-login-api")
 
+  implicit val defaultTimeout: FiniteDuration = Duration(15, TimeUnit.SECONDS)
+  override def authResource(r: String) = externalResource("auth-login-api", r)
+
+  override def httpClient = app.injector.instanceOf[WSClient]
+
+  val nino = Nino("CE100000D")
+
+  val authHeader =
+    governmentGatewayAuthority()
+      .withNino(nino)
+      .bearerTokenHeader()
 
   override def additionalConfig: Map[String, _] = Map("auditing.consumer.baseUri.port" -> externalServicePorts("datastream"))
 
-
-  "Creating a message" should {
-    "Should be successful given valid json" in {
-      val wsClient = app.injector.instanceOf[WSClient]
+  "Creating a message if message microservice is unavailable" should {
+    "fail even with a valid json" in {
       val content = UUID.randomUUID().toString
       val jsonString =
         s"""
            | {
-           |   "recipient": { "taxIdentifier" : { "name" : "sautr", "value" : "AB012345A"}, "email": "test@test.com"},
+           |   "recipient": {"email": "test@test.com"},
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"
@@ -79,10 +102,9 @@ class IntegrationTestWithoutMessage extends WordSpec with Matchers with ServiceS
     """.stripMargin
 
       val message = Json.parse(jsonString).as[JsObject]
-      val response = wsClient.url(resource("/two-way-message/message/customer/0/submit")).post(message).futureValue
+      val response = httpClient.url(resource("/two-way-message/message/customer/0/submit")).withHeaders(authHeader).post(message).futureValue
 
       response.status shouldBe 502
     }
   }
-
 }
