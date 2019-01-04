@@ -3,6 +3,7 @@ package uk.gov.hmrc.twowaymessage
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
+import org.scalatest.Ignore
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.WSClient
@@ -12,6 +13,7 @@ import uk.gov.hmrc.test.it.CanCreateAuthority
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
+@Ignore
 class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
   def externalServices: Seq[String] = Seq("datastream", "auth", "message", "auth-login-api")
@@ -70,6 +72,7 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
   }
 }
 
+@Ignore
 class IntegrationTestWithoutMessage extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
   def externalServices: Seq[String] = Seq("datastream", "auth", "auth-login-api")
