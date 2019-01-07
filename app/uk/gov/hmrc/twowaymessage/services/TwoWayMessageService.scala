@@ -16,32 +16,29 @@
 
 package uk.gov.hmrc.twowaymessage.services
 
-import java.util.UUID
 import java.util.UUID.randomUUID
-import java.util.concurrent.TimeUnit
 
 import com.google.inject.Inject
 import play.api.http.Status._
 import play.api.libs.json._
-import play.api.mvc.{Result, Results}
+import play.api.mvc.Result
 import play.api.mvc.Results._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model.CommonFormats._
-import uk.gov.hmrc.twowaymessage.model.Error
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
-import uk.gov.hmrc.twowaymessage.model._
+import uk.gov.hmrc.twowaymessage.model.{Error, _}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ExecutionContext, Future}
 
 class TwoWayMessageService @Inject()(messageConnector: MessageConnector)(implicit ec: ExecutionContext) {
 
   implicit val hc = HeaderCarrier()
 
-  def post(ninoId: String, twoWayMessage: TwoWayMessage): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, MessageType.Customer, FormId.Question, twoWayMessage, ninoId)
+  def post(nino: Nino, twoWayMessage: TwoWayMessage): Future[Result] = {
+    val body = createJsonForMessage(randomUUID.toString, MessageType.Customer, FormId.Question, twoWayMessage, nino)
     messageConnector.postMessage(body) map {
       handleResponse
     } recover handleError
@@ -84,8 +81,8 @@ class TwoWayMessageService @Inject()(messageConnector: MessageConnector)(implici
   def createJsonForMessage(id: String,
                            messageType: MessageType,
                            formId: FormId,
-                           twoWayMessage: TwoWayMessage, ninoId: String): Message = {
-    val recipient = Recipient(TaxIdentifier("nino", ninoId), twoWayMessage.email)
+                           twoWayMessage: TwoWayMessage, nino: Nino): Message = {
+    val recipient = Recipient(TaxIdentifier(nino.name, nino.value), twoWayMessage.email)
     Message(
       ExternalRef(id, "2WSM"),
       recipient,

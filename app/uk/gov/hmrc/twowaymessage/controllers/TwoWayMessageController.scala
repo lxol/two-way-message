@@ -22,6 +22,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
@@ -42,9 +43,7 @@ class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConne
     implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised().retrieve(Retrievals.nino) {
-      case Some(ninoId) => {
-        validateAndPostMessage(ninoId, request.body)
-      }
+      case Some(ninoId) => validateAndPostMessage(Nino(ninoId), request.body)
       case _ => {
         Logger.debug("Can not retrieve user's nino, returning Forbidden - Not Authorised Error")
         Future.successful(Forbidden(Json.toJson("Not authorised")))
@@ -62,9 +61,9 @@ class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConne
   }
 
   // Validates the customer's message payload and then posts the message
-  def validateAndPostMessage(ninoId: String,requestBody: JsValue): Future[Result] =
+  def validateAndPostMessage(nino: Nino,requestBody: JsValue): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
-      case _: JsSuccess[_] => twms.post(ninoId, requestBody.as[TwoWayMessage])
+      case _: JsSuccess[_] => twms.post(nino, requestBody.as[TwoWayMessage])
       case e: JsError => Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> JsError.toJson(e))))
     }
 

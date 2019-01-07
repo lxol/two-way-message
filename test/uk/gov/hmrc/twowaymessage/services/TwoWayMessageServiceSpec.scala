@@ -28,6 +28,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.mvc.Http
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -35,7 +36,6 @@ import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.parsing.json.JSONObject
 
 class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
@@ -56,7 +56,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
   "TwoWayMessageService.post" should {
 
-    val ninoId = "AB123456C"
+    val nino = Nino("AB123456C")
     val twoWayMessageExample = TwoWayMessage(
       "someEmail@test.com",
       "Question",
@@ -80,14 +80,14 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           )
         )
 
-      val messageResult = await(messageService.post(ninoId, twoWayMessageExample))
+      val messageResult = await(messageService.post(nino, twoWayMessageExample))
       messageResult.header.status shouldBe 201
     }
 
     "return 502 (Bad Gateway) when posting a message to the message service fails" in {
       when(mockMessageConnector.postMessage(any[Message])(any[HeaderCarrier]))
         .thenReturn(Future.successful(HttpResponse(Http.Status.BAD_REQUEST)))
-      val messageResult = await(messageService.post(ninoId, twoWayMessageExample))
+      val messageResult = await(messageService.post(nino, twoWayMessageExample))
       messageResult.header.status shouldBe 502
     }
 
@@ -242,8 +242,8 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         "QUESTION",
         Some("some base64-encoded-html"))
 
-      val ninoId = "AB123456C"
-      val actual = messageService.createJsonForMessage("123412342314",  MessageType.Customer, FormId.Question, originalMessage, ninoId)
+      val nino = Nino("AB123456C")
+      val actual = messageService.createJsonForMessage("123412342314",  MessageType.Customer, FormId.Question, originalMessage, nino)
       assert(actual.equals(expected))
     }
 

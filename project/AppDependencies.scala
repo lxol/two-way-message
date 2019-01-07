@@ -28,6 +28,7 @@ object AppDependencies {
     "com.typesafe.play" %% "play" % "2.6.10",
     "com.typesafe.play" %% "play-functional" % "2.6.10",
     "com.typesafe.play" %% "play-json" % "2.6.10",
+    "uk.gov.hmrc"       %% "domain"  % "5.3.0",
     "javax.inject" % "javax.inject" % "1"
   )
 

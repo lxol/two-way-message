@@ -30,6 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.test.Helpers._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
@@ -69,9 +70,9 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
   "TwoWayMessageController" should {
 
     "return 201 (Created) when a message is successfully created in the message service " in {
-      val ninoId = "AB123456C"
-      when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(ninoId), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
-      val result = await(controller.validateAndPostMessage(ninoId, twoWayMessageGood))
+      val nino = Nino("AB123456C")
+      when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(controller.validateAndPostMessage(nino, twoWayMessageGood))
       result.header.status shouldBe Status.CREATED
     }
 

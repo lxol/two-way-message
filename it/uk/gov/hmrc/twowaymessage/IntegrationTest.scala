@@ -34,7 +34,6 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
 
   "Creating a message" should {
     "be successful given valid json" in {
-      // val wsClient = app.injector.instanceOf[WSClient]
       val content = UUID.randomUUID().toString
 
       val jsonString =

@@ -30,6 +30,7 @@ import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments, MissingBearerToken}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessage
@@ -65,9 +66,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     "AuthConnector returns nino id " when  {
 
       "a message is successfully created in the message service, return 201 (Created)  " in {
-        val ninoId = "AB123456C"
-        mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.successful(Some(ninoId)))
-        when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(ninoId), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+        val nino = Nino("AB123456C")
+        mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.successful(Some(nino.value)))
+        when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
         val result = await(testTwoWayMessageController.createMessage("queueName")(fakeRequest1))
         status(result) shouldBe Status.CREATED
       }
