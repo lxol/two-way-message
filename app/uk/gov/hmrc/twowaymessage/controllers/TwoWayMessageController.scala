@@ -44,10 +44,9 @@ class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConne
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised().retrieve(Retrievals.nino) {
       case Some(ninoId) => validateAndPostMessage(Nino(ninoId), request.body)
-      case _ => {
+      case _ =>
         Logger.debug("Can not retrieve user's nino, returning Forbidden - Not Authorised Error")
         Future.successful(Forbidden(Json.toJson("Not authorised")))
-      }
 
     } recover {
       case _: NoActiveSession =>
