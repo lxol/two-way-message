@@ -29,7 +29,7 @@ object TwoWayMessageFormat {
   implicit val twoWayMessagReplyeWrites: Writes[TwoWayMessageReply] = Json.writes[TwoWayMessageReply]
 }
 
-case class TwoWayMessage(recipient: Recipient, subject: String, content: Option[String] = None, replyTo: Option[String] = None)
+case class TwoWayMessage(email: String, subject: String, content: Option[String] = None, replyTo: Option[String] = None)
 case class TwoWayMessageReply(content: String)
 
 object FormId extends Enumeration {

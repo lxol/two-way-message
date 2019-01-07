@@ -40,8 +40,8 @@ class TwoWayMessageService @Inject()(messageConnector: MessageConnector)(implici
 
   implicit val hc = HeaderCarrier()
 
-  def post(twoWayMessage: TwoWayMessage): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, MessageType.Customer, FormId.Question, twoWayMessage)
+  def post(ninoId: String, twoWayMessage: TwoWayMessage): Future[Result] = {
+    val body = createJsonForMessage(randomUUID.toString, MessageType.Customer, FormId.Question, twoWayMessage, ninoId)
     messageConnector.postMessage(body) map {
       handleResponse
     } recover handleError
@@ -84,15 +84,17 @@ class TwoWayMessageService @Inject()(messageConnector: MessageConnector)(implici
   def createJsonForMessage(id: String,
                            messageType: MessageType,
                            formId: FormId,
-                           twoWayMessage: TwoWayMessage): Message =
+                           twoWayMessage: TwoWayMessage, ninoId: String): Message = {
+    val recipient = Recipient(TaxIdentifier("nino", ninoId), twoWayMessage.email)
     Message(
       ExternalRef(id, "2WSM"),
-      twoWayMessage.recipient,
+      recipient,
       messageType,
       twoWayMessage.subject,
       twoWayMessage.content.getOrElse(""),
       Details(formId, None)
     )
+  }
 
   def createJsonForReply(id: String,
                          messageType: MessageType,

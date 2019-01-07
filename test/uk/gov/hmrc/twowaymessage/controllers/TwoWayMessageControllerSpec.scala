@@ -48,27 +48,7 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
   val twoWayMessageGood = Json.parse(
     """
       |    {
-      |      "recipient":{
-      |        "taxIdentifier":{
-      |          "name":"HMRC_ID",
-      |          "value":"AB123456C"
-      |        },
-      |        "email":"someEmail@test.com"
-      |      },
-      |      "subject":"QUESTION",
-      |      "content":"SGVsbG8gV29ybGQ="
-      |    }""".stripMargin)
-
-  val twoWayMessageBadIdentifier = Json.parse(
-    """
-      |       {
-      |        "recipient":{
-      |        "taxIdentifier":{
-      |          "name":"HMRC_ID",
-      |          "value":"abc"
-      |        },
-      |        "email":"someEmail@test.com"
-      |      },
+      |      "email":"someEmail@test.com",
       |      "subject":"QUESTION",
       |      "content":"SGVsbG8gV29ybGQ="
       |    }""".stripMargin)
@@ -89,14 +69,10 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
   "TwoWayMessageController" should {
 
     "return 201 (Created) when a message is successfully created in the message service " in {
-      when(mockMessageService.post(any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
-      val result = await(controller.validateAndPostMessage(twoWayMessageGood))
+      val ninoId = "AB123456C"
+      when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(ninoId), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(controller.validateAndPostMessage(ninoId, twoWayMessageGood))
       result.header.status shouldBe Status.CREATED
-    }
-
-    "return 400 (Bad Request) if the tax identifier is not supported " in {
-      val result = await(controller.validateAndPostMessage(twoWayMessageBadIdentifier))
-      result.header.status shouldBe Status.BAD_REQUEST
     }
 
     "return 201 (Created) when an advisor reply is successfully created in the message service " in {

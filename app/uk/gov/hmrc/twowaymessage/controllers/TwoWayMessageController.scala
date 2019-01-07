@@ -42,20 +42,8 @@ class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConne
     implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised().retrieve(Retrievals.nino) {
-      case Some(id) => {
-        val taxIdfromAuth = Json.parse(s"""
-        | {
-        |   "taxIdentifier":{
-        |      "name":"nino",
-        |      "value":"${id}"
-        |      }
-        | }""".stripMargin).as[JsObject]
-
-        val updatedBody = request.body.transform((__ \ 'recipient \ 'taxIdentifier).json.prune
-          andThen (__ \ 'recipient).json.update(
-            __.read[JsObject].map { o => o ++ taxIdfromAuth }
-          )).get
-        validateAndPostMessage(updatedBody)
+      case Some(ninoId) => {
+        validateAndPostMessage(ninoId, request.body)
       }
       case _ => {
         Logger.debug("Can not retrieve user's nino, returning Forbidden - Not Authorised Error")
@@ -74,9 +62,9 @@ class TwoWayMessageController @Inject()(twms: TwoWayMessageService,val authConne
   }
 
   // Validates the customer's message payload and then posts the message
-  def validateAndPostMessage(requestBody: JsValue): Future[Result] =
+  def validateAndPostMessage(ninoId: String,requestBody: JsValue): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
-      case _: JsSuccess[_] => twms.post(requestBody.as[TwoWayMessage])
+      case _: JsSuccess[_] => twms.post(ninoId, requestBody.as[TwoWayMessage])
       case e: JsError => Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> JsError.toJson(e))))
     }
 

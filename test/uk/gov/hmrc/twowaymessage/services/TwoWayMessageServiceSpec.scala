@@ -56,27 +56,16 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
   "TwoWayMessageService.post" should {
 
+    val ninoId = "AB123456C"
     val twoWayMessageExample = TwoWayMessage(
-      Recipient(
-        TaxIdentifier(
-          "HMRC_ID",
-          "AB123456C"
-        ),
-        "someEmail@test.com"
-      ),
+      "someEmail@test.com",
       "Question",
       Some("SGVsbG8gV29ybGQ="),
       Option.empty
     )
 
     val twoWayMessageReplyExample = TwoWayMessage(
-      Recipient(
-        TaxIdentifier(
-          "HMRC_ID",
-          "AB123456C"
-        ),
-        "someEmail@test.com"
-      ),
+      "someEmail@test.com",
       "Question",
       Some("SGVsbG8gV29ybGQ="),
       Option.apply("replyId")
@@ -91,14 +80,14 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           )
         )
 
-      val messageResult = await(messageService.post(twoWayMessageExample))
+      val messageResult = await(messageService.post(ninoId, twoWayMessageExample))
       messageResult.header.status shouldBe 201
     }
 
     "return 502 (Bad Gateway) when posting a message to the message service fails" in {
       when(mockMessageConnector.postMessage(any[Message])(any[HeaderCarrier]))
         .thenReturn(Future.successful(HttpResponse(Http.Status.BAD_REQUEST)))
-      val messageResult = await(messageService.post(twoWayMessageExample))
+      val messageResult = await(messageService.post(ninoId, twoWayMessageExample))
       messageResult.header.status shouldBe 502
     }
 
@@ -249,14 +238,12 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
 
       val originalMessage = TwoWayMessage(
-        Recipient(
-          TaxIdentifier("nino", "AB123456C"),
-          "email@test.com"
-        ),
+          "email@test.com",
         "QUESTION",
         Some("some base64-encoded-html"))
 
-      val actual = messageService.createJsonForMessage("123412342314",  MessageType.Customer, FormId.Question, originalMessage)
+      val ninoId = "AB123456C"
+      val actual = messageService.createJsonForMessage("123412342314",  MessageType.Customer, FormId.Question, originalMessage, ninoId)
       assert(actual.equals(expected))
     }
 

@@ -40,7 +40,7 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
       val jsonString =
         s"""
            | {
-           |   "recipient": { "email": "test@test.com"},
+           |   "email": "test@test.com",
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"
@@ -58,7 +58,7 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
       val jsonString =
         s"""
          | {
-         |   "recipient": { "email": "test@test.com"},
+         |   "email": "test@test.com",
          |   "content": "$content",
          |   "replyTo": "replyTo"
          | }
@@ -97,7 +97,7 @@ class IntegrationTestWithoutMessage extends WordSpec with Matchers with  CanCrea
       val jsonString =
         s"""
            | {
-           |   "recipient": {"email": "test@test.com"},
+           |   "email": "test@test.com",
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"

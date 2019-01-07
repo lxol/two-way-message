@@ -53,13 +53,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
   val twoWayMessageGood = Json.parse(
     """
       |    {
-      |      "recipient":{
-      |        "taxIdentifier":{
-      |          "name":"HMRC_ID",
-      |          "value":"AB123456C"
-      |        },
-      |        "email":"someEmail@test.com"
-      |      },
+      |      "email":"someEmail@test.com",
       |      "subject":"QUESTION",
       |      "content":"SGVsbG8gV29ybGQ="
       |    }""".stripMargin)
@@ -71,8 +65,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     "AuthConnector returns nino id " when  {
 
       "a message is successfully created in the message service, return 201 (Created)  " in {
-        mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.successful(Some("AB123456C")))
-        when(mockMessageService.post(any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+        val ninoId = "AB123456C"
+        mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.successful(Some(ninoId)))
+        when(mockMessageService.post(org.mockito.ArgumentMatchers.eq(ninoId), any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
         val result = await(testTwoWayMessageController.createMessage("queueName")(fakeRequest1))
         status(result) shouldBe Status.CREATED
       }
@@ -80,14 +75,12 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "AuthConnector doesn't return nino id, returns 403(FORBIDDEN) " in  {
       mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.successful(None))
-      when(mockMessageService.post(any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("queueName")(fakeRequest1))
       status(result) shouldBe Status.FORBIDDEN
     }
 
     "AuthConnector returns an exception that extends NoActiveSession, returns 401(UNAUTHORIZED) " in  {
       mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.failed(MissingBearerToken()))
-      when(mockMessageService.post(any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("queueName")(fakeRequest1))
       status(result) shouldBe Status.UNAUTHORIZED
     }
@@ -95,7 +88,6 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "AuthConnector returns an exception that doesn't extend NoActiveSession, returns 403(FORBIDDEN) " in  {
       mockAuthorise(EmptyPredicate, Retrievals.nino)(Future.failed(InsufficientEnrolments()))
-      when(mockMessageService.post(any[TwoWayMessage])).thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("queueName")(fakeRequest1))
       status(result) shouldBe Status.FORBIDDEN
     }
