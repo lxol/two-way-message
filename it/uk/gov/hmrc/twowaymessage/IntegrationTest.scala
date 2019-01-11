@@ -16,7 +16,7 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 @Ignore
 class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
-  def externalServices: Seq[String] = Seq("datastream", "auth", "message", "auth-login-api")
+  def externalServices: Seq[String] = Seq("datastream", "auth", "message", "user-details", "auth-login-api")
 
   implicit val defaultTimeout: FiniteDuration = Duration(15, TimeUnit.SECONDS)
 
@@ -39,7 +39,9 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
       val jsonString =
         s"""
            | {
-           |   "email": "test@test.com",
+           |   "contactDetails":{
+           |      "email": "someEmail@test.com"
+           |   },
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"
@@ -74,7 +76,7 @@ class IntegrationTest extends WordSpec with Matchers with  CanCreateAuthority wi
 @Ignore
 class IntegrationTestWithoutMessage extends WordSpec with Matchers with  CanCreateAuthority with ServiceSpec  {
 
-  def externalServices: Seq[String] = Seq("datastream", "auth", "auth-login-api")
+  def externalServices: Seq[String] = Seq("datastream", "auth", "user-details", "auth-login-api")
 
   implicit val defaultTimeout: FiniteDuration = Duration(15, TimeUnit.SECONDS)
   override def authResource(r: String) = externalResource("auth-login-api", r)
@@ -96,7 +98,9 @@ class IntegrationTestWithoutMessage extends WordSpec with Matchers with  CanCrea
       val jsonString =
         s"""
            | {
-           |   "email": "test@test.com",
+           |   "contactDetails":{
+           |      "email": "someEmail@test.com"
+           |   },
            |   "subject": "subject",
            |   "content": "$content",
            |   "replyTo": "replyTo"
