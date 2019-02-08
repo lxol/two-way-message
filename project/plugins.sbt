@@ -26,6 +26,8 @@ addSbtPlugin("com.github.cb372" % "sbt-explicit-dependencies" % "0.2.6")
 
 addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.15")
 
+addSbtPlugin("uk.gov.hmrc" % "sbt-service-manager" % "0.4.0")
+
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.4")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")

@@ -17,6 +17,10 @@
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
+import uk.gov.hmrc.ServiceManagerPlugin.serviceManagerSettings
+import uk.gov.hmrc.{ExternalService, SbtBuildInfo, ShellPrompt}
+
 
 val appName = "two-way-message"
 
@@ -31,8 +35,14 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     majorVersion                     := 0,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
-    dependencyOverrides              ++= AppDependencies.overrides
-  )
+    dependencyOverrides              ++= AppDependencies.overrides )
+  .settings(ServiceManagerPlugin.serviceManagerSettings)
+  .settings(itDependenciesList := List(
+    ExternalService("AUTH"),
+    ExternalService("IDENTITY_VERIFICATION"),
+    ExternalService("MESSAGE"),
+    ExternalService("USER_DETAILS")
+  ))
 
 
 
