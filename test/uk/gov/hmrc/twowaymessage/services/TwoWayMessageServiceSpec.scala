@@ -312,7 +312,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     "return HTML as a string" in {
       val expectedHtml =
         <p class="govuk-body-l"><span id="nino" class="govuk-font-weight-bold">National insurance number</span>AA112211A</p>.mkString
-      val actualHtml = messageService.createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample)
+      val actualHtml = messageService.createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample.content, htmlMessageExample.subject)
       assert(actualHtml.contains(expectedHtml))
     }
   }

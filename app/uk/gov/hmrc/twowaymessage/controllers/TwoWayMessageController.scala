@@ -116,8 +116,11 @@ class TwoWayMessageController @Inject()(
   def createCustomerResponse(queueId: String, replyTo: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-      authorised(Enrolment("HMRC-NI")) {
-        validateAndPostCustomerResponse(request.body, replyTo)
+      authorised(Enrolment("HMRC-NI")).retrieve(Retrievals.nino) {
+          case Some(ninoId) => validateAndPostCustomerResponse(request.body, replyTo)
+          case _ =>
+              Logger.debug("Can not retrieve user's nino, returning Forbidden - Not Authorised Error")
+              Future.successful(Forbidden(Json.toJson("Not authorised")))
       } recover handleAuthorizationError
   }
 

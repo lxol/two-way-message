@@ -19,6 +19,7 @@ package uk.gov.hmrc.twowaymessage.model
 import play.api.libs.json._
 import MessageType._
 import FormId._
+import uk.gov.hmrc.domain.Nino
 
 object MessageFormat {
 
@@ -74,6 +75,7 @@ case class Details(
 case class MetadataDetails(threadId: Option[String], enquiryType: Option[String], adviser: Option[Adviser])
 object MetadataDetails {
   implicit val metadataDetailsFormat: Format[MetadataDetails] = Json.format[MetadataDetails]
+  val a = Nino(???)
 }
 
 final case class TaxIdWithName(name: String, value: String)
