@@ -65,6 +65,14 @@ class TwoWayMessageController @Inject()(
     }
   }
 
+  def getRecipientMessageContentBy(messageId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    twms.getMessageContentBy(messageId).map {
+      case Some(m) => Ok(m)
+      case None => NotFound
+    }
+  }
+
   def handleAuthorizationError(): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession =>
       Logger.debug("Request did not have an Active Session, returning Unauthorised - Unauthenticated Error")

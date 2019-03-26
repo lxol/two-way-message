@@ -349,4 +349,40 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     }
   }
 
+  "TwoWayMessageService.getMessageContentBy" should {
+    "return Html content of the message" in {
+
+      val htmlString = <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h1>
+        <p class="message_time faded-text--small">You sent this message on 12 March, 2019</p>
+        <p>What happens if I refuse to pay?</p>
+          <hr/>
+        <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h2>
+        <p class="message_time faded-text--small">This message was sent to you on 12 March, 2019</p>
+        <p>I'm sorry but this tax bill is for you and you need to pay it.
+
+        You can pay it online of at your bank.</p>
+          <hr/>
+        <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h2>
+        <p class="message_time faded-text--small">You sent this message on 12 March, 2019</p>
+        <p>I have been sent a tax bill that I'm sure is for someone else as I don't earn any money. Please can you check.</p>.mkString
+
+      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
+        Future.successful(
+          HttpResponse(Http.Status.OK, None, Map.empty, Some(htmlString))
+        )
+      )
+      val actualHtml = await(messageService.getMessageContentBy("123"))
+      assert(actualHtml.get.contains(htmlString))
+
+    }
+
+    "return None if unable to get message content" in {
+      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
+        Future.successful(HttpResponse(Http.Status.BAD_GATEWAY))
+      )
+      val actualHtml = await(messageService.getMessageContentBy("123"))
+      actualHtml shouldBe None
+    }
+  }
+
 }

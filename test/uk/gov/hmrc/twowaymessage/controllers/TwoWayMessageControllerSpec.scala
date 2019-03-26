@@ -123,6 +123,19 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
       result.header.status shouldBe Status.NOT_FOUND
     }
 
+    "return 200 (Ok) when message content for a valid message id is requested correctly" in {
+      val dummyContent = "dummy content"
+      when(mockMessageService.getMessageContentBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(dummyContent)))
+      val result = await(controller.getRecipientMessageContentBy("123")(FakeRequest()))
+      result.header.status shouldBe Status.OK
+    }
+
+    "return 404 (Not Found) when content for a invalid message id is requested correctly" in {
+      when(mockMessageService.getMessageContentBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(None))
+      val result = await(controller.getRecipientMessageContentBy("123")(FakeRequest()))
+      result.header.status shouldBe Status.NOT_FOUND
+    }
+
     SharedMetricRegistries.clear
   }
 

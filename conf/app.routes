@@ -6,6 +6,8 @@ POST       /message/customer/:queueId/:replyTo/reply    uk.gov.hmrc.twowaymessag
 
 GET        /message/adviser/recipient-metadata/:messageId   uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMetadata(messageId)
 
+GET        /message/adviser/message-content/:messageId   uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMessageContentBy(messageId)
+
 
 POST       /dms/submit                       uk.gov.hmrc.gform.dms.DmsSubmissionController.submitToDms()
 

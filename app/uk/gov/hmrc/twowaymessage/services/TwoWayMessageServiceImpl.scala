@@ -102,6 +102,12 @@ class TwoWayMessageServiceImpl @Inject()(messageConnector: MessageConnector, gfo
     }
   }
 
+  override def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
+    getMessageContent(messageId).flatMap {
+      case Some(content) => Future.successful(Some(content))
+      case None => Future.successful(None)
+    }
+
   private def postReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String, messageType: MessageType, formId: FormId)(
     implicit hc: HeaderCarrier): Future[Result] =
     (for {
