@@ -20,7 +20,7 @@ import java.util.UUID.randomUUID
 
 import com.google.inject.Inject
 import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsPath, Json, JsonValidationError}
 import play.api.mvc.Result
 import play.api.mvc.Results.Created
 import play.twirl.api.Html
@@ -36,6 +36,8 @@ import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
+import uk.gov.hmrc.twowaymessage.model.Message
+import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.Node
@@ -101,6 +103,14 @@ class TwoWayMessageServiceImpl @Inject()(messageConnector: MessageConnector, gfo
       case None => Future.successful(None)
     }
   }
+
+  override def findMessagesBy(messageId: String)(implicit hc: HeaderCarrier): Future[Either[List[Message], String]] =
+    messageConnector.getMessages(messageId).flatMap{
+      response => response.json.validate[List[Message]].fold(
+        errors => Future.successful(Right(Json stringify JsError.toJson(errors))),
+          msgList => Future.successful(Left(msgList))
+      )
+    }
 
   private def postReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String, messageType: MessageType, formId: FormId)(
     implicit hc: HeaderCarrier): Future[Result] =

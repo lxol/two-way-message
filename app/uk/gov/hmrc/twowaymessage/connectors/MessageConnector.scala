@@ -40,4 +40,7 @@ class MessageConnector @Inject()(httpClient: HttpClient, servicesConfig: Service
   def getMessageContent(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     httpClient.GET(s"$messageBaseUrl/messages/$messageId/content")
   }
+
+  def getMessages(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+        httpClient.GET(s"$messageBaseUrl/messages/messages-list/$messageId")
 }

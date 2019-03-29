@@ -28,17 +28,19 @@ import play.api.Mode
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{Json, JsSuccess}
+import play.api.libs.json.{JsSuccess, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.twowaymessage.model._
+import uk.gov.hmrc.twowaymessage.assets.Fixtures
+import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
+import uk.gov.hmrc.twowaymessage.model.{Message, _}
 
 import scala.concurrent.ExecutionContext
 
-class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with GuiceOneAppPerSuite with MockitoSugar {
+class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 
   lazy val mockhttpClient = mock[HttpClient]
   implicit lazy val mockHeaderCarrier = new HeaderCarrier()
@@ -146,7 +148,28 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
     }
     SharedMetricRegistries.clear
   }
+
+  "GET list of messages via message connector" should {
+
+    "returns 200 successfully for a valid messageId" in {
+      val jsonResponseBody = v3Messages("123456", "654321")
+
+      val messageId = "5d12eb115f0000000205c150"
+      givenThat(
+        get(urlEqualTo(s"/messages/messages-list/${messageId}"))
+          .willReturn(
+            aResponse()
+              .withStatus(Status.OK)
+              .withBody(jsonResponseBody)))
+
+      val httpResult = await(messageConnector.getMessages(messageId)(new HeaderCarrier()))
+      httpResult.status shouldBe (200)
+      Json.parse(httpResult.body).validate[List[Message]] shouldBe a[JsSuccess[List[Message]]]
+    }
+    SharedMetricRegistries.clear
+  }
 }
+
 
 trait WithWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {
   suite: Suite =>
