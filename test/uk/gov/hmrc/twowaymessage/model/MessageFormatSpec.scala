@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.twowaymessage.connectors
+package uk.gov.hmrc.twowaymessage.model
 
 import org.scalatest._
 import play.api.libs.json.{Json, _}
