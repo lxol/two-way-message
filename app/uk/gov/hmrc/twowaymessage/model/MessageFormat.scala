@@ -21,31 +21,17 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 
-import play.api.libs.functional.syntax._
-
 object MessageFormat {
 
-  implicit val taxIdentifierFormat: Format[TaxIdentifier] = Json.format[TaxIdentifier]
+  implicit val taxIdentifierWrites: Writes[TaxIdentifier] = Json.writes[TaxIdentifier]
 
-  implicit val recipientFormat: Format[Recipient] = Json.format[Recipient]
+  implicit val recipientWrites: Writes[Recipient] = Json.writes[Recipient]
 
-  implicit val externalRefFormat: Format[ExternalRef] = Json.format[ExternalRef]
+  implicit val detailsWrites: OWrites[Details] = Json.writes[Details]
 
-  implicit val formIdFormat: Format[FormId] =
-    Format(
-      Reads.enumNameReads(FormId),
-      Writes.enumNameWrites
-    )
+  implicit val externalRefWrites: OWrites[ExternalRef] = Json.writes[ExternalRef]
 
-  implicit val messageTypeFormat: Format[MessageType] =
-    Format(
-      Reads.enumNameReads(MessageType),
-      Writes.enumNameWrites
-    )
-
-  implicit val detailsFormat: Format[Details] = Json.format[Details]
-
-  implicit val messageFormat: Format[Message] = Json.format[Message]
+  implicit val messageWrites: OWrites[Message] = Json.writes[Message]
 
 }
 
@@ -90,3 +76,4 @@ case class Details(
   threadId: Option[String] = None,
   enquiryType: Option[String] = None,
   adviser: Option[Adviser] = None)
+

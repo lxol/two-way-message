@@ -52,8 +52,6 @@ trait TwoWayMessageService {
 
   def createHtmlMessage(messageId: String, nino: Nino, messageContent: String, subject: String)(implicit hc: HeaderCarrier): Future[Option[String]]
 
-  def findMessagesBy(messageId: String)(implicit hc: HeaderCarrier): Future[Either[List[Message], String]]
-
   def createJsonForMessage(refId: String, twoWayMessage: TwoWayMessage, nino: Nino, queueId: String): Message = {
     val recipient = Recipient(TaxIdentifier(nino.name, nino.value), twoWayMessage.contactDetails.email)
     Message(

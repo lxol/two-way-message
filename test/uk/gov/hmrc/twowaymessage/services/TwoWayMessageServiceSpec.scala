@@ -33,14 +33,13 @@ import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
+class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
   implicit val mockExecutionContext = mock[ExecutionContext]
   implicit val mockHeaderCarrier = mock[HeaderCarrier]
@@ -245,32 +244,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         "{\"error\":404,\"message\":\"GET of 'http://localhost:8910/messages/5c2dec526900006b000d53b1/metadata' returned 404 (Not Found). Response body: ''\"}"
     }
 
-    SharedMetricRegistries.clear
-  }
-
-  "TwoWayMessageService.findMessagesListBy" should {
-
-    val fixtureMessages = v3Messages("123456", "654321")
-    "return list of messages if successfully fetched from the message service" in {
-      when(
-        mockMessageConnector
-          .getMessages(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(
-          HttpResponse(Http.Status.OK, Some(Json.parse(fixtureMessages)))))
-      val messagesResult = await(messageService.findMessagesBy("1234567890"))
-      messagesResult.left.get.head.externalRef.id should be("123456")
-    }
-
-    val invalidFixtureMessages = "{}"
-    "return error if invalid message list json" in {
-        when(
-            mockMessageConnector
-                .getMessages(any[String])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(
-                HttpResponse(Http.Status.OK, Some(Json.parse(invalidFixtureMessages)))))
-        val messagesResult = await(messageService.findMessagesBy("1234567890"))
-        messagesResult.right should not be(None)
-    }
     SharedMetricRegistries.clear
   }
 
