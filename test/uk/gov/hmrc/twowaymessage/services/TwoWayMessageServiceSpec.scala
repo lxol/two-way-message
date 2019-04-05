@@ -253,7 +253,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
   "TwoWayMessageService.findMessagesListBy" should {
 
-    val fixtureMessages = v3Messages("123456", "654321")
+    val fixtureMessages = conversationItems("123456", "654321")
     "return a list of messages if successfully fetched from the message service" in {
       when(
         mockMessageConnector

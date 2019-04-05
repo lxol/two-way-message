@@ -140,7 +140,7 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
     }
 
     "return 200 (Ok) when messages are  requested correctly" in {
-      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Left(List(testMessageV3, testMessageV3))))
+      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Left(List(testConversationItem, testConversationItem))))
       val result = await(controller.getMessagesListBy("123")(FakeRequest()))
       result.header.status shouldBe Status.OK
     }
