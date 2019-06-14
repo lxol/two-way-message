@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import org.joda.time.LocalDate
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -30,6 +31,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, Json}
 import play.api.test.Helpers._
+//import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -73,33 +75,12 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
 
   "POST message connector" should {
 
-    "return 201" in {
-      val jsonResponseBody =
-        """
-          |{
-          |   "externalRef":{
-          |      "id":"123412342314",
-          |      "source":"2WSM-CUSTOMER"
-          |   },
-          |   "recipient":{
-          |      "taxIdentifier":{
-          |         "name":"HMRC-NI",
-          |         "value":"AB123456C"
-          |      },
-          |      "email":"someEmail@test.com"
-          |   },
-          |   "messageType":"2wsm-customer",
-          |   "subject":"SUBJECT",
-          |   "content":"SGVsbG8gV29ybGQ=",
-          |   "details":{
-          |      "formId":"2WSM-question"
-          |   }
-          |}
-        """.stripMargin
+    val messageJson = Json.toJson(messageExample)
 
+    "return 201" in {
       givenThat(
         post(urlEqualTo("/messages"))
-          .withRequestBody(equalToJson(jsonResponseBody))
+          .withRequestBody(equalToJson(messageJson.toString))
           .willReturn(aResponse().withStatus(Status.CREATED)))
 
       val result = await(messageConnector.postMessage(messageExample)(new HeaderCarrier()))
@@ -170,7 +151,6 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
     SharedMetricRegistries.clear
   }
 }
-
 
 trait WithWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {
   suite: Suite =>

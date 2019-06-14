@@ -23,8 +23,9 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{Json, Reads}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig, StandaloneAhcWSClient}
 import play.api.libs.ws.WSClient
+import play.twirl.api.Html
 import uk.gov.hmrc.integration.ServiceSpec
-import uk.gov.hmrc.twowaymessage.MessageUtil.{buildValidCustomerMessage, MessageId}
+import uk.gov.hmrc.twowaymessage.MessageUtil._
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
@@ -42,9 +43,21 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
 
   def getValidNinoMessageId(): String = {
     val message = buildValidCustomerMessage()
-    val response = httpClient.url(resource("/two-way-message/message/customer/p800/submit"))
+    val response = httpClient
+      .url(resource("/two-way-message/message/customer/p800/submit"))
       .withHttpHeaders(AuthUtil.buildNinoUserToken())
-      .post(message).futureValue
+      .post(message)
+      .futureValue
+    Json.parse(response.body).as[MessageId].id
+  }
+
+  def getReplyToMessageId(messageId: String): String = {
+    val replyMessage = buildValidReplyMessage()
+    val response = httpClient
+      .url(resource(s"/two-way-message/message/adviser/$messageId/reply"))
+      .withHttpHeaders(AuthUtil.buildStrideToken())
+      .post(replyMessage)
+      .futureValue
     Json.parse(response.body).as[MessageId].id
   }
 
@@ -164,6 +177,55 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
 
       response.status shouldBe 400
     }
+  }
+
+  "html render" should {
+
+    "createConversation" in {
+
+      val regex = raw"(<div>)".r
+
+      val messageId = getValidNinoMessageId()
+
+      val responseAdviser = httpClient
+        .url(resource(s"/messages/$messageId/adviser-content"))
+        .withHttpHeaders(AuthUtil.buildStrideToken())
+        .get()
+        .futureValue
+
+      val adviserDivCount = for(div <- regex.findAllMatchIn(responseAdviser.body)) yield div.group(1)
+      adviserDivCount.length shouldBe 1
+
+      val adviserReplyId = getReplyToMessageId(messageId)
+      val responseCustomer = httpClient
+        .url(resource(s"/messages/$adviserReplyId/content"))
+        .withHttpHeaders(AuthUtil.buildNinoUserToken())
+        .get()
+        .futureValue
+
+      val customerDivCount = for(div <- regex.findAllMatchIn(responseCustomer.body)) yield div.group(1)
+      customerDivCount.length shouldBe 2
+
+      val customerLatestMesage = httpClient
+        .url(resource(s"/messages/$messageId/latest-message"))
+        .withHttpHeaders(AuthUtil.buildNinoUserToken())
+        .get()
+        .futureValue
+
+      val getLatestMessage = for(div <- regex.findAllMatchIn(customerLatestMesage.body)) yield div.group(1)
+      getLatestMessage.length shouldBe 1
+
+      val previousMessages = httpClient
+        .url(resource(s"/messages/$adviserReplyId/previous-messages"))
+        .withHttpHeaders(AuthUtil.buildNinoUserToken())
+        .get()
+        .futureValue
+
+      val getPreviousMessages = for(div <- regex.findAllMatchIn(previousMessages.body)) yield div.group(1)
+      getPreviousMessages.length shouldBe 1
+    }
+
+
   }
 
   object AuthUtil {

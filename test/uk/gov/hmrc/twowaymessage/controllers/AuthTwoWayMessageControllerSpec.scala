@@ -26,6 +26,7 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
+import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
@@ -136,10 +137,54 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 403 (FORBIDDEN) when AuthConnector returns an exception that doesn't extend NoActiveSession" in {
       mockAuthorise(Enrolment("HMRC-NI"))(Future.failed(InsufficientEnrolments()))
-      val result = await(testTwoWayMessageController.createCustomerResponse("p800", "replyTo")(fakeRequest1))
+      val result: Result = await(testTwoWayMessageController.createCustomerResponse("queueName", "replyTo")(fakeRequest1))
       status(result) shouldBe Status.FORBIDDEN
     }
 
     SharedMetricRegistries.clear
   }
+
+
+  "The TwoWayMessageController.getContentBy method" should {
+    "return 200 (OK) with the content of the conversation in html" in {
+      val nino = Nino("AB123456C")
+      mockAuthorise(Enrolment("HMRC-NI"))(Future.successful(Some(nino.value)))
+      when(
+        mockMessageService.postCustomerReply(any[TwoWayMessageReply], ArgumentMatchers.eq("replyTo"))(
+          any[HeaderCarrier]))
+        .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(testTwoWayMessageController.getContentBy("1", "Customer")(fakeRequest1).run() )
+      status(result) shouldBe Status.OK
+      bodyOf(result) shouldBe "Hello <b>World</b>"
+    }
+
+    "return 200 dwq with the content of the conversation in html" in {
+      val nino = Nino("AB123456C")
+      mockAuthorise(Enrolment("HMRC-NI"))(Future.successful(Some(nino.value)))
+      when(
+        mockMessageService.postCustomerReply(any[TwoWayMessageReply], ArgumentMatchers.eq("replyTo"))(
+          any[HeaderCarrier]))
+        .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(testTwoWayMessageController.getContentBy("1", "Adviser")(fakeRequest1).run() )
+      status(result) shouldBe Status.OK
+      bodyOf(result) shouldBe "Hello <b>World</b>"
+    }
+
+
+
+    "return 200  with the content of the conversation in html" in {
+      val nino = Nino("AB123456C")
+      mockAuthorise(Enrolment("HMRC-NI"))(Future.successful(Some(nino.value)))
+      when(
+        mockMessageService.postCustomerReply(any[TwoWayMessageReply], ArgumentMatchers.eq("replyTo"))(
+          any[HeaderCarrier]))
+        .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(testTwoWayMessageController.getContentBy("1", "nfejwk")(fakeRequest1).run() )
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+
+
+    SharedMetricRegistries.clear
+  }
+
 }

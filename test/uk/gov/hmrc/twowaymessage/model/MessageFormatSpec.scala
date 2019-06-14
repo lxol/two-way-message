@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.twowaymessage.model
 
+import org.joda.time.LocalDate
 import org.scalatest._
 import play.api.libs.json.{Json, _}
+//import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.{Message, _}
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
@@ -69,20 +71,98 @@ class MessageFormatSpec extends WordSpec with Fixtures with Matchers {
 
   "Message json reader" should {
     "read conversation item as defined in message microservice " in {
-      val id = "123456"
-      val json = Json.parse(conversationItem(s"${id}"))
+      val json = jsonConversationItem
       val messageResult = json.validate[ConversationItem]
-      messageResult should (matchPattern { case _:JsSuccess[ConversationItem] =>})
-      messageResult.get.validFrom.toString should be("2013-12-01")
+      messageResult should matchPattern { case _:JsSuccess[ConversationItem] =>}
+      messageResult.get.validFrom.toString should be("2019-06-13")
       messageResult.get.body.get.`type` should be(MessageType.Adviser)
     }
 
    "read conversation items as defined in message microservice " in {
-      val id1 = "123456"
-      val id2 = "654321"
+      val id1 = "5d02201b5b0000360151779e"
+      val id2 = "5d021fbe5b0000200151779c"
       val json = Json.parse(conversationItems(id1, id2))
       val messageResult = json.validate[List[ConversationItem]]
       messageResult should (matchPattern { case _:JsSuccess[List[ConversationItem]] =>})
+    }
+  }
+
+  val jsonConversationItem = Json.parse("""
+  {
+    "recipient": {
+      "regime": "paye",
+      "identifier": {
+      "name": "nino",
+      "value": "AB124567C"
+    },
+      "email": "matthew.groom@ntlworld.com"
+    },
+    "subject": "Matt Test 1",
+    "body": {
+      "form": "2WSM-reply",
+      "type": "2wsm-advisor",
+      "paperSent": false,
+      "issueDate": "2019-06-13",
+      "replyTo": "5d021fbe5b0000200151779c",
+      "threadId": "5d021fbe5b0000200151779d",
+      "enquiryType": "p800",
+      "adviser": {
+      "pidId": "123"
+    }
+    },
+    "validFrom": "2019-06-13",
+    "alertFrom": "2019-06-13",
+    "alertDetails": {
+      "templateId": "newMessageAlert_2WSM-reply",
+      "recipientName": {
+      "forename": "TestUser",
+      "line1": "TestUser"
+    },
+      "data": {
+      "email": "matthew.groom@ntlworld.com",
+      "date": "2019-06-13",
+      "subject": "Matt Test 1"
+    }
+    },
+    "alerts": {
+      "emailAddress": "matthew.groom@ntlworld.com",
+      "alertTime": {
+      "$date": 1560420498677
+    },
+      "success": true
+    },
+    "status": "succeeded",
+    "lastUpdated": {
+      "$date": 1560420498619
+    },
+    "hash": "n81BiQFbRwSFQ0b9rcthzPihVHpQ/wew1G8flshXeRM=",
+    "statutory": false,
+    "renderUrl": {
+      "service": "message",
+      "url": "/messages/5d02201b5b0000360151779e/content"
+    },
+    "externalRef": {
+      "id": "5a3e51c6-f657-48dc-a132-2e72151a8e6c",
+      "source": "2WSM"
+    },
+    "content": "RGVhciBUZXN0VXNlciBUaGFuayB5b3UgZm9yIHlvdXIgbWVzc2FnZSBvZiAxMyBKdW5lIDIwMTkuPC9icj5UbyByZWNhcCB5b3VyIHF1ZXN0aW9uLCBJIHRoaW5rIHlvdSdyZSBhc2tpbmcgZm9yIGhlbHAgd2l0aDwvYnI+SSBiZWxpZXZlIHRoaXMgYW5zd2VycyB5b3VyIHF1ZXN0aW9uIGFuZCBob3BlIHlvdSBhcmUgc2F0aXNmaWVkIHdpdGggdGhlIHJlc3BvbnNlLiBUaGVyZSdzIG5vIG5lZWQgdG8gc2VuZCBhIHJlcGx5LiBCdXQgaWYgeW91IHRoaW5rIHRoZXJlJ3Mgc29tZXRoaW5nIGltcG9ydGFudCBtaXNzaW5nLCBqdXN0IGFzayBhbm90aGVyIHF1ZXN0aW9uIGFib3V0IHRoaXMgYmVsb3cuPC9icj5SZWdhcmRzPC9icj5NYXR0aGV3IEdyb29tPC9icj5uSE1SQyBkaWdpdGFsIHRlYW0u",
+    "id":"5d02201b5b0000360151779e"
+  }""")
+
+  "ConversationItem" should {
+    "content should be successfully decoded" in {
+      val conversationItem = jsonConversationItem.validate[ConversationItem]
+      conversationItem shouldBe JsSuccess(ConversationItem("5d02201b5b0000360151779e","Matt Test 1",Some(
+        ConversationItemDetails(
+          MessageType.Adviser,
+          FormId.Reply,
+          Some(LocalDate.parse("2019-06-13")),
+          Some("5d021fbe5b0000200151779c"),
+          Some("p800"),
+          Some(Adviser("123")))),
+        LocalDate.parse("2019-06-13"),
+        Some("Dear TestUser Thank you for your message of 13 June 2019.</br>To recap your question, I think you're asking for help with</br>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</br>Regards</br>Matthew Groom</br>nHMRC digital team.")
+      ))
     }
   }
 }

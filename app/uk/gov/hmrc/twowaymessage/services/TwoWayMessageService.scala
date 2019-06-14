@@ -22,6 +22,7 @@ import play.api.http.Status._
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
+import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
@@ -55,17 +56,16 @@ trait TwoWayMessageService {
   def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
     implicit hc: HeaderCarrier): Future[Result]
 
-  def createHtmlMessage(messageId: String, nino: Nino, messageContent: String, subject: String)(
-    implicit hc: HeaderCarrier): Future[Option[String]]
-
   def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]]
 
-  def createJsonForMessage(
-    refId: String,
-    twoWayMessage: TwoWayMessage,
-    nino: Nino,
-    queueId: String,
-    name: Name): Message = {
+  def getConversation(messageId: String, replyType: ReplyType): Future[Either[Html,String]]
+
+  def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
+
+  def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
+
+  def createJsonForMessage(refId: String, twoWayMessage: TwoWayMessage, nino: Nino, queueId: String, name: Name): Message = {
+
     val responseTime = Enquiry(queueId).get.responseTime
     Message(
       ExternalRef(refId, "2WSM"),
