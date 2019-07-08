@@ -523,7 +523,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
       )
 
-      when(mockHtmlCreationService.createConversation("5d02201b5b0000360151779e",listOfConversationItems.tail,RenderType.Customer)).thenReturn(
+      when(mockHtmlCreationService.createConversation("5d02201b5b0000360151779e",listOfConversationItems.tail,RenderType.CustomerLink)).thenReturn(
         Future.successful(Right(htmlConversationItems))
       )
 
@@ -540,11 +540,11 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
       )
 
-      when(mockHtmlCreationService.createConversation("5d02201b5b0000360151779e",listOfConversationItems,RenderType.Customer)).thenReturn(
+      when(mockHtmlCreationService.createConversation("5d02201b5b0000360151779e",listOfConversationItems,RenderType.CustomerLink)).thenReturn(
         Future.successful(Right(htmlConversationItems))
       )
 
-      val result = await(messageService.getConversation("5d02201b5b0000360151779e",RenderType.Customer)(mockHeaderCarrier))
+      val result = await(messageService.getConversation("5d02201b5b0000360151779e",RenderType.CustomerLink)(mockHeaderCarrier))
       result.isRight
 
     }

@@ -167,7 +167,7 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
   override def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]] = {
     findMessagesBy(messageId).flatMap {
       case Right(error)   => Future.successful(Left(error))
-      case Left(list)     => list.headOption.map(
+      case Left(list)     => list.sortWith((_.id > _.id)).headOption.map(
         msg => htmlCreatorService.createSingleMessageHtml(msg))
         .getOrElse(Future.successful(Right(Html(""))))
     }
@@ -176,7 +176,7 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
   override def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]] = {
     findMessagesBy(messageId).flatMap {
       case Right(error)   => Future.successful(Left(error))
-      case Left(list)     => htmlCreatorService.createConversation(messageId,list.tail,RenderType.Customer)
+      case Left(list)     => htmlCreatorService.createConversation(messageId,list.sortWith(_.id > _.id).drop(1),RenderType.CustomerForm)
     }
   }
 

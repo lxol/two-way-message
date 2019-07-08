@@ -38,7 +38,9 @@ object RenderType {
 
   sealed trait ReplyType
 
-  case object Customer extends ReplyType
+  case object CustomerLink extends ReplyType
+
+  case object CustomerForm extends ReplyType
 
   case object Adviser extends ReplyType
 

@@ -37,37 +37,28 @@ class HtmlCreatorServiceImpl @Inject()()
   override def createConversation(latestMessageId: String, messages: List[ConversationItem], replyType: RenderType.ReplyType)
                                  (implicit ec: ExecutionContext):Future[Either[String,Html]] = {
 
-    Future.successful(Right(HtmlFormat.fill(createConversationList(sortConversation(latestMessageId, messages),replyType))))
+    Future.successful(Right(HtmlFormat.fill(
+      createConversationList(
+        messages.sortWith(_.id > _.id),
+        replyType)
+    )))
   }
 
   override def createSingleMessageHtml(conversationItem: ConversationItem)(implicit ec: ExecutionContext): Future[Either[String,Html]] = {
-    Future.successful(Right(format2wsMessageForCustomer(conversationItem,true)))
+    Future.successful(Right(format2wsMessageForCustomer(conversationItem,true, false)))
   }
 
-  def sortConversation(latestMessageId: String, messages: List[ConversationItem]): List[ConversationItem] = {
-
-    def sortConversation(messageId: String, messages: List[ConversationItem], orderedMsgList: List[ConversationItem]): List[ConversationItem] = {
-      val message = messages.find(message => message.id == messageId).get
-      message.body.flatMap(_.replyTo) match {
-        case None => orderedMsgList :+ message
-        case Some(replyToId) => sortConversation(replyToId, messages, orderedMsgList :+ message)
-      }
-    }
-    sortConversation(latestMessageId, messages, List())
-  }
-
-  private def createConversationList(messages: List[ConversationItem], replyType: RenderType.ReplyType):List[Html] = {
-    if(replyType == RenderType.Customer) {
-      val latestMessage = format2wsMessageForCustomer(messages.head, true)
-      val restOfList = for {
-        msg <- messages.tail
-      } yield format2wsMessageForCustomer(msg, false)
-      val listOfMessage = restOfList :+ latestMessage
-      listOfMessage.reverse
-    } else {
-      for {
-        msg <- messages
-      } yield format2wsMessageForAdviser(msg)
+  private def createConversationList(messages: List[ConversationItem], replyType: RenderType.ReplyType ):List[Html] = {
+    replyType match {
+      case RenderType.CustomerLink => messages.sortWith(_.id > _.id)
+          .headOption.map {
+            hm => format2wsMessageForCustomer(hm, isLatestMessage = true, hasSmallSubject = false) :: messages.tail.map(m => format2wsMessageForCustomer(m, isLatestMessage = false))}
+          .getOrElse(List(Html("")))
+      case RenderType.CustomerForm => messages.sortWith(_.id > _.id)
+          .headOption.map {
+            hm => format2wsMessageForCustomer(hm, isLatestMessage = true, hasSmallSubject = true) :: messages.tail.map(m => format2wsMessageForCustomer(m, isLatestMessage = false))}
+          .getOrElse(List(Html("")))
+      case RenderType.Adviser => messages.sortWith(_.id > _.id).map(format2wsMessageForAdviser(_))
     }
   }
 
@@ -81,18 +72,18 @@ class HtmlCreatorServiceImpl @Inject()()
       Html.apply(message.mkString)
     }
 
-    private def format2wsMessageForCustomer(conversationItem: ConversationItem, isLatestMessage: Boolean): Html = {
+    private def format2wsMessageForCustomer(conversationItem: ConversationItem, isLatestMessage: Boolean, hasLink:Boolean = true, hasSmallSubject:Boolean = false): Html = {
       val headingClass = "govuk-heading-xl margin-top-small margin-bottom-small"
-      val header = if (isLatestMessage) {
+      val header = if (isLatestMessage && !hasSmallSubject) {
         <h1 class={headingClass}>
-          {conversationItem.subject}
+        {conversationItem.subject}
         </h1>
       } else {
         <h2 class={headingClass}>
-          {conversationItem.subject}
+        {conversationItem.subject}
         </h2>
       }
-      val replyForm = if (isLatestMessage) {
+      val replyForm = if (isLatestMessage && hasLink) {
         val enquiryType = conversationItem.body.flatMap {
           _.enquiryType
         }.getOrElse("")

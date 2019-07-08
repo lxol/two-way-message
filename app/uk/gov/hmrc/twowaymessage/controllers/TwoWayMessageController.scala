@@ -183,7 +183,7 @@ class TwoWayMessageController @Inject()(
         }
 
         msgType match {
-          case "Customer" => createMsg(RenderType.Customer)
+          case "Customer" => createMsg(RenderType.CustomerLink)
           case "Adviser" => createMsg(RenderType.Adviser)
           case _ => Future.successful(BadRequest)
         }
