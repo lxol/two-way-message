@@ -31,6 +31,7 @@ import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
+import uk.gov.hmrc.twowaymessage.services.RenderType.ReplyType
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -58,7 +59,7 @@ trait TwoWayMessageService {
 
   def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]]
 
-  def getConversation(messageId: String, replyType: ReplyType): Future[Either[Html,String]]
+  def getConversation(messageId: String, replyType: RenderType.ReplyType)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
 
   def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
 

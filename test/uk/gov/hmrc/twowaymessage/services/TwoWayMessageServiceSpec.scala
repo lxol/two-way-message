@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.services
 
+import akka.util.Timeout
 import com.codahale.metrics.SharedMetricRegistries
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
@@ -42,7 +43,9 @@ import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model._
+import uk.gov.hmrc.twowaymessage.services.RenderType.ReplyType
 
+import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 
 class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
@@ -86,7 +89,8 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
    val conversationItem = List(ConversationItem(
       "5d02201b5b0000360151779e",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Adviser,
+      Some(ConversationItemDetails(
+        MessageType.Adviser,
         FormId.Reply,
         Some(LocalDate.parse("2019-06-13")),
         Some("5d021fbe5b0000200151779c"),
@@ -127,10 +131,10 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
             )
           )
       when(
-        mockHtmlCreationService.createConversation(any[String],any[List[ConversationItem]],any[ReplyType])
+        mockHtmlCreationService.createConversation(any[String],any[List[ConversationItem]],any[ReplyType])(any[ExecutionContext])
       )
           .thenReturn(
-            Html.apply(<html/>.mkString)
+            Future.successful(Right(Html.apply(<html/>.mkString)))
           )
 
       val name = Name(Option("firstname"), Option("surname"))

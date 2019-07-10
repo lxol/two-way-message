@@ -23,6 +23,7 @@ import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.Created
+import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
@@ -53,8 +54,7 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
     xml.child
   }
 
-  override def getMessageMetadata(messageId: String)
-                                 (implicit hc: HeaderCarrier): Future[Option[MessageMetadata]] = {
+  override def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]] = {
     messageConnector.getMessageMetadata(messageId).flatMap(  response =>
       response.status match {
         case OK =>
@@ -62,6 +62,7 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
           Future.successful(metadata.asOpt)
         case _ => Future.successful(None)
       })
+  }
 
   override def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)
                    (implicit hc: HeaderCarrier): Future[Result] = {
@@ -83,13 +84,25 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
         .fold[Future[String]](Future.failed(new Exception(s"Unable to get DMS queue id for $replyTo")))(Future.successful)
       enquiryId <- Enquiry(queueId)
         .fold[Future[EnquiryTemplate]](Future.failed(new Exception(s"Unknown $queueId")))(Future.successful)
-      dmsMetaData = DmsMetadata(enquiryId.dmsFormId, metadata.get.recipient.identifier.value,
-        enquiryId.classificationType, enquiryId.businessArea)
-      body = createJsonForReply(randomUUID.toString, MessageType.Customer, FormId.Question, metadata.get,
-        twoWayMessageReply, replyTo)
+      dmsMetaData = DmsMetadata(
+        enquiryId.dmsFormId,
+        metadata.get.recipient.identifier.value,
+        enquiryId.classificationType,
+        enquiryId.businessArea)
+      body = createJsonForReply(
+        Some(queueId),
+        randomUUID.toString,
+        MessageType.Customer,
+        FormId.Question,
+        metadata.get,
+        twoWayMessageReply,
+        replyTo)
       postMessageResponse <- messageConnector.postMessage(body)
-      dmsHandleResponse <- handleResponse(twoWayMessageReply.content, metadata.get.subject,
-        postMessageResponse, dmsMetaData)
+      dmsHandleResponse <- handleResponse(
+        twoWayMessageReply.content,
+        metadata.get.subject,
+        postMessageResponse,
+        dmsMetaData)
     } yield dmsHandleResponse) recover handleError
 
   override def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)
@@ -110,6 +123,7 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
           msgList => Future.successful(Left(msgList))
         )
     }
+  }
 
   override def getMessageContentBy(messageId: String)
                                   (implicit hc: HeaderCarrier): Future[Option[String]] =
@@ -142,9 +156,9 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
       case CREATED =>
         response.json.validate[Identifier].asOpt match {
           case Some(identifier) =>
-            getConversation(identifier.id, Advisor).flatMap {
-              case Left(html) => createDmsSubmission(html.toString,response,dmsMetaData)
-              case Right(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
+            getConversation(identifier.id, RenderType.Adviser).flatMap {
+              case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error.toString))
+              case Right(html) => createDmsSubmission(html.toString,response,dmsMetaData)
             }
           case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
         }
@@ -158,13 +172,16 @@ servicesConfig: ServicesConfig, htmlCreatorService: HtmlCreatorService)
         case Some(content) => Future successful Some(content)
         case None => Future.successful(None)
       })
+  }
 
 //TODO: In future fix the either to be evaluate the correct left and right.
   override def getConversation(messageId: String, replyType: RenderType.ReplyType)
                               (implicit hc: HeaderCarrier): Future[Either[String,Html]] = {
     findMessagesBy(messageId).flatMap {
       case Right(error) => Future.successful(Left(error))
-      case Left(list)   => htmlCreatorService.createConversation(messageId,list,replyType)
+      case Left(list)   =>
+        val conversation = htmlCreatorService.createConversation(messageId,list,replyType)
+        conversation
     }
   }
 

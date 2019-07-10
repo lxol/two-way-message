@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.twowaymessage.controllers
 
-import com.sun.javafx.sg.prism.NodeEffectInput.RenderType
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
@@ -35,7 +34,7 @@ import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
 import uk.gov.hmrc.twowaymessage.model.{MessageType, _}
-import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, TwoWayMessageService}
+import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, RenderType, TwoWayMessageService}
 
 import scala.concurrent.{ExecutionContext, Future}
 

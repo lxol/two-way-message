@@ -108,7 +108,7 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
         mockTwoWayMessageService
           .findMessagesBy(any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(listOfConversationItems)))
-      val result = await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, Advisor))
+      val result = await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.Adviser))
       result shouldBe
       Right(Html.apply(<p class="message_time faded-text--small">
           13 June 2019 by HMRC

@@ -23,7 +23,8 @@ import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.model.{ConversationItem, MessageType}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import scala.xml.XML
 
 class HtmlCreatorServiceImpl @Inject()()
                                       (implicit ec: ExecutionContext) extends HtmlCreatorService {
