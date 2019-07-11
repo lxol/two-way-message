@@ -32,7 +32,7 @@ import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.{~, Name, Retrievals}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata

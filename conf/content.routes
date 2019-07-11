@@ -1,7 +1,0 @@
-
-GET        /:id/previous-messages    uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getPreviousMessages(id:String)
-
-GET        /:id/latest-message       uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getLatestMessage(id:String)
-
-GET        /:id/content              uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getContentBy(id:String, msgType ?= "Customer")
-GET        /:id/adviser-content      uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getContentBy(id:String, msgType ?= "Adviser")
