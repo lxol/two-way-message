@@ -1,18 +1,18 @@
 # microservice specific routes
 
-POST       /message/customer/:queueId/submit            uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createMessage(queueId)
+POST       /message/customer/:queueId/submit               uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createMessage(queueId)
 
-POST       /message/advisor/:replyTo/reply              uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo)
-POST       /message/adviser/:replyTo/reply              uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo)
+POST       /message/advisor/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo)
+POST       /message/adviser/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo)
 
-POST       /message/customer/:queueId/:replyTo/reply    uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createCustomerResponse(queueId, replyTo)
+POST       /message/customer/:queueId/:replyTo/reply       uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createCustomerResponse(queueId, replyTo)
 
-GET     /message/adviser/recipient-metadata/:messageId  uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMetadata(messageId)
+GET        /message/adviser/recipient-metadata/:messageId  uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMetadata(messageId)
 
-GET     /message/messages-list/:messageId               uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getMessagesListBy(messageId)
-GET     /message/messages-list/:messageId/size          uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getMessagesListSizeBy(messageId)
-GET     /message/adviser/message-content/:messageId     uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMessageContentBy(messageId)
+GET        /message/messages-list/:messageId               uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getMessagesListBy(messageId)
+GET        /message/messages-list/:messageId/size          uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getMessagesListSizeBy(messageId)
+GET        /message/adviser/message-content/:messageId     uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getRecipientMessageContentBy(messageId)
 
-GET        /message/admin/:formId/response-time    uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getCurrentResponseTime(formId)
+GET        /message/admin/:formId/response-time            uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.getCurrentResponseTime(formId)
 
-POST       /dms/submit                       uk.gov.hmrc.gform.dms.DmsSubmissionController.submitToDms()
+POST       /dms/submit                                     uk.gov.hmrc.gform.dms.DmsSubmissionController.submitToDms()

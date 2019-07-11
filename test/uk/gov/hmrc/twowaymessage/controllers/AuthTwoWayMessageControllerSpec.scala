@@ -26,20 +26,25 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
+import play.api.mvc.Result
 import play.api.mvc.Results._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
-import uk.gov.hmrc.auth.core.retrieve.{ Name, Retrievals, ~ }
-import uk.gov.hmrc.auth.core.{ AuthConnector, Enrolment, InsufficientEnrolments, MissingBearerToken }
+import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.twirl.api.Html
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
-import uk.gov.hmrc.twowaymessage.model.{ TwoWayMessage, TwoWayMessageReply }
+import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
+import uk.gov.hmrc.twowaymessage.services.RenderType.ReplyType
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
 class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
@@ -136,10 +141,34 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 403 (FORBIDDEN) when AuthConnector returns an exception that doesn't extend NoActiveSession" in {
       mockAuthorise(Enrolment("HMRC-NI"))(Future.failed(InsufficientEnrolments()))
-      val result = await(testTwoWayMessageController.createCustomerResponse("p800", "replyTo")(fakeRequest1))
+      val result: Result = await(testTwoWayMessageController.createCustomerResponse("queueName", "replyTo")(fakeRequest1))
       status(result) shouldBe Status.FORBIDDEN
     }
 
     SharedMetricRegistries.clear
   }
+
+
+  "The TwoWayMessageController.getContentBy method" should {
+    "return 200 (OK) when the message type is valid" in {
+      val nino = Nino("AB123456C")
+      mockAuthorise(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication))(Future.successful(Some(nino.value)))
+      when(
+        mockMessageService.getConversation(any[String],any[ReplyType])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Right(Html.apply(""))))
+      val result = await(testTwoWayMessageController.getContentBy("1", "Customer")(fakeRequest1).run())(Duration.Inf)
+      status(result) shouldBe Status.OK
+    }
+
+    "return 400 (BAD_REQUEST) when the message type is invalid" in {
+      val nino = Nino("AB123456C")
+      mockAuthorise(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication))(Future.successful(Some(nino.value)))
+      val result = await(testTwoWayMessageController.getContentBy("1", "nfejwk")(fakeRequest1).run() )
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+
+
+    SharedMetricRegistries.clear
+  }
+
 }

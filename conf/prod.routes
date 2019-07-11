@@ -1,5 +1,8 @@
 # Add all the application routes to the app.routes file
+
 ->         /two-way-message              app.Routes
 ->         /                          health.Routes
+
+->         /messages                   content.Routes
 
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics

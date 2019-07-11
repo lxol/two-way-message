@@ -34,19 +34,21 @@ import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
+import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
+import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-class TwoWayMessageControllerSpec
-    extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
+class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with MockAuthConnector  {
 
   val mockMessageService = mock[TwoWayMessageService]
 

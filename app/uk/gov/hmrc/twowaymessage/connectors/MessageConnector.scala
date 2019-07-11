@@ -31,16 +31,20 @@ class MessageConnector @Inject()(httpClient: HttpClient, servicesConfig: Service
 
   val messageBaseUrl: String = servicesConfig.baseUrl("message")
 
-  def postMessage(body: Message)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def postMessage(body: Message)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     httpClient.POST(s"$messageBaseUrl/messages", body)
+  }
 
-  def getMessageMetadata(replyTo: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def getMessageMetadata(replyTo: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     httpClient.GET(s"$messageBaseUrl/messages/$replyTo/metadata")
+  }
 
   def getMessageContent(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     httpClient.GET(s"$messageBaseUrl/messages/$messageId/content")
   }
 
-  def getMessages(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-        httpClient.GET(s"$messageBaseUrl/messages-list/$messageId")
+  def getMessages(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    httpClient.GET(s"$messageBaseUrl/messages-list/$messageId")
+  }
+
 }

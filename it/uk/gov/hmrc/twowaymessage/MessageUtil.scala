@@ -30,6 +30,10 @@ object MessageUtil {
     BaseEncoding.base64().encode(s"Hello world! - ${Random.nextString(stringLength)}".getBytes())
   }
 
+  def generateSimpleContent(): String = {
+    "Hello world!"
+  }
+
   case class MessageId(id: String)
 
   def buildValidCustomerMessage(): JsObject = {
