@@ -3,6 +3,6 @@
 ->         /two-way-message              app.Routes
 ->         /                          health.Routes
 
-->         /messages                   content.Routes
+->         /messages                   app.Routes
 
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
