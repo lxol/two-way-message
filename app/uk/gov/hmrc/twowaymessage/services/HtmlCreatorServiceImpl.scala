@@ -77,11 +77,11 @@ class HtmlCreatorServiceImpl @Inject()()
       val headingClass = "govuk-heading-xl margin-top-small margin-bottom-small"
       val header = if (isLatestMessage && !hasSmallSubject) {
         <h1 class={headingClass}>
-        {conversationItem.subject}
+          {XML.loadString("<root>" + conversationItem.subject + "</root>").child}
         </h1>
       } else {
         <h2 class={headingClass}>
-        {conversationItem.subject}
+          {XML.loadString("<root>" + conversationItem.subject + "</root>").child}
         </h2>
       }
       val replyForm = if (isLatestMessage && hasLink) {

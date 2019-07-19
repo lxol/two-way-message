@@ -88,14 +88,14 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
       val result = await(htmlCreatorService.createConversation(latestMessage,listOfConversationItems,RenderType.CustomerLink))
       result shouldBe
         Right(Html.apply(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
-        Matt Test 1
+          Matt Test 1
         </h1><p class="message_time faded-text--small">
         This message was sent to you on 13 June 2019
       </p><div>
           Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
         </div><a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a><hr/><h2
         class="govuk-heading-xl margin-top-small margin-bottom-small">
-        Matt Test 1
+          Matt Test 1
         </h2><p class="message_time faded-text--small">
         You sent this message on 13 June 2019
       </p><div>
@@ -137,7 +137,7 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
       result shouldBe
         Right(Html.apply(<h1
         class="govuk-heading-xl margin-top-small margin-bottom-small">
-        Matt Test 1
+          Matt Test 1
         </h1><p class="message_time faded-text--small">
         You sent this message on 13 June 2019
       </p><div>

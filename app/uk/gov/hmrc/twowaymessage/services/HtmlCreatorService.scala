@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.twowaymessage.services
 
-import com.google.inject.{ImplementedBy, Inject}
+import com.google.inject.ImplementedBy
 import play.twirl.api.Html
 import uk.gov.hmrc.twowaymessage.model.ConversationItem
-import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 
 import scala.concurrent.{ExecutionContext, Future}
 
