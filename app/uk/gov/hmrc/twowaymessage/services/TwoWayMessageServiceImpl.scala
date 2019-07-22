@@ -126,7 +126,7 @@ class TwoWayMessageServiceImpl @Inject()(
       case Some(content) =>
         val htmlText = updateDatePara(stripH1(stripH2(content))).mkString
         Future.successful(
-          Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, Html(htmlText)).body))
+          Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, htmlText).body))
       case None => Future.successful(None)
     }
   }
