@@ -57,15 +57,24 @@ trait TwoWayMessageService {
   def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
     implicit hc: HeaderCarrier): Future[Result]
 
+  def createHtmlMessage(messageId: String, nino: Nino, messageContent: String, subject: String)(
+    implicit hc: HeaderCarrier): Future[Option[String]]
+
   def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]]
 
-  def getConversation(messageId: String, replyType: RenderType.ReplyType)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
+  def getConversation(messageId: String, replyType: RenderType.ReplyType)(
+    implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
-  def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
+  def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
-  def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String,Html]]
+  def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
-  def createJsonForMessage(refId: String, twoWayMessage: TwoWayMessage, nino: Nino, queueId: String, name: Name): Message = {
+  def createJsonForMessage(
+    refId: String,
+    twoWayMessage: TwoWayMessage,
+    nino: Nino,
+    queueId: String,
+    name: Name): Message = {
 
     val responseTime = Enquiry(queueId).get.responseTime
     Message(
