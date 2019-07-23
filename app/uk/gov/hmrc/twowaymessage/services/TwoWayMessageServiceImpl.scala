@@ -121,7 +121,7 @@ class TwoWayMessageServiceImpl @Inject()(
     getMessageContent(messageId).flatMap {
       case Some(content) =>
         val htmlText =
-          XML.loadString("<root>" + updateDatePara(stripH1(stripH2(content))) + "</root>").child.mkString
+          XML.loadString("<root>" + updateDatePara(stripH1(stripH2(content))).mkString + "</root>").child.mkString
         Future.successful(
           Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, Html(htmlText)).body))
       case None => Future.successful(None)
