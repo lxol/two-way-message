@@ -40,7 +40,7 @@ import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.xml.Node
+import scala.xml.{ Node, XML }
 
 class TwoWayMessageServiceImpl @Inject()(
   messageConnector: MessageConnector,
@@ -120,7 +120,8 @@ class TwoWayMessageServiceImpl @Inject()(
     val url = s"$frontendUrl/message/$messageId/reply"
     getMessageContent(messageId).flatMap {
       case Some(content) =>
-        val htmlText = updateDatePara(stripH1(stripH2(content))).mkString
+        val htmlText =
+          XML.loadString("<root>" + updateDatePara(stripH1(stripH2(content))) + "</root>").child.mkString
         Future.successful(
           Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, Html(htmlText)).body))
       case None => Future.successful(None)
