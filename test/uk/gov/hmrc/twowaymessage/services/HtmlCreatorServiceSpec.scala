@@ -21,7 +21,7 @@ import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
@@ -33,9 +33,10 @@ import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with UnitSpec {
+class HtmlCreatorServiceSpec
+    extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with UnitSpec {
 
   implicit val mockExecutionContext = mock[ExecutionContext]
   implicit val mockHeaderCarrier = mock[HeaderCarrier]
@@ -49,7 +50,7 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
     .overrides(bind[TwoWayMessageService].to(mockTwoWayMessageService))
     .injector()
 
-  implicit val htmlCreatorService  = injector.instanceOf[HtmlCreatorServiceImpl]
+  implicit val htmlCreatorService = injector.instanceOf[HtmlCreatorServiceImpl]
 
   val latestMessage = "5d02201b5b0000360151779e"
 
@@ -57,27 +58,35 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
     ConversationItem(
       "5d02201b5b0000360151779e",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Adviser,
-        FormId.Reply,
-        Some(LocalDate.parse("2019-06-13")),
-        Some("5d021fbe5b0000200151779c"),
-        Some("P800"))),
+      Some(
+        ConversationItemDetails(
+          MessageType.Adviser,
+          FormId.Reply,
+          Some(LocalDate.parse("2019-06-13")),
+          Some("5d021fbe5b0000200151779c"),
+          Some("P800"))),
       LocalDate.parse("2019-06-13"),
-      Some("Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, " +
-        "I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. " +
-        "There's no need to send a reply. " +
-        "But if you think there's something important missing, just ask another question about this below." +
-        "<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.")
-  ),ConversationItem(
+      Some(
+        "Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, " +
+          "I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. " +
+          "There's no need to send a reply. " +
+          "But if you think there's something important missing, just ask another question about this below." +
+          "<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.")
+    ),
+    ConversationItem(
       "5d021fbe5b0000200151779c",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Customer,
-        FormId.Question,
-        Some(LocalDate.parse("2019-06-13")),
-        None,
-        Some("p800"))),
+      Some(
+        ConversationItemDetails(
+          MessageType.Customer,
+          FormId.Question,
+          Some(LocalDate.parse("2019-06-13")),
+          None,
+          Some("p800"))),
       LocalDate.parse("2019-06-13"),
-      Some("Hello, my friend!")))
+      Some("Hello, my friend!")
+    )
+  )
 
   "createConversation" should {
     "create HTML for a customer" in {
@@ -85,7 +94,8 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
         mockTwoWayMessageService
           .findMessagesBy(any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(listOfConversationItems)))
-      val result = await(htmlCreatorService.createConversation(latestMessage,listOfConversationItems,RenderType.CustomerLink))
+      val result =
+        await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.CustomerLink))
       result shouldBe
         Right(Html.apply(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
           Matt Test 1
@@ -108,15 +118,16 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
         mockTwoWayMessageService
           .findMessagesBy(any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(listOfConversationItems)))
-      val result = await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.Adviser))
+      val result =
+        await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.Adviser))
       result shouldBe
-      Right(Html.apply(<p class="message_time faded-text--small">
-          13 June 2019 by HMRC
+        Right(Html.apply(<p class="message_time faded-text--small">
+          13 June 2019 by HMRC:
         </p><div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div><hr/><p class="message_time faded-text--small">
-          13 June 2019 by the customer
+          13 June 2019 by the customer:
         </p><div>Hello, my friend!</div>.mkString))
     }
-  SharedMetricRegistries.clear()
+    SharedMetricRegistries.clear()
   }
 
   "createSingleMessageHtml" should {
@@ -124,16 +135,19 @@ class HtmlCreatorServiceSpec extends WordSpec with Matchers with GuiceOneAppPerS
     val conversationItem = ConversationItem(
       "5d021fbe5b0000200151779c",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Customer,
-        FormId.Question,
-        Some(LocalDate.parse("2019-06-13")),
-        None,
-        Some("p800"))),
+      Some(
+        ConversationItemDetails(
+          MessageType.Customer,
+          FormId.Question,
+          Some(LocalDate.parse("2019-06-13")),
+          None,
+          Some("p800"))),
       LocalDate.parse("2019-06-13"),
-      Some("Hello, my friend!"))
+      Some("Hello, my friend!")
+    )
 
     "create one HTML message for the first message" in {
-          val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem))
+      val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem))
       result shouldBe
         Right(Html.apply(<h1
         class="govuk-heading-xl margin-top-small margin-bottom-small">

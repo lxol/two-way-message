@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.controllers
 
-import java.util.{Base64, UUID}
+import java.util.{ Base64, UUID }
 
 import com.codahale.metrics.SharedMetricRegistries
 import org.joda.time.LocalDate
@@ -28,14 +28,14 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Results.Created
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.mvc.Http
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.{AuthProviders, _}
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment}
+import uk.gov.hmrc.auth.core.{ AuthProviders, _ }
+import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
+import uk.gov.hmrc.auth.core.{ AuthConnector, Enrolment }
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
@@ -74,28 +74,35 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
     FakeHeaders(),
     twoWayMessageGood)
 
-
   val listOfConversationItems = List(
     ConversationItem(
       id = "5d02201b5b0000360151779e",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Adviser,
-        FormId.Reply,
-        Some(LocalDate.parse("2019-06-13")),
-        Some("5d021fbe5b0000200151779c"),
-        Some("P800"))),
+      Some(
+        ConversationItemDetails(
+          MessageType.Adviser,
+          FormId.Reply,
+          Some(LocalDate.parse("2019-06-13")),
+          Some("5d021fbe5b0000200151779c"),
+          Some("P800"))),
       LocalDate.parse("2019-06-13"),
-      Some(Base64.getEncoder.encodeToString("Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.".getBytes))
-    ),ConversationItem(
+      Some(Base64.getEncoder.encodeToString(
+        "Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.".getBytes))
+    ),
+    ConversationItem(
       "5d021fbe5b0000200151779c",
       "Matt Test 1",
-      Some(ConversationItemDetails(MessageType.Customer,
-        FormId.Question,
-        Some(LocalDate.parse("2019-06-13")),
-        None,
-        Some("p800"))),
+      Some(
+        ConversationItemDetails(
+          MessageType.Customer,
+          FormId.Question,
+          Some(LocalDate.parse("2019-06-13")),
+          None,
+          Some("p800"))),
       LocalDate.parse("2019-06-13"),
-      Some(Base64.getEncoder.encodeToString("Hello, my friend!".getBytes))))
+      Some(Base64.getEncoder.encodeToString("Hello, my friend!".getBytes))
+    )
+  )
 
   "The TwoWayMessageController.getContentBy method" should {
     "return 200 (OK) with the content of the conversation in html" in {
@@ -109,16 +116,16 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       when(
         mockMessageConnector
           .getMessages(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(
-          HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems)))))
+        .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems)))))
 
-      val result = await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Adviser")(fakeRequest1).run() )
+      val result =
+        await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Adviser")(fakeRequest1).run())
       status(result) shouldBe Status.OK
       bodyOf(result) shouldBe
         """<p class="message_time faded-text--small">
-          |          13 June 2019 by HMRC
+          |          13 June 2019 by HMRC:
           |        </p><div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div><hr/><p class="message_time faded-text--small">
-          |          13 June 2019 by the customer
+          |          13 June 2019 by the customer:
           |        </p><div>Hello, my friend!</div>""".stripMargin
     }
 
@@ -133,10 +140,10 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       when(
         mockMessageConnector
           .getMessages(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(
-          HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems)))))
+        .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems)))))
 
-      val result = await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Customer")(fakeRequest1).run() )
+      val result =
+        await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Customer")(fakeRequest1).run())
       status(result) shouldBe Status.OK
       bodyOf(result) shouldBe
         """<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
@@ -154,8 +161,6 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
           |        </div>""".stripMargin
     }
 
-
-
     "return 400 (bad request)  with no content in body" in {
       val nino = Nino("AB123456C")
       mockAuthorise(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication))(Future.successful(Some(nino.value)))
@@ -163,13 +168,11 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
         mockMessageService.postCustomerReply(any[TwoWayMessageReply], ArgumentMatchers.eq("replyTo"))(
           any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
-      val result = await(testTwoWayMessageController.getContentBy("1", "nfejwk")(fakeRequest1).run() )
+      val result = await(testTwoWayMessageController.getContentBy("1", "nfejwk")(fakeRequest1).run())
       status(result) shouldBe Status.BAD_REQUEST
     }
-
 
     SharedMetricRegistries.clear
   }
 
 }
-
