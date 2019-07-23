@@ -71,7 +71,7 @@ class TwoWayMessageServiceImpl @Inject()(
     implicit hc: HeaderCarrier): Future[Result] = {
     val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, queueId, name)
     messageConnector.postMessage(body) flatMap { response =>
-      handleResponse(twoWayMessage.content, twoWayMessage.subject, response, dmsMetaData)
+      handleResponse(twoWayMessage.subject, response, dmsMetaData)
     } recover handleError
   }
 
@@ -102,11 +102,7 @@ class TwoWayMessageServiceImpl @Inject()(
         twoWayMessageReply,
         replyTo)
       postMessageResponse <- messageConnector.postMessage(body)
-      dmsHandleResponse <- handleResponse(
-                            twoWayMessageReply.content,
-                            metadata.get.subject,
-                            postMessageResponse,
-                            dmsMetaData)
+      dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData)
     } yield dmsHandleResponse) recover handleError
 
   override def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
@@ -117,7 +113,7 @@ class TwoWayMessageServiceImpl @Inject()(
     }
   }
 
-  override def createHtmlMessage(messageId: String, nino: Nino, messageContent: String, subject: String)(
+  override def createHtmlMessage(messageId: String, nino: Nino, subject: String)(
     implicit hc: HeaderCarrier): Future[Option[String]] = {
     import XmlTransformService._
     val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
@@ -126,7 +122,7 @@ class TwoWayMessageServiceImpl @Inject()(
       case Some(content) =>
         val htmlText = updateDatePara(stripH1(stripH2(content))).mkString
         Future.successful(
-          Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, htmlText).body))
+          Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, Html(htmlText)).body))
       case None => Future.successful(None)
     }
   }
@@ -169,13 +165,13 @@ class TwoWayMessageServiceImpl @Inject()(
       handleResponse
     } recover handleError
 
-  private def handleResponse(content: String, subject: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
+  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
     implicit hc: HeaderCarrier): Future[Result] =
     response.status match {
       case CREATED =>
         response.json.validate[Identifier].asOpt match {
           case Some(identifier) =>
-            createHtmlMessage(identifier.id, Nino(dmsMetaData.customerId), content, subject).flatMap {
+            createHtmlMessage(identifier.id, Nino(dmsMetaData.customerId), subject).flatMap {
               case Some(html) => createDmsSubmission(html, response, dmsMetaData)
               case _ =>
                 Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create HTML for DMS submission"))

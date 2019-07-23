@@ -414,6 +414,39 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     Option.empty
   )
 
+  "TwoWayMessageService.createHtmlMessage" should {
+    "return HTML as a string" in {
+
+      val htmlString = <p>*** we are the &amp; children ***</p>.mkString
+
+      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
+        Future.successful(
+          HttpResponse(Http.Status.OK, None, Map.empty, Some(htmlString))
+        )
+      )
+      val expectedHtml1 =
+        <p class="govuk-body-l"><span id="nino" class="govuk-font-weight-bold">National insurance number</span>AA112211A</p>.mkString
+      val actualHtml = await(
+        messageService
+          .createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample.subject))
+      /* The following can only be used for local testing of PDF generation as wkhtmltopdf is not available on the build server */
+      //PdfTestUtil.generatePdfFromHtml(actualHtml.get,"result.pdf")
+      assert(actualHtml.get.contains(expectedHtml1))
+      assert(actualHtml.get.contains(htmlString))
+
+    }
+
+    "return an empty string" in {
+      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
+        Future.successful(HttpResponse(Http.Status.BAD_GATEWAY))
+      )
+      val actualHtml = await(
+        messageService
+          .createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample.subject))
+      actualHtml shouldBe None
+    }
+  }
+
   "TwoWayMessageService.getMessageContentBy" should {
     "return Html content of the message" in {
 
