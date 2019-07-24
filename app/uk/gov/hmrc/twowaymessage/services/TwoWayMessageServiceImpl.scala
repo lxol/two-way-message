@@ -172,10 +172,21 @@ class TwoWayMessageServiceImpl @Inject()(
       case CREATED =>
         response.json.validate[Identifier].asOpt match {
           case Some(identifier) =>
-            createHtmlMessage(identifier.id, Nino(dmsMetaData.customerId), subject).flatMap {
-              case Some(html) => createDmsSubmission(html, response, dmsMetaData)
-              case _ =>
-                Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create HTML for DMS submission"))
+            getConversation(identifier.id, RenderType.Adviser).flatMap {
+              case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error.toString))
+              case Right(html) => {
+                val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
+                val url = s"$frontendUrl/message/${identifier.id}/reply"
+                val htmlText = uk.gov.hmrc.twowaymessage.views.html
+                  .two_way_message(
+                    url,
+                    dmsMetaData.customerId,
+                    subject,
+                    html
+                  )
+                  .body
+                createDmsSubmission(htmlText, response, dmsMetaData)
+              }
             }
           case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
         }
