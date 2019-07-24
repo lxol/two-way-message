@@ -20,7 +20,7 @@
 
 @import uk.gov.hmrc.twowaymessage.model.TwoWayMessage
 
-@(url: String, nino: String, subject: String, content: Html)
+@(url: String, nino: String, subject: Html, content: Html)
 <!DOCTYPE html>
 <html lang="en" class="govuk-template ">
     <head>
@@ -78,7 +78,7 @@
                 <p class="govuk-body-l"><a href="@url">@url</a></p>
                 <hr/>
                 <h2 class="govuk-heading-l">Conversation details</h2>
-                <p class="govuk-body-l"><span class="govuk-font-weight-bold">Subject:</span> @subject</p>
+                <p class="govuk-body-l"><span class="govuk-font-weight-bold">Subject:</span>@subject</p>
                 <hr />
                 <div id="indented" class="govuk-body-l">@content</div>
                 <hr />

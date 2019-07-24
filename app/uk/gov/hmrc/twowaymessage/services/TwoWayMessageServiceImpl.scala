@@ -113,21 +113,6 @@ class TwoWayMessageServiceImpl @Inject()(
     }
   }
 
-  override def createHtmlMessage(messageId: String, nino: Nino, subject: String)(
-    implicit hc: HeaderCarrier): Future[Option[String]] = {
-    import XmlTransformService._
-    val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
-    val url = s"$frontendUrl/message/$messageId/reply"
-    getMessageContent(messageId).flatMap {
-      case Some(content) =>
-        val htmlText =
-          XML.loadString("<root>" + updateDatePara(stripH1(stripH2(content))).mkString + "</root>").child.mkString
-        Future.successful(
-          Some(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, nino.nino, subject, Html(htmlText)).body))
-      case None => Future.successful(None)
-    }
-  }
-
   //TODO: In future fix the either to be evaluate the correct left and right.
   override def findMessagesBy(messageId: String)(
     implicit hc: HeaderCarrier): Future[Either[List[ConversationItem], String]] =
@@ -181,7 +166,7 @@ class TwoWayMessageServiceImpl @Inject()(
                   .two_way_message(
                     url,
                     dmsMetaData.customerId,
-                    subject,
+                    Html(subject),
                     html
                   )
                   .body
