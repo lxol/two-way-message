@@ -106,46 +106,42 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
             "</br>Regards</br>Matthew Groom</br>HMRC digital team.")
       ))
 
-    //TODO: Fix me
-//      "return 201 (Created) when a message is successfully created by the message service" in {
-//      when(
-//        mockMessageConnector
-//          .postMessage(any[Message])(any[HeaderCarrier])
-//      )
-//        .thenReturn(
-//          Future.successful(
-//            HttpResponse(Http.Status.CREATED, Some(Json.parse("{\"id\":\"5c18eb2e6f0000100204b161\"}")))
-//          )
-//        )
-//      when(
-//        mockMessageConnector
-//          .getMessages(any[String])(any[HeaderCarrier])
-//      )
-//        .thenReturn(
-//          Future.successful(
-//            HttpResponse(Http.Status.OK, Some(Json.toJson(conversationItem)))
-//          )
-//        )
-//      when(
-//        mockGformConnector
-//          .submitToDmsViaGform(any[DmsHtmlSubmission])(any[HeaderCarrier], any[ExecutionContext])
-//      )
-//          .thenReturn(
-//            Future.successful(
-//              HttpResponse(Http.Status.CREATED)
-//            )
-//          )
-//      when(
-//        mockHtmlCreationService.createConversation(any[String],any[List[ConversationItem]],any[ReplyType])(any[ExecutionContext])
-//      )
-//          .thenReturn(
-//            Future.successful(Right(Html.apply(<html/>.mkString)))
-//          )
-//
-//      val name = Name(Option("firstname"), Option("surname"))
-//      val messageResult = await(messageService.post("p800", nino, twoWayMessageExample, dmsMetadataExample, name))
-//      messageResult.header.status shouldBe 201
-//    }
+    "return 201 (Created) when a message is successfully created by the message service" in {
+      when(
+        mockMessageConnector
+          .postMessage(any[Message])(any[HeaderCarrier])
+      ).thenReturn(
+        Future.successful(
+          HttpResponse(Http.Status.CREATED, Some(Json.parse("{\"id\":\"5c18eb2e6f0000100204b161\"}")))
+        )
+      )
+      when(
+        mockMessageConnector
+          .getMessages(any[String])(any[HeaderCarrier])
+      ).thenReturn(
+        Future.successful(
+          HttpResponse(Http.Status.OK, Some(Json.toJson(conversationItem)))
+        )
+      )
+      when(
+        mockGformConnector
+          .submitToDmsViaGform(any[DmsHtmlSubmission])(any[HeaderCarrier], any[ExecutionContext])
+      ).thenReturn(
+        Future.successful(
+          HttpResponse(Http.Status.CREATED)
+        )
+      )
+      when(
+        mockHtmlCreationService.createConversation(any[String], any[List[ConversationItem]], any[ReplyType])(
+          any[ExecutionContext])
+      ).thenReturn(
+        Future.successful(Right(Html.apply(<html/>.mkString)))
+      )
+
+      val name = Name(Option("firstname"), Option("surname"))
+      val messageResult = await(messageService.post("p800", nino, twoWayMessageExample, dmsMetadataExample, name))
+      messageResult.header.status shouldBe 201
+    }
 
     "return 502 (Bad Gateway) when posting a message to the message service fails" in {
       when(mockMessageConnector.postMessage(any[Message])(any[HeaderCarrier]))
@@ -253,22 +249,21 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       Some("08 May 2019")
     )
 
-    //TODO: Fix me
-//    "return 201 (Created) when a message is successfully created by the message service" in {
-//
-//      when(mockMessageConnector.getMessageMetadata(any[String])(any[HeaderCarrier]))
-//        .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(messageMetadata)))))
-//
-//      when(
-//        mockMessageConnector
-//          .postMessage(any[Message])(any[HeaderCarrier]))
-//        .thenReturn(Future.successful(
-//          HttpResponse(Http.Status.CREATED, Some(Json.parse("{\"id\":\"5c18eb2e6f0000100204b161\"}")))))
-//
-//      val messageResult =
-//        await(messageService.postCustomerReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id"))
-//      messageResult.header.status shouldBe 201
-//    }
+    "return 201 (Created) when a message is successfully created by the message service" in {
+
+      when(mockMessageConnector.getMessageMetadata(any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(messageMetadata)))))
+
+      when(
+        mockMessageConnector
+          .postMessage(any[Message])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(
+          HttpResponse(Http.Status.CREATED, Some(Json.parse("{\"id\":\"5c18eb2e6f0000100204b161\"}")))))
+
+      val messageResult =
+        await(messageService.postCustomerReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id"))
+      messageResult.header.status shouldBe 201
+    }
 
     "return 502 (Bad Gateway) when posting a message to the message service fails with a 409 Conflict" in {
 
@@ -414,40 +409,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     Option.empty
   )
 
-//  "TwoWayMessageService.createHtmlMessage" should {
-//    "return HTML as a string" in {
-//
-//      val htmlString = <p>*** we are the &amp; children ***</p>.mkString
-//
-//      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
-//        Future.successful(
-//          HttpResponse(Http.Status.OK, None, Map.empty, Some(htmlString))
-//        )
-//      )
-//      val expectedHtml1 =
-//        <p class="govuk-body-l"><span id="nino" class="govuk-font-weight-bold">National insurance number</span>AA112211A</p>.mkString
-//      val expectedHtml2 = "*** we are the & children ***"
-//      val actualHtml = await(
-//        messageService
-//          .createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample.subject))
-//      /* The following can only be used for local testing of PDF generation as wkhtmltopdf is not available on the build server */
-//      //PdfTestUtil.generatePdfFromHtml(actualHtml.get,"result.pdf")
-//      assert(actualHtml.get.contains(expectedHtml1))
-//      assert(actualHtml.get.contains(expectedHtml2))
-//
-//    }
-//
-//    "return an empty string" in {
-//      when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
-//        Future.successful(HttpResponse(Http.Status.BAD_GATEWAY))
-//      )
-//      val actualHtml = await(
-//        messageService
-//          .createHtmlMessage("123", Nino("AA112211A"), htmlMessageExample.subject))
-//      actualHtml shouldBe None
-//    }
-//  }
-
   "TwoWayMessageService.getMessageContentBy" should {
     "return Html content of the message" in {
 
@@ -484,31 +445,36 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     }
   }
 
-//  "TwoWayMessageService.getLatestMessage" should {
-//    "return the latest message as Html" in {
-//
-//      val conversationItem = ConversationItem(
-//        "5d021fbe5b0000200151779c",
-//        "Matt Test 1",
-//        Some(ConversationItemDetails(MessageType.Customer,
-//          FormId.Question,
-//          Some(LocalDate.parse("2019-06-13")),
-//          None,
-//          Some("p800"))),
-//        LocalDate.parse("2019-06-13"),
-//        Some("Hello, my friend!"))
-//
-//      val conversationItemAsJson = Json.toJson(conversationItem.toString.stripMargin)
-//
-//      val htmlConvervsationItem = Html.apply(<h1
-//      class="govuk-heading-xl margin-top-small margin-bottom-small">
-//        Matt Test 1
-//      </h1><p class="message_time faded-text--small">
-//        You sent this message on 13 June 2019
-//      </p><p>
-//        Hello, my friend!
-//      </p>.mkString)
-//  }
+  "TwoWayMessageService.getLatestMessage" should {
+    "return the latest message as Html" in {
+
+      val conversationItem = ConversationItem(
+        "5d021fbe5b0000200151779c",
+        "Matt Test 1",
+        Some(
+          ConversationItemDetails(
+            MessageType.Customer,
+            FormId.Question,
+            Some(LocalDate.parse("2019-06-13")),
+            None,
+            Some("p800"))),
+        LocalDate.parse("2019-06-13"),
+        Some("Hello, my friend!")
+      )
+
+      val conversationItemAsJson = Json.toJson(conversationItem.toString.stripMargin)
+
+      val htmlConvervsationItem = Html.apply(<h1
+        class="govuk-heading-xl margin-top-small margin-bottom-small">
+          Matt Test 1
+        </h1><p class="message_time faded-text--small">
+          You sent this message on 13 June 2019
+        </p><p>
+          Hello, my friend!
+        </p>.mkString)
+    }
+  }
+
   val listOfConversationItems = List(
     ConversationItem(
       "5d02201b5b0000360151779e",
