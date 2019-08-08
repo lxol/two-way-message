@@ -19,42 +19,36 @@ package uk.gov.hmrc.twowaymessage.services
 import java.util.UUID.randomUUID
 
 import com.google.inject.Inject
-import play.api.http.Status.{ CREATED, INTERNAL_SERVER_ERROR, OK }
-import play.api.libs.json.{ JsError, Json }
+import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
+import play.api.libs.json.{JsError, Json}
 import play.api.mvc.Result
 import play.api.mvc.Results.Created
 import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
+import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
 import uk.gov.hmrc.gform.gformbackend.GformConnector
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
 import uk.gov.hmrc.twowaymessage.enquiries.Enquiry.EnquiryTemplate
+import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
-import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.xml.{ Node, XML }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TwoWayMessageServiceImpl @Inject()(
   messageConnector: MessageConnector,
   gformConnector: GformConnector,
   servicesConfig: ServicesConfig,
   htmlCreatorService: HtmlCreatorService)(implicit ec: ExecutionContext)
-    extends TwoWayMessageService {
+    extends TwoWayMessageService with XmlConversion {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  implicit def stringToXml(string: String): Seq[Node] = {
-    val xml = scala.xml.XML.loadString("<root>" + string + "</root>")
-    xml.child
-  }
 
   override def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]] =
     messageConnector
@@ -108,20 +102,19 @@ class TwoWayMessageServiceImpl @Inject()(
   override def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
     implicit hc: HeaderCarrier): Future[Result] = {
     val dmsSubmission = DmsHtmlSubmission(encodeToBase64String(html), dmsMetaData)
-    Future.successful(Created(Json.parse(response.body))).andThen {
+    Future(Created(Json.parse(response.body))).andThen {
       case _ => gformConnector.submitToDmsViaGform(dmsSubmission)
     }
   }
 
-  //TODO: In future fix the either to be evaluate the correct left and right.
   override def findMessagesBy(messageId: String)(
-    implicit hc: HeaderCarrier): Future[Either[List[ConversationItem], String]] =
+    implicit hc: HeaderCarrier): Future[Either[String, List[ConversationItem]]] =
     messageConnector.getMessages(messageId).flatMap { response =>
       response.json
         .validate[List[ConversationItem]]
         .fold(
-          errors => Future.successful(Right(Json stringify JsError.toJson(errors))),
-          msgList => Future.successful(Left(msgList))
+          errors => Future.successful(Left(Json stringify JsError.toJson(errors))),
+          msgList => Future.successful(Right(msgList))
         )
     }
 
@@ -157,23 +150,15 @@ class TwoWayMessageServiceImpl @Inject()(
       case CREATED =>
         response.json.validate[Identifier].asOpt match {
           case Some(identifier) =>
-            getConversation(identifier.id, RenderType.Adviser).flatMap {
-              case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error.toString))
-              case Right(html) => {
-                val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
-                val url = s"$frontendUrl/message/${identifier.id}/reply"
-                val htmlText = uk.gov.hmrc.twowaymessage.views.html
-                  .two_way_message(
-                    url,
-                    dmsMetaData.customerId,
-                    Html(subject),
-                    html
-                  )
-                  .body
-                createDmsSubmission(htmlText, response, dmsMetaData)
+            findMessagesBy(identifier.id).flatMap {
+              case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
+              case Right(list) =>
+                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject).flatMap {
+                  case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
+                  case Right(html) => createDmsSubmission(html, response, dmsMetaData)
+                }
               }
-            }
-          case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
+            case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
         }
       case _ => Future.successful(errorResponse(response.status, response.body))
     }
@@ -187,22 +172,12 @@ class TwoWayMessageServiceImpl @Inject()(
           case None          => Future.successful(None)
       })
 
-//TODO: In future fix the either to be evaluate the correct left and right.
-  override def getConversation(messageId: String, replyType: RenderType.ReplyType)(
-    implicit hc: HeaderCarrier): Future[Either[String, Html]] =
-    findMessagesBy(messageId).flatMap {
-      case Right(error) => Future.successful(Left(error))
-      case Left(list) =>
-        val conversation = htmlCreatorService.createConversation(messageId, list, replyType)
-        conversation
-    }
-
   override def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]] =
     findMessagesBy(messageId).flatMap {
-      case Right(error) => Future.successful(Left(error))
-      case Left(list) =>
+      case Left(error) => Future.successful(Left(error))
+      case Right(list) =>
         list
-          .sortWith((_.id > _.id))
+          .sortWith(_.id > _.id)
           .headOption
           .map(msg => htmlCreatorService.createSingleMessageHtml(msg))
           .getOrElse(Future.successful(Right(Html(""))))
@@ -210,8 +185,8 @@ class TwoWayMessageServiceImpl @Inject()(
 
   override def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]] =
     findMessagesBy(messageId).flatMap {
-      case Right(error) => Future.successful(Left(error))
-      case Left(list) =>
+      case Left(error) => Future.successful(Left(error))
+      case Right(list) =>
         htmlCreatorService.createConversation(messageId, list.sortWith(_.id > _.id).drop(1), RenderType.CustomerForm)
     }
 

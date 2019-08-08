@@ -20,9 +20,9 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, _}
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core.retrieve.{~, Name, Retrievals}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.gform.gformbackend.GformConnector
@@ -30,10 +30,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
+import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
-import uk.gov.hmrc.twowaymessage.model.{MessageType, _}
 import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, RenderType, TwoWayMessageService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,16 +77,16 @@ class TwoWayMessageController @Inject()(
   def getMessagesListBy(messageId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     twms.findMessagesBy(messageId).map {
-      case Left(messages) => Ok(Json.toJson(messages))
-      case Right(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
+      case Right(messages) => Ok(Json.toJson(messages))
+      case Left(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
     }
   }
 
   def getMessagesListSizeBy(messagesId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     twms.findMessagesBy(messagesId).map {
-      case Left(messages) => Ok(JsNumber(messages.size))
-      case Right(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
+      case Right(messages) => Ok(JsNumber(messages.size))
+      case Left(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
     }
   }
 
@@ -172,15 +172,11 @@ class TwoWayMessageController @Inject()(
       authorised(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication)) {
 
         def createMsg(typ: RenderType.ReplyType): Future[Result] = {
-          twms.getConversation(id, typ).map {
-            case Right(htmlContent) =>
-              if (htmlContent.toString.isEmpty) {
-                Logger.warn(s"""Content for message with id: $id is empty""")
-              }
-              Ok(htmlContent)
+          twms.findMessagesBy(id).flatMap {
+            case Right(msgList) => getHtmlResponse(id,msgList,typ)
             case Left(err) =>
-              Logger.warn(s"HtmlCreatorService conversion error: $err")
-              BadGateway(err)
+              Logger.warn(s"Error retrieving messages: $err")
+              Future.successful(BadGateway(err))
           }
         }
 
@@ -191,6 +187,15 @@ class TwoWayMessageController @Inject()(
         }
 
       } recover handleError
+  }
+
+  private def getHtmlResponse(id:String, msgList: List[ConversationItem], typ: RenderType.ReplyType): Future[Result] = {
+    htmlCreatorService.createConversation(id, msgList, typ).map {
+      case Right(html) => Ok(html)
+      case Left(error) =>
+        Logger.warn(s"HtmlCreatorService conversion error: $error")
+        InternalServerError(error)
+    }
   }
 
   def getLatestMessage(messageId: String): Action[AnyContent] = Action.async {

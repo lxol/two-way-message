@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.controllers
 
-import java.util.{ Base64, UUID }
+import java.util.{Base64, UUID}
 
 import com.codahale.metrics.SharedMetricRegistries
 import org.joda.time.LocalDate
@@ -28,14 +28,14 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Results.Created
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import play.mvc.Http
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.{ AuthProviders, _ }
-import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
-import uk.gov.hmrc.auth.core.{ AuthConnector, Enrolment }
+import uk.gov.hmrc.auth.core.{AuthProviders, _}
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.{AuthConnector, Enrolment}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
@@ -44,6 +44,7 @@ import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
+import scala.xml.Xhtml
 
 class HtmlCreationSpec extends TestUtil with MockAuthConnector {
 
@@ -121,12 +122,12 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       val result =
         await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Adviser")(fakeRequest1).run())
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe
-        """<p class="message_time faded-text--small">
-          |          13 June 2019 by HMRC:
-          |        </p><div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div><hr/><p class="message_time faded-text--small">
-          |          13 June 2019 by the customer:
-          |        </p><div>Hello, my friend!</div>""".stripMargin
+      bodyOf(result) shouldBe Xhtml.toXhtml(
+        <p class="faded-text--small">13 June 2019 by HMRC:</p>
+        <div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div>
+          <hr/>
+        <p class="faded-text--small">13 June 2019 by the customer:</p>
+        <div>Hello, my friend!</div>)
     }
 
     "return 200 dwq with the content of the conversation in html" in {
@@ -145,20 +146,15 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       val result =
         await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Customer")(fakeRequest1).run())
       status(result) shouldBe Status.OK
-      bodyOf(result) shouldBe
-        """<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
-          |          Matt Test 1
-          |        </h1><p class="message_time faded-text--small">
-          |        This message was sent to you on 13 June 2019
-          |      </p><div>
-          |          Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
-          |        </div><a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a><hr/><h2 class="govuk-heading-xl margin-top-small margin-bottom-small">
-          |          Matt Test 1
-          |        </h2><p class="message_time faded-text--small">
-          |        You sent this message on 13 June 2019
-          |      </p><div>
-          |          Hello, my friend!
-          |        </div>""".stripMargin
+      bodyOf(result) shouldBe Xhtml.toXhtml(
+        <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
+          <p class="faded-text--small">This message was sent to you on 13 June 2019</p>
+          <div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div>
+          <a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a>
+            <hr/>
+          <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
+          <p class="faded-text--small">You sent this message on 13 June 2019</p>
+          <div>Hello, my friend!</div>)
     }
 
     "return 400 (bad request)  with no content in body" in {

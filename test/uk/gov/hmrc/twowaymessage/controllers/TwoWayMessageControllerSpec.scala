@@ -154,13 +154,25 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
 
     "return 200 (Ok) when messages are  requested correctly" in {
       when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Left(List(testConversationItem, testConversationItem))))
+        .thenReturn(Future.successful(Right(List(testConversationItem, testConversationItem))))
       val result = await(controller.getMessagesListBy("123")(FakeRequest()))
       result.header.status shouldBe Status.OK
     }
     "return 400 () when messages are  requested incorrectly" in {
-      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Right("")))
+      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Left("")))
       val result = await(controller.getMessagesListBy("123")(FakeRequest()))
+      result.header.status shouldBe Status.BAD_REQUEST
+    }
+
+    "return 200 (Ok) when message list size is requested correctly" in {
+      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Right(List(testConversationItem, testConversationItem))))
+      val result = await(controller.getMessagesListSizeBy("123")(FakeRequest()))
+      result.header.status shouldBe Status.OK
+    }
+    "return 400 () when message list size is requested incorrectly" in {
+      when(mockMessageService.findMessagesBy(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Left("")))
+      val result = await(controller.getMessagesListSizeBy("123")(FakeRequest()))
       result.header.status shouldBe Status.BAD_REQUEST
     }
 

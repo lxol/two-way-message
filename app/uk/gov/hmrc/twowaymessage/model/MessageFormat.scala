@@ -140,4 +140,10 @@ case class ConversationItem (
   content: Option[String]
 )
 
+case class ItemMetadata(
+  isLatestMessage: Boolean,
+  hasLink: Boolean = true,
+  hasSmallSubject: Boolean = false
+)
+
 

@@ -132,10 +132,9 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
       )
       when(
-        mockHtmlCreationService.createConversation(any[String], any[List[ConversationItem]], any[ReplyType])(
-          any[ExecutionContext])
+        mockHtmlCreationService.createHtmlForPdf(any[String], any[String], any[List[ConversationItem]], any[String])
       ).thenReturn(
-        Future.successful(Right(Html.apply(<html/>.mkString)))
+        Future.successful(Right(<html/>.mkString))
       )
 
       val name = Name(Option("firstname"), Option("surname"))
@@ -315,7 +314,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           .getMessages(any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.parse(fixtureMessages)))))
       val messagesResult = await(messageService.findMessagesBy("1234567890"))
-      messagesResult.left.get.head.validFrom.toString should be("2013-12-01")
+      messagesResult.right.get.head.validFrom.toString should be("2013-12-01")
     }
 
     val invalidFixtureMessages = "{}"
@@ -413,17 +412,17 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     "return Html content of the message" in {
 
       val htmlString = <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h1>
-        <p class="message_time faded-text--small">You sent this message on 12 March, 2019</p>
+        <p class="faded-text--small">You sent this message on 12 March, 2019</p>
         <p>What happens if I refuse to pay?</p>
           <hr/>
         <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h2>
-        <p class="message_time faded-text--small">This message was sent to you on 12 March, 2019</p>
+        <p class="faded-text--small">This message was sent to you on 12 March, 2019</p>
         <p>I'm sorry but this tax bill is for you and you need to pay it.
 
         You can pay it online of at your bank.</p>
           <hr/>
         <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Incorrect tax bill</h2>
-        <p class="message_time faded-text--small">You sent this message on 12 March, 2019</p>
+        <p class="faded-text--small">You sent this message on 12 March, 2019</p>
         <p>I have been sent a tax bill that I'm sure is for someone else as I don't earn any money. Please can you check.</p>.mkString
 
       when(mockMessageConnector.getMessageContent(any[String])(any[HeaderCarrier])).thenReturn(
@@ -467,7 +466,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val htmlConvervsationItem = Html.apply(<h1
         class="govuk-heading-xl margin-top-small margin-bottom-small">
           Matt Test 1
-        </h1><p class="message_time faded-text--small">
+        </h1><p class="faded-text--small">
           You sent this message on 13 June 2019
         </p><p>
           Hello, my friend!
@@ -510,14 +509,14 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
   val htmlConversationItems = Html.apply(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
     Matt Test 1
-  </h1><p class="message_time faded-text--small">
+  </h1><p class="faded-text--small">
     This message was sent to you on 13 June 2019
   </p><p>
     Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
   </p><a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a><h2
   class="govuk-heading-xl margin-top-small margin-bottom-small">
     Matt Test 1
-  </h2><p class="message_time faded-text--small">
+  </h2><p class="faded-text--small">
     You sent this message on 13 June 2019
   </p><p>
     Hello, my friend!
@@ -561,7 +560,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       )
 
       val result =
-        await(messageService.getConversation("5d02201b5b0000360151779e", RenderType.CustomerLink)(mockHeaderCarrier))
+        await(messageService.findMessagesBy("5d02201b5b0000360151779e")(mockHeaderCarrier))
       result.isRight
 
     }

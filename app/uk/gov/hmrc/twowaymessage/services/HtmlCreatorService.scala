@@ -20,17 +20,17 @@ import com.google.inject.ImplementedBy
 import play.twirl.api.Html
 import uk.gov.hmrc.twowaymessage.model.ConversationItem
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 
 @ImplementedBy(classOf[HtmlCreatorServiceImpl])
 trait HtmlCreatorService {
   /** Returns either the HTML conversation for the message ID or an error message */
-  def createConversation(messageId: String, listMsg: List[ConversationItem], replyType: RenderType.ReplyType)
-                        (implicit ec: ExecutionContext): Future[Either[String,Html]]
+  def createConversation(messageId: String, listMsg: List[ConversationItem], replyType: RenderType.ReplyType): Future[Either[String,Html]]
 
-  def createSingleMessageHtml(conversationItem: ConversationItem)
-                             (implicit ec: ExecutionContext): Future[Either[String,Html]]
+  def createSingleMessageHtml(conversationItem: ConversationItem): Future[Either[String,Html]]
+
+  def createHtmlForPdf(latestMessageId: String, customerId: String, messages: List[ConversationItem], subject: String): Future[Either[String,String]]
 }
 
 

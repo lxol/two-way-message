@@ -21,7 +21,7 @@ import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
@@ -33,7 +33,9 @@ import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
+import scala.xml.{Utility, Xhtml}
 
 class HtmlCreatorServiceSpec
     extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with UnitSpec {
@@ -52,7 +54,7 @@ class HtmlCreatorServiceSpec
 
   implicit val htmlCreatorService = injector.instanceOf[HtmlCreatorServiceImpl]
 
-  val latestMessage = "5d02201b5b0000360151779e"
+  val latestMessageId = "5d02201b5b0000360151779e"
 
   val listOfConversationItems = List(
     ConversationItem(
@@ -67,11 +69,11 @@ class HtmlCreatorServiceSpec
           Some("P800"))),
       LocalDate.parse("2019-06-13"),
       Some(
-        "Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, " +
-          "I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. " +
+        "<p>Dear TestUser</p><p>Thank you for your message of 13 June 2019.</p><p>To recap your question, " +
+          "I think you're asking for help with</p><p>I believe this answers your question and hope you are satisfied with the response. " +
           "There's no need to send a reply. " +
-          "But if you think there's something important missing, just ask another question about this below." +
-          "<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.")
+          "But if you think there's something important missing, just ask another question about this below.</p>" +
+          "<p>Regards<br>Matthew Groom<br>HMRC digital team</p>")
     ),
     ConversationItem(
       "5d021fbe5b0000200151779c",
@@ -84,7 +86,7 @@ class HtmlCreatorServiceSpec
           None,
           Some("p800"))),
       LocalDate.parse("2019-06-13"),
-      Some("Hello, my friend!")
+      Some("<p>Hello, my friend!</p>")
     )
   )
 
@@ -93,39 +95,47 @@ class HtmlCreatorServiceSpec
       when(
         mockTwoWayMessageService
           .findMessagesBy(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Left(listOfConversationItems)))
+        .thenReturn(Future.successful(Right(listOfConversationItems)))
       val result =
-        await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.CustomerLink))
+        await(htmlCreatorService.createConversation(latestMessageId, listOfConversationItems, RenderType.CustomerLink))
       result shouldBe
-        Right(Html.apply(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">
-          Matt Test 1
-        </h1><p class="message_time faded-text--small">
-        This message was sent to you on 13 June 2019
-      </p><div>
-          Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
-        </div><a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a><hr/><h2
-        class="govuk-heading-xl margin-top-small margin-bottom-small">
-          Matt Test 1
-        </h2><p class="message_time faded-text--small">
-        You sent this message on 13 June 2019
-      </p><div>
-          Hello, my friend!
-        </div>.mkString))
+        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
+          <p class="faded-text--small">This message was sent to you on 13 June 2019</p> ++
+          Utility.trim(
+            <div>
+              <p>Dear TestUser</p>
+              <p>Thank you for your message of 13 June 2019.</p>
+              <p>To recap your question, I think you're asking for help with</p>
+              <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p>
+              <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
+            </div>) ++
+          <a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a>
+            <hr/>
+          <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
+          <p class="faded-text--small">You sent this message on 13 June 2019</p>
+          <div><p>Hello, my friend!</p></div>)))
     }
 
     "create HTML content for an advisor" in {
       when(
         mockTwoWayMessageService
           .findMessagesBy(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Left(listOfConversationItems)))
+        .thenReturn(Future.successful(Right(listOfConversationItems)))
       val result =
-        await(htmlCreatorService.createConversation(latestMessage, listOfConversationItems, RenderType.Adviser))
+        await(htmlCreatorService.createConversation(latestMessageId, listOfConversationItems, RenderType.Adviser))
       result shouldBe
-        Right(Html.apply(<p class="message_time faded-text--small">
-          13 June 2019 by HMRC:
-        </p><div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div><hr/><p class="message_time faded-text--small">
-          13 June 2019 by the customer:
-        </p><div>Hello, my friend!</div>.mkString))
+        Right(Html(Xhtml.toXhtml(<p class="faded-text--small">13 June 2019 by HMRC:</p> ++
+          Utility.trim(
+            <div>
+              <p>Dear TestUser</p>
+              <p>Thank you for your message of 13 June 2019.</p>
+              <p>To recap your question, I think you're asking for help with</p>
+              <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p>
+              <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
+            </div>) ++
+            <hr/>
+          <p class="faded-text--small">13 June 2019 by the customer:</p>
+          <div><p>Hello, my friend!</p></div>)))
     }
     SharedMetricRegistries.clear()
   }
@@ -149,14 +159,32 @@ class HtmlCreatorServiceSpec
     "create one HTML message for the first message" in {
       val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem))
       result shouldBe
-        Right(Html.apply(<h1
-        class="govuk-heading-xl margin-top-small margin-bottom-small">
-          Matt Test 1
-        </h1><p class="message_time faded-text--small">
-        You sent this message on 13 June 2019
-      </p><div>
-          Hello, my friend!
-        </div>.mkString))
+        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
+          <p class="faded-text--small">You sent this message on 13 June 2019</p>
+          <div>Hello, my friend!</div>)))
     }
   }
+
+  "createHtmlForPdf" should {
+    "create a complete HTML document" in {
+      val subject = "Some subject"
+      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,"Some subject"))
+      result shouldBe
+      Right(expectedPdfHtml(subject))
+    }
+
+    "correctly render escaped HTML in the message subject" in {
+      val subjectWithEscapedChars = "&lt;b&gt;This is another test to see if this &gt; that &amp; that &lt; this&lt;/b&gt;"
+      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithEscapedChars))
+      result shouldBe
+        Right(expectedPdfHtml(subjectWithEscapedChars))
+      result match {
+        case Right(html) => PdfTestUtil.generatePdfFromHtml(html,"result2.pdf")
+        case _ => ""
+      }
+
+    }
+  }
+
+
 }

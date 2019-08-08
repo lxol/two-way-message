@@ -31,7 +31,6 @@ import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
-import uk.gov.hmrc.twowaymessage.services.RenderType.ReplyType
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -45,22 +44,15 @@ trait TwoWayMessageService {
 
   def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]]
 
-  def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
-    implicit hc: HeaderCarrier): Future[Result]
+  def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(implicit hc: HeaderCarrier): Future[Result]
 
-  def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
-    implicit hc: HeaderCarrier): Future[Result]
+  def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(implicit hc: HeaderCarrier): Future[Result]
 
-  def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
-    implicit hc: HeaderCarrier): Future[Result]
+  def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(implicit hc: HeaderCarrier): Future[Result]
 
-  def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
-    implicit hc: HeaderCarrier): Future[Result]
+  def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(implicit hc: HeaderCarrier): Future[Result]
 
   def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]]
-
-  def getConversation(messageId: String, replyType: RenderType.ReplyType)(
-    implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
   def getPreviousMessages(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
@@ -121,7 +113,7 @@ trait TwoWayMessageService {
   def encodeToBase64String(text: String): String =
     Base64.encodeBase64String(text.getBytes("UTF-8"))
 
-  def findMessagesBy(messageId: String)(implicit hc: HeaderCarrier): Future[Either[List[ConversationItem], String]]
+  def findMessagesBy(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, List[ConversationItem]]]
 
   protected def getContent(response: HttpResponse): Option[String] =
     response.status match {
