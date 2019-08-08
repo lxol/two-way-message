@@ -178,11 +178,6 @@ class HtmlCreatorServiceSpec
       val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithEscapedChars))
       result shouldBe
         Right(expectedPdfHtml(subjectWithEscapedChars))
-      result match {
-        case Right(html) => PdfTestUtil.generatePdfFromHtml(html,"result2.pdf")
-        case _ => ""
-      }
-
     }
   }
 
