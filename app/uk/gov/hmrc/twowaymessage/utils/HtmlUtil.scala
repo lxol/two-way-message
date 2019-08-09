@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.twowaymessage.model
+package uk.gov.hmrc.twowaymessage.utils
 
-import scala.xml.Node
+object HtmlUtil {
 
-trait XmlConversion {
+  def escapeForHtml(text: String): String = {
+    text.replaceAll("<","&lt;").replaceAll(">","&gt;")
+  }
 
-  implicit def stringToXml(string: String): Seq[Node] = {
-    val xml = scala.xml.XML.loadString("<root>" + string + "</root>")
-    xml.child
+  def escapeForXhtml(text: String): String = {
+    escapeForHtml(text).replaceAll("&\\s","&amp; ")
   }
 
 }

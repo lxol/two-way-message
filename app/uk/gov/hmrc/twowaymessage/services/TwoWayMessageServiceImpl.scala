@@ -46,7 +46,7 @@ class TwoWayMessageServiceImpl @Inject()(
   gformConnector: GformConnector,
   servicesConfig: ServicesConfig,
   htmlCreatorService: HtmlCreatorService)(implicit ec: ExecutionContext)
-    extends TwoWayMessageService with XmlConversion {
+    extends TwoWayMessageService {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

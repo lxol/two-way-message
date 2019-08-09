@@ -22,12 +22,15 @@ import org.joda.time.format.DateTimeFormat
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.twowaymessage.model.{ConversationItem, ItemMetadata, MessageType, XmlConversion}
+import uk.gov.hmrc.twowaymessage.model.{ConversationItem, ItemMetadata, MessageType}
+import uk.gov.hmrc.twowaymessage.utils.HtmlUtil._
+import uk.gov.hmrc.twowaymessage.utils.XmlConversion
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 import scala.xml._
 
-class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends HtmlCreatorService with XmlConversion {
+class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends HtmlCreatorService {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -53,11 +56,11 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
     val url = s"$frontendUrl/message/$latestMessageId/reply"
     createConversation(latestMessageId, messages, RenderType.Adviser) map {
       case Left(error) => Left(error)
-      case Right(html) => Right(
-        "<!DOCTYPE html>" + Xhtml.toXhtml(
-          Utility.trim(
-            XML.loadString(
-              uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, Html(subject), html).body))))
+      case Right(html) =>
+        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, Html(escapeForXhtml(subject)), html).body) match {
+          case Success(xml) => Right("<!DOCTYPE html>" + Xhtml.toXhtml(Utility.trim(xml.head)))
+          case Failure(e) => Left("Unable to generate HTML for PDF due to: " + e.getMessage)
+        }
     }
   }
 
@@ -97,15 +100,19 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
   private def getHeader(metadata: ItemMetadata, subject: String): Elem = {
     val headingClass = "govuk-heading-xl margin-top-small margin-bottom-small"
     if (metadata.isLatestMessage && !metadata.hasSmallSubject) {
-      <h1 class={headingClass}>{Unparsed(subject)}</h1>
+      <h1 class={headingClass}>{Unparsed(escapeForXhtml(subject))}</h1>
     } else {
-      <h2 class={headingClass}>{Unparsed(subject)}</h2>
+      <h2 class={headingClass}>{Unparsed(escapeForXhtml(subject))}</h2>
     }
   }
 
   private def getContentDiv(maybeContent: Option[String]): Elem = {
     maybeContent match {
-      case Some(content) => <div>{stringToXml(content.replaceAllLiterally("<br>", "<br/>"))}</div>
+      case Some(content) =>
+        XmlConversion.stringToXmlNodes(content.replaceAllLiterally("<br>", "<br/>")) match {
+          case Success(nodes) => <div>{nodes}</div>
+          case Failure(_) => <div>There was a problem reading the message content</div>
+        }
       case None => <div/>
     }
   }

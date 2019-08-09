@@ -142,9 +142,9 @@ class HtmlCreatorServiceSpec
 
   "createSingleMessageHtml" should {
 
-    val conversationItem = ConversationItem(
+    def conversationItem(subject:String):ConversationItem = ConversationItem(
       "5d021fbe5b0000200151779c",
-      "Matt Test 1",
+      subject,
       Some(
         ConversationItemDetails(
           MessageType.Customer,
@@ -157,15 +157,35 @@ class HtmlCreatorServiceSpec
     )
 
     "create one HTML message for the first message" in {
-      val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem))
+      val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("Matt Test 1")))
       result shouldBe
         Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
           <div>Hello, my friend!</div>)))
     }
+
+    "create one HTML message with escaped HTML subject text for the first message" in {
+      val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("&lt;h1&gt;A &amp; B&lt;/h1&gt;")))
+      result shouldBe
+        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
+          <p class="faded-text--small">You sent this message on 13 June 2019</p>
+          <div>Hello, my friend!</div>)))
+    }
+
+    "create one HTML message with non-escaped HTML subject for the first message" in {
+      val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("<h1>A & B</h1>")))
+      result shouldBe
+        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
+          <p class="faded-text--small">You sent this message on 13 June 2019</p>
+          <div>Hello, my friend!</div>)))
+    }
+
   }
 
   "createHtmlForPdf" should {
+
+    val subjectWithEscapedChars = "&lt;b&gt;This is another test to see if this &gt; that &amp; that &lt; this&lt;/b&gt;"
+
     "create a complete HTML document" in {
       val subject = "Some subject"
       val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,"Some subject"))
@@ -174,8 +194,14 @@ class HtmlCreatorServiceSpec
     }
 
     "correctly render escaped HTML in the message subject" in {
-      val subjectWithEscapedChars = "&lt;b&gt;This is another test to see if this &gt; that &amp; that &lt; this&lt;/b&gt;"
       val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithEscapedChars))
+      result shouldBe
+        Right(expectedPdfHtml(subjectWithEscapedChars))
+    }
+
+    "correctly escape unescaped HTML in the message subject" in {
+      val subjectWithUnescapedChars = "<b>This is another test to see if this > that & that < this</b>"
+      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithUnescapedChars))
       result shouldBe
         Right(expectedPdfHtml(subjectWithEscapedChars))
     }
