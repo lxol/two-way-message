@@ -44,7 +44,7 @@ import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
-import scala.xml.Xhtml
+import scala.xml.{Utility, Xhtml}
 
 class HtmlCreationSpec extends TestUtil with MockAuthConnector {
 
@@ -106,7 +106,7 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
   )
 
   "The TwoWayMessageController.getContentBy method" should {
-    "return 200 (OK) with the content of the conversation in html" in {
+    "return 200 (OK) with the content of the conversation in html for the advisor" in {
       val nino = Nino("AB123456C")
       mockAuthorise(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication))(Future.successful(Some(nino.value)))
       when(
@@ -123,14 +123,19 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
         await(testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Adviser")(fakeRequest1).run())
       status(result) shouldBe Status.OK
       bodyOf(result) shouldBe Xhtml.toXhtml(
-        <p class="faded-text--small">13 June 2019 by HMRC:</p>
-        <div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div>
-          <hr/>
+        <p class="faded-text--small">13 June 2019 by HMRC:</p> ++
+        Utility.trim(<div>Dear TestUser Thank you for your message of 13 June 2019.<br/>
+          To recap your question, I think you're asking for help with<br/>
+          I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>
+          Regards<br/>
+          Matthew Groom<br/>
+          HMRC digital team.</div>) ++
+        <hr/>
         <p class="faded-text--small">13 June 2019 by the customer:</p>
         <div>Hello, my friend!</div>)
     }
 
-    "return 200 dwq with the content of the conversation in html" in {
+    "return 200 (OK) with the content of the conversation in html for the customer" in {
       val nino = Nino("AB123456C")
       mockAuthorise(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication))(Future.successful(Some(nino.value)))
       when(
@@ -148,10 +153,30 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       status(result) shouldBe Status.OK
       bodyOf(result) shouldBe Xhtml.toXhtml(
         <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
-          <p class="faded-text--small">This message was sent to you on 13 June 2019</p>
-          <div>Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.</div>
-          <a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a>
-            <hr/>
+          <p class="faded-text--small">This message was sent to you on 13 June 2019</p> ++
+          Utility.trim(<div>Dear TestUser Thank you for your message of 13 June 2019.<br/>
+            To recap your question, I think you're asking for help with<br/>
+            I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>
+            Regards<br/>
+            Matthew Groom<br/>
+            HMRC digital team.</div>) ++
+          Utility.trim(
+            <p>
+              <span>
+                <a style="text-decoration:none;" href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">
+                  <svg style="vertical-align:text-top;padding-right:5px;" width="21px" height="20px" viewBox="0 0 33 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <title>Reply</title>
+                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                      <g id="icon-reply" fill="#000000" fill-rule="nonzero">
+                        <path d="M20.0052977,9.00577935 C27.0039418,9.21272548 32.6139021,14.9512245 32.6139021,22 C32.6139021,25.5463753 31.1938581,28.7610816 28.8913669,31.1065217 C29.2442668,30.1082895 29.4380446,29.1123203 29.4380446,28.1436033 C29.4380446,21.8962314 25.9572992,21.1011463 20.323108,21 L15,21 L15,30 L-1.42108547e-14,15 L15,2.25597319e-13 L15,9 L20,9 L20.0052977,9.00577935 Z" id="Combined-Shape"></path>
+                      </g>
+                    </g>
+                  </svg>
+                </a>
+              </span>
+              <a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a>
+            </p>) ++
+          <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
           <div>Hello, my friend!</div>)

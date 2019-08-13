@@ -126,7 +126,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
 
       val httpResult = await(messageConnector.getMessageMetadata(replyTo)(new HeaderCarrier()))
       httpResult.status shouldBe (200)
-      Json.parse(httpResult.body).validate[MessageMetadata] shouldBe a[JsSuccess[MessageMetadata]]
+      Json.parse(httpResult.body).validate[MessageMetadata] shouldBe a[JsSuccess[_]]
     }
     SharedMetricRegistries.clear
   }
@@ -146,7 +146,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
 
       val httpResult = await(messageConnector.getMessages(messageId)(new HeaderCarrier()))
       httpResult.status shouldBe (200)
-      Json.parse(httpResult.body).validate[List[ConversationItem]] shouldBe a[JsSuccess[List[ConversationItem]]]
+      Json.parse(httpResult.body).validate[List[ConversationItem]] shouldBe a[JsSuccess[_]]
     }
     SharedMetricRegistries.clear
   }
