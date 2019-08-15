@@ -26,7 +26,7 @@ object P800 extends EnquiryTemplate {
   val dmsFormId:String = "P800"
   val classificationType: String = "PSA-DFS Secure Messaging SA"
   val businessArea: String = "PT Operations"
-  lazy val responseTime: String = Play.current.configuration.getString("forms.p800.reponseTime").get
+  lazy val responseTime: String = Play.current.configuration.getString("forms.p800.responseTime").get
 
 
 }

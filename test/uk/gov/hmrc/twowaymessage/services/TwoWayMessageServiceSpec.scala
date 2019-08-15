@@ -341,7 +341,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           MessageType.Customer,
           "QUESTION",
           "some base64-encoded-html",
-          Details(FormId.Question, None, None, enquiryType = Some("p800"), waitTime = Some("7 days"))
+          Details(FormId.Question, None, None, enquiryType = Some("p800"), waitTime = Some("5 days"))
         )
 
       val originalMessage = TwoWayMessage(ContactDetails("email@test.com"), "QUESTION", "some base64-encoded-html")
