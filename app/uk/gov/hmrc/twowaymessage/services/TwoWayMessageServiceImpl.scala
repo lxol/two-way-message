@@ -31,8 +31,7 @@ import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry.EnquiryTemplate
+import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, EnquiryType}
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
@@ -61,9 +60,9 @@ class TwoWayMessageServiceImpl @Inject()(
           case _ => Future.successful(None)
       })
 
-  override def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
+  override def post(enquiryType: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
     implicit hc: HeaderCarrier): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, queueId, name)
+    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, enquiryType, name)
     messageConnector.postMessage(body) flatMap { response =>
       handleResponse(twoWayMessage.subject, response, dmsMetaData)
     } recover handleError
@@ -77,18 +76,18 @@ class TwoWayMessageServiceImpl @Inject()(
     implicit hc: HeaderCarrier): Future[Result] =
     (for {
       metadata <- getMessageMetadata(replyTo)
-      queueId <- metadata.get.details.enquiryType
+      enquiryType <- metadata.get.details.enquiryType
                   .fold[Future[String]](Future.failed(new Exception(s"Unable to get DMS queue id for $replyTo")))(
                     Future.successful)
-      enquiryId <- Enquiry(queueId)
-                    .fold[Future[EnquiryTemplate]](Future.failed(new Exception(s"Unknown $queueId")))(Future.successful)
+      enquiryId <- Enquiry(enquiryType)
+                    .fold[Future[EnquiryType]](Future.failed(new Exception(s"Unknown $enquiryType")))(Future.successful)
       dmsMetaData = DmsMetadata(
         enquiryId.dmsFormId,
         metadata.get.recipient.identifier.value,
         enquiryId.classificationType,
         enquiryId.businessArea)
       body = createJsonForReply(
-        Some(queueId),
+        Some(enquiryType),
         randomUUID.toString,
         MessageType.Customer,
         FormId.Question,

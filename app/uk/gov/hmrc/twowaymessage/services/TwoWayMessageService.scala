@@ -44,7 +44,7 @@ trait TwoWayMessageService {
 
   def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]]
 
-  def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(implicit hc: HeaderCarrier): Future[Result]
+  def post(enquiryType: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(implicit hc: HeaderCarrier): Future[Result]
 
   def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(implicit hc: HeaderCarrier): Future[Result]
 
@@ -59,13 +59,13 @@ trait TwoWayMessageService {
   def getLastestMessage(messageId: String)(implicit hc: HeaderCarrier): Future[Either[String, Html]]
 
   def createJsonForMessage(
-    refId: String,
-    twoWayMessage: TwoWayMessage,
-    nino: Nino,
-    queueId: String,
-    name: Name): Message = {
+                              refId: String,
+                              twoWayMessage: TwoWayMessage,
+                              nino: Nino,
+                              enquiryType: String,
+                              name: Name): Message = {
 
-    val responseTime = Enquiry(queueId).get.responseTime
+    val responseTime = Enquiry(enquiryType).get.responseTime
     Message(
       ExternalRef(refId, "2WSM"),
       Recipient(
@@ -78,7 +78,7 @@ trait TwoWayMessageService {
       MessageType.Customer,
       twoWayMessage.subject,
       twoWayMessage.content,
-      Details(FormId.Question, None, None, enquiryType = Some(queueId), waitTime = Some(responseTime))
+      Details(FormId.Question, None, None, enquiryType = Some(enquiryType), waitTime = Some(responseTime))
     )
   }
 

@@ -25,7 +25,7 @@ class EnquirySpec extends WordSpec with Matchers {
     "find a name for 'P800'" in {
       Enquiry("p800") match {
         case None => fail("Invalid enquiry")
-        case Some(meteadata) => meteadata.title shouldBe ("P800")
+        case Some(meteadata) => meteadata.name shouldBe ("p800")
       }
     }
 

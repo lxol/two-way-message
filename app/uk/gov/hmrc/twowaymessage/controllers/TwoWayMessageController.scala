@@ -22,7 +22,7 @@ import play.api.libs.json._
 import play.api.mvc.{Action, _}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.retrieve.{~, Name, Retrievals}
+import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.gform.gformbackend.GformConnector
@@ -48,10 +48,10 @@ class TwoWayMessageController @Inject()(
     extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
   // Customer creating a two-way message
-  def createMessage(queueId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def createMessage(enquiryType: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised(Enrolment("HMRC-NI")).retrieve(Retrievals.nino and Retrievals.name) {
-      case Some(ninoId) ~ name => validateAndPostMessage(queueId, Nino(ninoId), request.body, name)
+      case Some(ninoId) ~ name => validateAndPostMessage(enquiryType, Nino(ninoId), request.body, name)
       case None ~ name =>
         Logger.info("No nino found for user")
         Future.successful(Forbidden(Json.toJson("Not authenticated")))
@@ -103,17 +103,17 @@ class TwoWayMessageController @Inject()(
   }
 
   // Validates the customer's message payload and then posts the message
-  def validateAndPostMessage(queueId: String, nino: Nino, requestBody: JsValue, name: Name)(
+  def validateAndPostMessage(enquiryType: String, nino: Nino, requestBody: JsValue, name: Name)(
     implicit hc: HeaderCarrier): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
       case _: JsSuccess[_] =>
-        Enquiry(queueId) match {
+        Enquiry(enquiryType) match {
           case Some(enquiryId) =>
             val dmsMetaData =
               DmsMetadata(enquiryId.dmsFormId, nino.nino, enquiryId.classificationType, enquiryId.businessArea)
-            twms.post(queueId, nino, requestBody.as[TwoWayMessage], dmsMetaData, name)
+            twms.post(enquiryType, nino, requestBody.as[TwoWayMessage], dmsMetaData, name)
           case None =>
-            Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> s"Invalid EnquityId: $queueId")))
+            Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> s"Invalid EnquityId: $enquiryType")))
         }
 
       case e: JsError => Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> JsError.toJson(e))))
@@ -141,7 +141,7 @@ class TwoWayMessageController @Inject()(
 
   // Customer replying to an adviser's message
   // TODO: queueId is redundant, as it's currently fetched from the original message metadata (i.e. postCustomerReply/getMessageMetadata) - you can safely remove
-  def createCustomerResponse(queueId: String, replyTo: String): Action[JsValue] = Action.async(parse.json) {
+  def createCustomerResponse(enquiryType: String, replyTo: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
       authorised(Enrolment("HMRC-NI")) {
@@ -160,6 +160,13 @@ class TwoWayMessageController @Inject()(
   def getCurrentResponseTime(formType: String): Action[AnyContent] = Action.async { implicit request =>
     Enquiry(formType) match {
       case Some(form) => Future.successful(Ok(Json.obj("responseTime" -> form.responseTime)))
+      case _          => Future.successful(NotFound)
+    }
+  }
+
+  def getEnquiryTypeDetails(enquiryTypeString: String): Action[AnyContent] = Action.async { implicit request =>
+    Enquiry(enquiryTypeString) match {
+      case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
       case _          => Future.successful(NotFound)
     }
   }
