@@ -16,17 +16,6 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-object Enquiry {
-
-  def apply (enq: String):Option[EnquiryType] = enquiries.get(enq.toLowerCase)
-
-  private val enquiries = Map[String, EnquiryType](
-    "p800" -> EnquiryTypes.P800,
-    "p800-over-payment" -> EnquiryTypes.P800OverPayment,
-    "p800-paid" -> EnquiryTypes.P800Paid,
-    "p800-processing" -> EnquiryTypes.P800Processing,
-    "p800-sent" -> EnquiryTypes.P800Sent,
-    "p800-not-available" -> EnquiryTypes.P800NotAvailable,
-    "p800-underpayment" -> EnquiryTypes.P800UnderPayment
-  )
+class Enquiry(enquiries: Map[String, EnquiryType]) {
+  def apply(enq: String): Option[EnquiryType] = enquiries.get(enq.toLowerCase)
 }

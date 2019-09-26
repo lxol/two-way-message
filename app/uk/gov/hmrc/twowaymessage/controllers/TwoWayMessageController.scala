@@ -29,7 +29,7 @@ import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
+import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, EnquiryType}
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
@@ -44,6 +44,7 @@ class TwoWayMessageController @Inject()(
   hcs:  HtmlCreatorService,
   val authConnector: AuthConnector,
   val gformConnector: GformConnector,
+  val enquiries: Enquiry,
   val htmlCreatorService:HtmlCreatorService)(implicit ec: ExecutionContext)
     extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
@@ -107,7 +108,7 @@ class TwoWayMessageController @Inject()(
     implicit hc: HeaderCarrier): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
       case _: JsSuccess[_] =>
-        Enquiry(enquiryType) match {
+        enquiries(enquiryType) match {
           case Some(enquiryId) =>
             val dmsMetaData =
               DmsMetadata(enquiryId.dmsFormId, nino.nino, enquiryId.classificationType, enquiryId.businessArea)
@@ -158,14 +159,14 @@ class TwoWayMessageController @Inject()(
     }
 
   def getCurrentResponseTime(formType: String): Action[AnyContent] = Action.async { implicit request =>
-    Enquiry(formType) match {
+    enquiries(formType) match {
       case Some(form) => Future.successful(Ok(Json.obj("responseTime" -> form.responseTime)))
       case _          => Future.successful(NotFound)
     }
   }
 
   def getEnquiryTypeDetails(enquiryTypeString: String): Action[AnyContent] = Action.async { implicit request =>
-    Enquiry(enquiryTypeString) match {
+    enquiries(enquiryTypeString) match {
       case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
       case _          => Future.successful(NotFound)
     }

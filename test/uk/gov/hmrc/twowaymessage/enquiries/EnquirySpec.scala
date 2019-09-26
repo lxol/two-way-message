@@ -16,46 +16,54 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 
 class EnquirySpec extends WordSpec with Matchers {
+  val enquiries = new Enquiry(
+    Map(
+      "p800" -> EnquiryType(
+        name = "p800",
+        dmsFormId = "P800",
+        classificationType = "PSA-DFS Secure Messaging SA",
+        businessArea = "PT Operations",
+        responseTime = "5 days",
+        displayName = "")))
 
   "for a 'P800' enquiry" should {
 
     "find a name for 'P800'" in {
-      Enquiry("p800") match {
-        case None => fail("Invalid enquiry")
+      enquiries("p800") match {
+        case None            => fail("Invalid enquiry")
         case Some(meteadata) => meteadata.name shouldBe ("p800")
       }
     }
 
     "Case insensitive lookup for 'P800'" in {
-      Enquiry("P800") match {
-        case None => fail("Invalid enquiry key")
+      enquiries("P800") match {
+        case None            => fail("Invalid enquiry key")
         case Some(meteadata) => meteadata.businessArea shouldBe ("PT Operations")
       }
     }
 
     "find a businessArea for 'P800'" in {
-      Enquiry("p800") match {
-        case None => fail("Invalid enquiry key")
+      enquiries("p800") match {
+        case None            => fail("Invalid enquiry key")
         case Some(meteadata) => meteadata.businessArea shouldBe ("PT Operations")
       }
     }
 
     "find a classificationType for 'P800'" in {
-      Enquiry("p800") match {
-        case None => fail("Invalid enquiry key")
+      enquiries("p800") match {
+        case None            => fail("Invalid enquiry key")
         case Some(meteadata) => meteadata.classificationType shouldBe ("PSA-DFS Secure Messaging SA")
       }
     }
   }
 
-
   "for an invalid enquiry" should {
     "find an invalid name " in {
-      Enquiry("badQueue") match {
-        case None =>
+      enquiries("badQueue") match {
+        case None            =>
         case Some(meteadata) => fail("Found enquiry")
       }
     }
