@@ -43,11 +43,11 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     }
   }
 
-  "Enquiry configuration for p800-over-payment" should {
+  "Enquiry configuration for p800-overpayment" should {
 
     "should have correct enquiry details" in {
-      enquiries("p800-over-payment").get shouldBe EnquiryType(
-        name = "p800-over-payment",
+      enquiries("p800-overpayment").get shouldBe EnquiryType(
+        name = "p800-overpayment",
         dmsFormId = "P800",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",

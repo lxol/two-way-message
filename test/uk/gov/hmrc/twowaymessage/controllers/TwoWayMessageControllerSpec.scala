@@ -198,8 +198,8 @@ class TwoWayMessageControllerSpec
                      |}""".stripMargin)
     }
 
-    "return 200 when p800-over-payment enquiryType is requested" in {
-      val result = controller.getEnquiryTypeDetails("p800-over-payment")(FakeRequest())
+    "return 200 when p800-overpayment enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-overpayment")(FakeRequest())
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
