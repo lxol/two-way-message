@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, _}
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
@@ -29,11 +29,11 @@ import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
-import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, EnquiryType}
-import uk.gov.hmrc.twowaymessage.model._
+import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, SubmissionDetails}
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
+import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, RenderType, TwoWayMessageService}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -166,7 +166,7 @@ class TwoWayMessageController @Inject()(
   }
 
   def getEnquiryTypeDetails(enquiryTypeString: String): Action[AnyContent] = Action.async { implicit request =>
-    enquiries(enquiryTypeString) match {
+    enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(enquiry.displayName, enquiry.responseTime)) match {
       case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
       case _          => Future.successful(NotFound)
     }

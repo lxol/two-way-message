@@ -193,12 +193,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 underpayment"
+                     |"displayName":"P800 underpayment",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -207,12 +203,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-over-payment",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 overpayment enquiry"
+                     |"displayName":"P800 overpayment enquiry",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -221,12 +213,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-paid",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 overpayment paid enquiry"
+                     |"displayName":"P800 overpayment paid enquiry",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -235,12 +223,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-processing",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 overpayment processing enquiry"
+                     |"displayName":"P800 overpayment processing enquiry",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -249,12 +233,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-sent",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 overpayment sent enquiry"
+                     |"displayName":"P800 overpayment sent enquiry",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -263,12 +243,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-not-available",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 overpayment not available enquiry"
+                     |"displayName":"P800 overpayment not available enquiry",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -277,12 +253,8 @@ class TwoWayMessageControllerSpec
       await(result).header.status shouldBe Status.OK
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
-                     |"name":"p800-underpayment",
-                     |"dmsFormId":"P800",
-                     |"classificationType":"PSA-DFS Secure Messaging SA",
-                     |"businessArea":"PT Operations",
-                     |"responseTime":"5 days",
-                     |"displayName":"P800 underpayment"
+                     |"displayName":"P800 underpayment",
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 

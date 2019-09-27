@@ -16,17 +16,10 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-import play.api.libs.json.{ Json, Writes }
+import play.api.libs.json.{Json, Writes}
 
-case class EnquiryType(
-  val name: String,
-  val dmsFormId: String,
-  val classificationType: String,
-  val businessArea: String,
-  val responseTime: String,
-  val displayName: String
-)
+case class SubmissionDetails(displayName: String, responseTime: String)
 
-object EnquiryType {
-  implicit val enquiryTypeWrites: Writes[EnquiryType] = Json.writes[EnquiryType]
+object SubmissionDetails {
+  implicit val submissionDetailsWrites: Writes[SubmissionDetails] = Json.writes[SubmissionDetails]
 }

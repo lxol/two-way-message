@@ -19,3 +19,12 @@ package uk.gov.hmrc.twowaymessage.enquiries
 class Enquiry(enquiries: Map[String, EnquiryType]) {
   def apply(enq: String): Option[EnquiryType] = enquiries.get(enq.toLowerCase)
 }
+
+case class EnquiryType(
+                        val name: String,
+                        val dmsFormId: String,
+                        val classificationType: String,
+                        val businessArea: String,
+                        val responseTime: String,
+                        val displayName: String
+                      )
