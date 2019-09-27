@@ -16,24 +16,15 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-import uk.gov.hmrc.twowaymessage.enquiries.repos.P800
-
-object Enquiry {
-
-  def apply (enq: String):Option[EnquiryTemplate] = enquiries.get(enq.toLowerCase)
-
-
-  private val enquiries = Map[String, EnquiryTemplate](
-    "p800" -> P800
-  )
-
-
-  abstract class EnquiryTemplate {
-    val title : String
-    val dmsFormId: String
-    val classificationType : String
-    val businessArea : String
-    val responseTime : String
-  }
-
+class Enquiry(enquiries: Map[String, EnquiryType]) {
+  def apply(enq: String): Option[EnquiryType] = enquiries.get(enq.toLowerCase)
 }
+
+case class EnquiryType(
+                        val name: String,
+                        val dmsFormId: String,
+                        val classificationType: String,
+                        val businessArea: String,
+                        val responseTime: String,
+                        val displayName: String
+                      )

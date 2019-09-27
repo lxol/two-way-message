@@ -19,32 +19,32 @@ package uk.gov.hmrc.twowaymessage.services
 import java.util.UUID.randomUUID
 
 import com.google.inject.Inject
-import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
-import play.api.libs.json.{JsError, Json}
+import play.api.http.Status.{ CREATED, INTERNAL_SERVER_ERROR, OK }
+import play.api.libs.json.{ JsError, Json }
 import play.api.mvc.Result
 import play.api.mvc.Results.Created
 import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
+import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
 import uk.gov.hmrc.gform.gformbackend.GformConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry.EnquiryTemplate
-import uk.gov.hmrc.twowaymessage.model._
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
+import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TwoWayMessageServiceImpl @Inject()(
   messageConnector: MessageConnector,
   gformConnector: GformConnector,
   servicesConfig: ServicesConfig,
+  enquiries: Enquiry,
   htmlCreatorService: HtmlCreatorService)(implicit ec: ExecutionContext)
     extends TwoWayMessageService {
 
@@ -61,9 +61,13 @@ class TwoWayMessageServiceImpl @Inject()(
           case _ => Future.successful(None)
       })
 
-  override def post(queueId: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
-    implicit hc: HeaderCarrier): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, queueId, name)
+  override def post(
+    enquiryType: String,
+    nino: Nino,
+    twoWayMessage: TwoWayMessage,
+    dmsMetaData: DmsMetadata,
+    name: Name)(implicit hc: HeaderCarrier): Future[Result] = {
+    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, enquiryType, name)
     messageConnector.postMessage(body) flatMap { response =>
       handleResponse(twoWayMessage.subject, response, dmsMetaData)
     } recover handleError
@@ -77,18 +81,18 @@ class TwoWayMessageServiceImpl @Inject()(
     implicit hc: HeaderCarrier): Future[Result] =
     (for {
       metadata <- getMessageMetadata(replyTo)
-      queueId <- metadata.get.details.enquiryType
-                  .fold[Future[String]](Future.failed(new Exception(s"Unable to get DMS queue id for $replyTo")))(
-                    Future.successful)
-      enquiryId <- Enquiry(queueId)
-                    .fold[Future[EnquiryTemplate]](Future.failed(new Exception(s"Unknown $queueId")))(Future.successful)
+      enquiryType <- metadata.get.details.enquiryType
+                      .fold[Future[String]](Future.failed(new Exception(s"Unable to get DMS queue id for $replyTo")))(
+                        Future.successful)
+      enquiryId <- enquiries(enquiryType)
+                    .fold[Future[EnquiryType]](Future.failed(new Exception(s"Unknown $enquiryType")))(Future.successful)
       dmsMetaData = DmsMetadata(
         enquiryId.dmsFormId,
         metadata.get.recipient.identifier.value,
         enquiryId.classificationType,
         enquiryId.businessArea)
       body = createJsonForReply(
-        Some(queueId),
+        Some(enquiryType),
         randomUUID.toString,
         MessageType.Customer,
         FormId.Question,
@@ -157,8 +161,8 @@ class TwoWayMessageServiceImpl @Inject()(
                   case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
                   case Right(html) => createDmsSubmission(html, response, dmsMetaData)
                 }
-              }
-            case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
+            }
+          case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
         }
       case _ => Future.successful(errorResponse(response.status, response.body))
     }
@@ -189,5 +193,57 @@ class TwoWayMessageServiceImpl @Inject()(
       case Right(list) =>
         htmlCreatorService.createConversation(messageId, list.sortWith(_.id > _.id).drop(1), RenderType.CustomerForm)
     }
+
+  def createJsonForMessage(
+    refId: String,
+    twoWayMessage: TwoWayMessage,
+    nino: Nino,
+    enquiryType: String,
+    name: Name): Message = {
+
+    val responseTime = enquiries(enquiryType).get.responseTime
+    Message(
+      ExternalRef(refId, "2WSM"),
+      Recipient(
+        TaxIdentifier(nino.name, nino.value),
+        twoWayMessage.contactDetails.email,
+        Option(
+          TaxpayerName(forename = name.name, surname = name.lastName, line1 = deriveAddressedName(name))
+        )
+      ),
+      MessageType.Customer,
+      twoWayMessage.subject,
+      twoWayMessage.content,
+      Details(FormId.Question, None, None, enquiryType = Some(enquiryType), waitTime = Some(responseTime))
+    )
+
+  }
+  def createJsonForReply(
+    queueId: Option[String],
+    refId: String,
+    messageType: MessageType,
+    formId: FormId,
+    metadata: MessageMetadata,
+    reply: TwoWayMessageReply,
+    replyTo: String): Message =
+    Message(
+      ExternalRef(refId, "2WSM"),
+      Recipient(
+        TaxIdentifier(metadata.recipient.identifier.name, metadata.recipient.identifier.value),
+        metadata.recipient.email.getOrElse(""),
+        metadata.taxpayerName
+      ),
+      messageType,
+      metadata.subject,
+      reply.content,
+      Details(
+        formId,
+        Some(replyTo),
+        metadata.details.threadId,
+        metadata.details.enquiryType,
+        metadata.details.adviser,
+        waitTime = queueId.map(qId => enquiries(qId).get.responseTime)
+      )
+    )
 
 }

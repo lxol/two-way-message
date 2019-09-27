@@ -31,6 +31,7 @@ import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -48,7 +49,8 @@ import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with MockAuthConnector  {
+class TwoWayMessageControllerSpec
+    extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with MockAuthConnector {
 
   val mockMessageService = mock[TwoWayMessageService]
 
@@ -177,13 +179,88 @@ class TwoWayMessageControllerSpec extends WordSpec with Matchers with GuiceOneAp
     }
 
     "return response time when response time is requested for valid enquiry type" in {
-      val result = controller.getCurrentResponseTime("p800")(FakeRequest())
+      val result: Future[Result] = controller.getCurrentResponseTime("p800")(FakeRequest())
       contentAsString(result) shouldEqual """{"responseTime":"5 days"}"""
     }
 
     "return 404 when response time requested for invalid enquiry type" in {
       val result = await(controller.getCurrentResponseTime("IP4U")(FakeRequest()))
       result.header.status shouldBe 404
+    }
+
+    "return 200 when p800 enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 underpayment",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-overpayment enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-overpayment")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 overpayment enquiry",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-paid enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-paid")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 overpayment paid enquiry",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-processing enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-processing")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 overpayment processing enquiry",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-sent enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-sent")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 overpayment sent enquiry",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-not-available enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-not-available")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 overpayment not available enquiry",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 200 when p800-underpayment enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("p800-underpayment")(FakeRequest())
+      await(result).header.status shouldBe Status.OK
+      Json.parse(contentAsString(result)) shouldBe
+        Json.parse("""{
+                     |"displayName":"P800 underpayment",
+                     |"responseTime":"5 days"
+                     |}""".stripMargin)
+    }
+
+    "return 404 when incorrect enquiryType is requested" in {
+      val result = controller.getEnquiryTypeDetails("i am not valid")(FakeRequest())
+      await(result).header.status shouldBe Status.NOT_FOUND
     }
 
     SharedMetricRegistries.clear

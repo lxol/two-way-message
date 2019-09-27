@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.twowaymessage.enquiries.repos
+package uk.gov.hmrc.twowaymessage.enquiries
 
-import play.api.Play
-import uk.gov.hmrc.twowaymessage.enquiries.Enquiry.EnquiryTemplate
+import play.api.libs.json.{Json, Writes}
 
-object P800 extends EnquiryTemplate {
+case class SubmissionDetails(displayName: String, responseTime: String)
 
-  val title: String = "P800"
-
-  val dmsFormId:String = "P800"
-  val classificationType: String = "PSA-DFS Secure Messaging SA"
-  val businessArea: String = "PT Operations"
-  lazy val responseTime: String = Play.current.configuration.getString("forms.p800.responseTime").get
-
-
+object SubmissionDetails {
+  implicit val submissionDetailsWrites: Writes[SubmissionDetails] = Json.writes[SubmissionDetails]
 }
