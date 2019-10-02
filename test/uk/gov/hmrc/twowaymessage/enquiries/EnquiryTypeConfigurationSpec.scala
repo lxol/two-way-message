@@ -34,7 +34,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800").get shouldBe EnquiryType(
         name = "p800",
-        dmsFormId = "P800",
+        dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -48,7 +48,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-overpayment").get shouldBe EnquiryType(
         name = "p800-overpayment",
-        dmsFormId = "P800",
+        dmsFormId = "p800-over",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -62,7 +62,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-paid").get shouldBe EnquiryType(
         name = "p800-paid",
-        dmsFormId = "P800",
+        dmsFormId = "p800-paid",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -76,7 +76,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-processing").get shouldBe EnquiryType(
         name = "p800-processing",
-        dmsFormId = "P800",
+        dmsFormId = "p800-process",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -90,7 +90,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-sent").get shouldBe EnquiryType(
         name = "p800-sent",
-        dmsFormId = "P800",
+        dmsFormId = "p800-cheque",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -104,7 +104,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-not-available").get shouldBe EnquiryType(
         name = "p800-not-available",
-        dmsFormId = "P800",
+        dmsFormId = "p800-unavail",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
@@ -118,7 +118,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "should have correct enquiry details" in {
       enquiries("p800-underpayment").get shouldBe EnquiryType(
         name = "p800-underpayment",
-        dmsFormId = "P800",
+        dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
