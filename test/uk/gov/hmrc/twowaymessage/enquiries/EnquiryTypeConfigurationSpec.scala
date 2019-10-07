@@ -19,14 +19,15 @@ package uk.gov.hmrc.twowaymessage.enquiries
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 
 class EnquiryTypeConfigurationSpec extends WordSpec
   with Matchers with GuiceOneAppPerSuite {
 
-  val injector = new GuiceApplicationBuilder().injector()
+  val injector: Injector = new GuiceApplicationBuilder().injector()
 
-  val enquiries = injector.instanceOf[Enquiry]
+  val enquiries: Enquiry = injector.instanceOf[Enquiry]
 
 
   "Enquiry configuration for p800" should {
@@ -37,7 +38,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 underpayment"
       )
     }
@@ -51,7 +52,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-over",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 overpayment enquiry"
       )
     }
@@ -65,7 +66,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-paid",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 overpayment paid enquiry"
       )
     }
@@ -79,7 +80,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-process",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 overpayment processing enquiry"
       )
     }
@@ -93,7 +94,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-cheque",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 overpayment sent enquiry"
       )
     }
@@ -107,7 +108,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-unavail",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 overpayment not available enquiry"
       )
     }
@@ -121,12 +122,12 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "5 days",
+        responseTime = "2 days",
         displayName = "P800 underpayment"
       )
     }
   }
 
-  SharedMetricRegistries.clear
+  SharedMetricRegistries.clear()
 
 }
