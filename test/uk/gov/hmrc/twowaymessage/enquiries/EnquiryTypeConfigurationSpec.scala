@@ -38,7 +38,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 underpayment"
       )
     }
@@ -52,7 +52,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-over",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 overpayment enquiry"
       )
     }
@@ -66,7 +66,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-paid",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 overpayment paid enquiry"
       )
     }
@@ -80,7 +80,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-process",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 overpayment processing enquiry"
       )
     }
@@ -94,7 +94,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-cheque",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 overpayment sent enquiry"
       )
     }
@@ -108,7 +108,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-unavail",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 overpayment not available enquiry"
       )
     }
@@ -122,7 +122,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         dmsFormId = "p800-under",
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
-        responseTime = "2 days",
+        responseTime = "4 days",
         displayName = "P800 underpayment"
       )
     }
