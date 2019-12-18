@@ -180,7 +180,7 @@ class TwoWayMessageControllerSpec
 
     "return response time when response time is requested for valid enquiry type" in {
       val result: Future[Result] = controller.getCurrentResponseTime("p800")(FakeRequest())
-      contentAsString(result) shouldEqual """{"responseTime":"4 days"}"""
+      contentAsString(result) shouldEqual """{"responseTime":"5 days"}"""
     }
 
     "return 404 when response time requested for invalid enquiry type" in {
@@ -194,7 +194,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 underpayment",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -204,7 +204,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 overpayment enquiry",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -214,7 +214,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 overpayment paid enquiry",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -224,7 +224,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 overpayment processing enquiry",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -234,7 +234,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 overpayment sent enquiry",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -244,7 +244,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 overpayment not available enquiry",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
@@ -254,7 +254,7 @@ class TwoWayMessageControllerSpec
       Json.parse(contentAsString(result)) shouldBe
         Json.parse("""{
                      |"displayName":"P800 underpayment",
-                     |"responseTime":"4 days"
+                     |"responseTime":"5 days"
                      |}""".stripMargin)
     }
 
