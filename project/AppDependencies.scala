@@ -42,8 +42,7 @@ object AppDependencies {
     "javax.inject" % "javax.inject" % "1",
     "com.typesafe.play" %% "twirl-api" % "1.3.15",
     "commons-codec" % "commons-codec" % "1.10",
-    "uk.gov.hmrc" %% "auth-client" % "2.11.0-play-26",
-    "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0"
+    "uk.gov.hmrc" %% "auth-client" % "2.11.0-play-26"
   )
 
   val test = Set(
