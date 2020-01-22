@@ -46,7 +46,7 @@ trait TwoWayMessageService {
   def post(enquiryType: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
     implicit hc: HeaderCarrier): Future[Result]
 
-  def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
+  def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String, topic: Option[String])(
     implicit hc: HeaderCarrier): Future[Result]
 
   def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
@@ -75,7 +75,8 @@ trait TwoWayMessageService {
     formId: FormId,
     metadata: MessageMetadata,
     reply: TwoWayMessageReply,
-    replyTo: String): Message
+    replyTo: String,
+    topic: Option[String]): Message
 
   def encodeToBase64String(text: String): String =
     Base64.encodeBase64String(text.getBytes("UTF-8"))

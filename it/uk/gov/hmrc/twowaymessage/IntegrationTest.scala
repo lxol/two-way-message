@@ -89,7 +89,8 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
     "return Forbidden (403) when valid bearer token with SaUtr credentials and valid JSON payload but no Nino" in {
       val message = MessageUtil.buildValidReplyMessage()
 
-      val response = httpClient.url(resource("/two-way-message/message/customer/p800/submit"))
+      val response = httpClient
+        .url(resource("/two-way-message/message/customer/p800/submit"))
         .withHttpHeaders(AuthUtil.buildSaUserToken())
         .post(message).futureValue
 

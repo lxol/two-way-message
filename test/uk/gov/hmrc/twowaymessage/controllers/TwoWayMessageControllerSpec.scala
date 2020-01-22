@@ -18,14 +18,11 @@ package uk.gov.hmrc.twowaymessage.controllers
 
 import java.util.UUID
 
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import com.codahale.metrics.SharedMetricRegistries
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.Inside.inside
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.inject.bind
@@ -35,19 +32,16 @@ import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
-import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
-import scala.concurrent.duration.Duration
 
 class TwoWayMessageControllerSpec
     extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with MockAuthConnector {
@@ -96,14 +90,14 @@ class TwoWayMessageControllerSpec
     }
 
     "return 201 (Created) when an adviser reply is successfully created in the message service " in {
-      when(mockMessageService.postAdviserReply(any[TwoWayMessageReply], any[String])(any[HeaderCarrier]))
+      when(mockMessageService.postAdviserReply(any[TwoWayMessageReply], any[String], any[Option[String]])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
-      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageReplyGood, "replyToId"))
+      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageReplyGood, "replyToId", None))
       result.header.status shouldBe Status.CREATED
     }
 
     "return 400 (Bad Request) if the adviser reply body is not as per the definition " in {
-      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageBadContent, "replyToId"))
+      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageBadContent, "replyToId", None))
       result.header.status shouldBe Status.BAD_REQUEST
     }
 

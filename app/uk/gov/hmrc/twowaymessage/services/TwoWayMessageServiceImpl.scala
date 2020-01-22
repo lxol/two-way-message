@@ -73,9 +73,9 @@ class TwoWayMessageServiceImpl @Inject()(
     } recover handleError
   }
 
-  override def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
+  override def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String, topic: Option[String])(
     implicit hc: HeaderCarrier): Future[Result] =
-    postReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply)
+    postAdviserReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply, topic)
 
   override def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
@@ -98,7 +98,8 @@ class TwoWayMessageServiceImpl @Inject()(
         FormId.Question,
         metadata.get,
         twoWayMessageReply,
-        replyTo)
+        replyTo,
+        None)
       postMessageResponse <- messageConnector.postMessage(body)
       dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData)
     } yield dmsHandleResponse) recover handleError
@@ -128,11 +129,12 @@ class TwoWayMessageServiceImpl @Inject()(
       case None          => Future.successful(None)
     }
 
-  private def postReply(
+  private def postAdviserReply(
     twoWayMessageReply: TwoWayMessageReply,
     replyTo: String,
     messageType: MessageType,
-    formId: FormId)(implicit hc: HeaderCarrier): Future[Result] =
+    formId: FormId,
+    topic: Option[String])(implicit hc: HeaderCarrier): Future[Result] =
     (for {
       metadata <- getMessageMetadata(replyTo)
       body = createJsonForReply(
@@ -142,7 +144,8 @@ class TwoWayMessageServiceImpl @Inject()(
         formId,
         metadata.get,
         twoWayMessageReply,
-        replyTo)
+        replyTo,
+        topic)
       resp <- messageConnector.postMessage(body)
     } yield resp) map {
       handleResponse
@@ -225,7 +228,8 @@ class TwoWayMessageServiceImpl @Inject()(
     formId: FormId,
     metadata: MessageMetadata,
     reply: TwoWayMessageReply,
-    replyTo: String): Message =
+    replyTo: String,
+    topic: Option[String]): Message =
     Message(
       ExternalRef(refId, "2WSM"),
       Recipient(
@@ -242,7 +246,8 @@ class TwoWayMessageServiceImpl @Inject()(
         metadata.details.threadId,
         metadata.details.enquiryType,
         metadata.details.adviser,
-        waitTime = queueId.map(qId => enquiries(qId).get.responseTime)
+        waitTime = queueId.map(qId => enquiries(qId).get.responseTime),
+        topic = topic
       )
     )
 
