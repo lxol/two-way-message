@@ -2,8 +2,8 @@
 
 POST       /message/customer/:enquiryType/submit               uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createMessage(enquiryType)
 
-POST       /message/advisor/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo: String, topic: Option[String])
-POST       /message/adviser/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo: String, topic: Option[String])
+POST       /message/advisor/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo: String)
+POST       /message/adviser/:replyTo/reply                 uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createAdviserResponse(replyTo: String)
 
 POST       /message/customer/:enquiryType/:replyTo/reply       uk.gov.hmrc.twowaymessage.controllers.TwoWayMessageController.createCustomerResponse(enquiryType, replyTo)
 

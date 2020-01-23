@@ -73,9 +73,9 @@ class TwoWayMessageServiceImpl @Inject()(
     } recover handleError
   }
 
-  override def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String, topic: Option[String])(
+  override def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
-    postAdviserReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply, topic)
+    postAdviserReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply)
 
   override def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
@@ -133,8 +133,7 @@ class TwoWayMessageServiceImpl @Inject()(
     twoWayMessageReply: TwoWayMessageReply,
     replyTo: String,
     messageType: MessageType,
-    formId: FormId,
-    topic: Option[String])(implicit hc: HeaderCarrier): Future[Result] =
+    formId: FormId)(implicit hc: HeaderCarrier): Future[Result] =
     (for {
       metadata <- getMessageMetadata(replyTo)
       body = createJsonForReply(
@@ -145,7 +144,7 @@ class TwoWayMessageServiceImpl @Inject()(
         metadata.get,
         twoWayMessageReply,
         replyTo,
-        topic)
+        twoWayMessageReply.topic)
       resp <- messageConnector.postMessage(body)
     } yield resp) map {
       handleResponse

@@ -35,4 +35,4 @@ case class TwoWayMessage(
   content: String,
   replyTo: Option[String] = None)
 
-case class TwoWayMessageReply(content: String)
+case class TwoWayMessageReply(content: String, topic: Option[String] = None)

@@ -90,14 +90,14 @@ class TwoWayMessageControllerSpec
     }
 
     "return 201 (Created) when an adviser reply is successfully created in the message service " in {
-      when(mockMessageService.postAdviserReply(any[TwoWayMessageReply], any[String], any[Option[String]])(any[HeaderCarrier]))
+      when(mockMessageService.postAdviserReply(any[TwoWayMessageReply], any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
-      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageReplyGood, "replyToId", None))
+      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageReplyGood, "replyToId"))
       result.header.status shouldBe Status.CREATED
     }
 
     "return 400 (Bad Request) if the adviser reply body is not as per the definition " in {
-      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageBadContent, "replyToId", None))
+      val result = await(controller.validateAndPostAdviserResponse(twoWayMessageBadContent, "replyToId"))
       result.header.status shouldBe Status.BAD_REQUEST
     }
 

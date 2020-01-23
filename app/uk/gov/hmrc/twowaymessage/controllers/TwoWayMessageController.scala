@@ -121,11 +121,11 @@ class TwoWayMessageController @Inject()(
     }
 
   // Adviser replying to a customer message
-  def createAdviserResponse(replyTo: String, topic: Option[String]): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def createAdviserResponse(replyTo: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     {
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
       authorised(AuthProviders(PrivilegedApplication)) {
-        validateAndPostAdviserResponse(request.body, replyTo, topic)
+        validateAndPostAdviserResponse(request.body, replyTo)
       }.recoverWith {
         case _ => Future.successful(Forbidden)
       }
@@ -133,10 +133,10 @@ class TwoWayMessageController @Inject()(
   }
 
   // Validates the adviser response payload and then posts the reply
-  def validateAndPostAdviserResponse(requestBody: JsValue, replyTo: String, topic: Option[String])(
+  def validateAndPostAdviserResponse(requestBody: JsValue, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
     requestBody.validate[TwoWayMessageReply] match {
-      case _: JsSuccess[_] => twms.postAdviserReply(requestBody.as[TwoWayMessageReply], replyTo, topic)
+      case _: JsSuccess[_] => twms.postAdviserReply(requestBody.as[TwoWayMessageReply], replyTo)
       case e: JsError      => Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> JsError.toJson(e))))
     }
 

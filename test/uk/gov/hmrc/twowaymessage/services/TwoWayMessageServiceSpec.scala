@@ -181,7 +181,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           HttpResponse(Http.Status.CREATED, Some(Json.parse("{\"id\":\"5c18eb2e6f0000100204b161\"}")))))
 
       val messageResult =
-        await(messageService.postAdviserReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id", None))
+        await(messageService.postAdviserReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id"))
       messageResult.header.status shouldBe 201
     }
 
@@ -200,7 +200,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         .thenReturn(Future.successful(postMessageResponse))
 
       val messageResult =
-        await(messageService.postAdviserReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id", None))
+        await(messageService.postAdviserReply(TwoWayMessageReply("Some content"), "some-reply-to-message-id"))
       messageResult.header.status shouldBe 502
       messageResult.body.asInstanceOf[Strict].data.utf8String shouldBe
         "{\"error\":409,\"message\":\"POST of 'http://localhost:8910/messages' returned 409. Response body: '{\\\"reason\\\":\\\"Duplicated message content or external reference ID\\\"}'\"}"
