@@ -75,8 +75,7 @@ trait TwoWayMessageService {
     formId: FormId,
     metadata: MessageMetadata,
     reply: TwoWayMessageReply,
-    replyTo: String,
-    topic: Option[String]): Message
+    replyTo: String): Message
 
   def encodeToBase64String(text: String): String =
     Base64.encodeBase64String(text.getBytes("UTF-8"))

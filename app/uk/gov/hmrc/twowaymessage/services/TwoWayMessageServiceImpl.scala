@@ -98,8 +98,7 @@ class TwoWayMessageServiceImpl @Inject()(
         FormId.Question,
         metadata.get,
         twoWayMessageReply,
-        replyTo,
-        None)
+        replyTo)
       postMessageResponse <- messageConnector.postMessage(body)
       dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData)
     } yield dmsHandleResponse) recover handleError
@@ -143,8 +142,7 @@ class TwoWayMessageServiceImpl @Inject()(
         formId,
         metadata.get,
         twoWayMessageReply,
-        replyTo,
-        twoWayMessageReply.topic)
+        replyTo)
       resp <- messageConnector.postMessage(body)
     } yield resp) map {
       handleResponse
@@ -227,8 +225,7 @@ class TwoWayMessageServiceImpl @Inject()(
     formId: FormId,
     metadata: MessageMetadata,
     reply: TwoWayMessageReply,
-    replyTo: String,
-    topic: Option[String]): Message =
+    replyTo: String): Message =
     Message(
       ExternalRef(refId, "2WSM"),
       Recipient(
@@ -246,7 +243,7 @@ class TwoWayMessageServiceImpl @Inject()(
         metadata.details.enquiryType,
         metadata.details.adviser,
         waitTime = queueId.map(qId => enquiries(qId).get.responseTime),
-        topic = topic
+        topic = reply.topic
       )
     )
 

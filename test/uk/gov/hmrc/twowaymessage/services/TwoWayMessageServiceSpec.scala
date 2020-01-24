@@ -355,7 +355,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         "QUESTION",
         "some base64-encoded-html",
         Details(FormId.Reply, Some("reply-to-id"), Some("thread-id"), Some("P800"),
-          Some(Adviser(pidId = "adviser-id")),topic = Some("some-topic"))
+          Some(Adviser(pidId = "adviser-id")))
       )
 
       val metadata = MessageMetadata(
@@ -373,7 +373,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
       val reply = TwoWayMessageReply("some base64-encoded-html")
       val actual = messageService
-        .createJsonForReply(None, "some-random-id", MessageType.Adviser, FormId.Reply, metadata, reply, "reply-to-id", Some("some-topic"))
+        .createJsonForReply(None, "some-random-id", MessageType.Adviser, FormId.Reply, metadata, reply, "reply-to-id")
       assert(actual.equals(expected))
     }
 
