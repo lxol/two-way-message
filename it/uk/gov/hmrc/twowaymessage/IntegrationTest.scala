@@ -125,8 +125,21 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
       response.status shouldBe 403
     }
 
-    "return Access when access token" in {
+    "return (201) when adviser message successfully sent" in {
       val message = MessageUtil.buildValidReplyMessage()
+      val validMessageId = getValidNinoMessageId()
+
+      val response = httpClient
+        .url(resource(s"/two-way-message/message/adviser/$validMessageId/reply"))
+        .withHttpHeaders(AuthUtil.buildStrideToken())
+        .post(message)
+        .futureValue
+
+      response.status shouldBe 201
+    }
+
+    "return (201) when adviser message with topic successfully sent" in {
+      val message = MessageUtil.buildValidReplyMessageWithTopic()
       val validMessageId = getValidNinoMessageId()
 
       val response = httpClient

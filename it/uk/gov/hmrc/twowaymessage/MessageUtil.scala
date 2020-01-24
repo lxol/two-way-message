@@ -60,6 +60,13 @@ object MessageUtil {
     ))
   }
 
+  def buildValidReplyMessageWithTopic(): JsObject = {
+    JsObject(Seq(
+      "content" -> JsString(generateContent()),
+      "topic"   -> JsString("some-topic")
+    ))
+  }
+
   def buildInvalidReplyMessage(): JsObject = {
     JsObject(Seq(
       "c" -> JsString(generateContent())
