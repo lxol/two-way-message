@@ -354,8 +354,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         MessageType.Adviser,
         "QUESTION",
         "some base64-encoded-html",
-        Details(FormId.Reply, Some("reply-to-id"), Some("thread-id"), Some("P800"),
-          Some(Adviser(pidId = "adviser-id")))
+        Details(FormId.Reply, Some("reply-to-id"), Some("thread-id"), Some("P800"), Some(Adviser(pidId = "adviser-id")))
       )
 
       val metadata = MessageMetadata(
