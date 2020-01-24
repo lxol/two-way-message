@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.twowaymessage.services
 
-import akka.util.Timeout
 import com.codahale.metrics.SharedMetricRegistries
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HttpEntity.Strict
 import play.api.inject.bind
@@ -33,9 +32,9 @@ import play.mvc.Http
 import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
+import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
 import uk.gov.hmrc.gform.gformbackend.GformConnector
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
@@ -43,10 +42,8 @@ import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model._
-import uk.gov.hmrc.twowaymessage.services.RenderType.ReplyType
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 

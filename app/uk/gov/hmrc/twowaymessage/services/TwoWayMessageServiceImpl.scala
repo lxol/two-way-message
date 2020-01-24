@@ -75,7 +75,7 @@ class TwoWayMessageServiceImpl @Inject()(
 
   override def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
-    postReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply)
+    postAdviserReply(twoWayMessageReply, replyTo, MessageType.Adviser, FormId.Reply)
 
   override def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result] =
@@ -128,7 +128,7 @@ class TwoWayMessageServiceImpl @Inject()(
       case None          => Future.successful(None)
     }
 
-  private def postReply(
+  private def postAdviserReply(
     twoWayMessageReply: TwoWayMessageReply,
     replyTo: String,
     messageType: MessageType,
@@ -242,7 +242,8 @@ class TwoWayMessageServiceImpl @Inject()(
         metadata.details.threadId,
         metadata.details.enquiryType,
         metadata.details.adviser,
-        waitTime = queueId.map(qId => enquiries(qId).get.responseTime)
+        waitTime = queueId.map(qId => enquiries(qId).get.responseTime),
+        topic = reply.topic
       )
     )
 
