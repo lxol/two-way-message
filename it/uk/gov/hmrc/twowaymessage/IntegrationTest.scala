@@ -138,7 +138,7 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec  {
       response.status shouldBe 201
     }
 
-    "return (201) when adviser message with topic successfully sent" in {
+    "return (201) when adviser message successfully sent with topic successfully sent" in {
       val message = MessageUtil.buildValidReplyMessageWithTopic()
       val validMessageId = getValidNinoMessageId()
 
