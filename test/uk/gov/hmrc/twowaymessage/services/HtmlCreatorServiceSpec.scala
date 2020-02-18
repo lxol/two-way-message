@@ -108,22 +108,6 @@ class HtmlCreatorServiceSpec
               <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p>
               <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
             </div>) ++
-          Utility.trim(
-            <p>
-              <span>
-                <a style="text-decoration:none;" href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">
-                  <svg style="vertical-align:text-top;padding-right:5px;" width="21px" height="20px" viewBox="0 0 33 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                    <title>Reply</title>
-                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                      <g id="icon-reply" fill="#000000" fill-rule="nonzero">
-                        <path d="M20.0052977,9.00577935 C27.0039418,9.21272548 32.6139021,14.9512245 32.6139021,22 C32.6139021,25.5463753 31.1938581,28.7610816 28.8913669,31.1065217 C29.2442668,30.1082895 29.4380446,29.1123203 29.4380446,28.1436033 C29.4380446,21.8962314 25.9572992,21.1011463 20.323108,21 L15,21 L15,30 L-1.42108547e-14,15 L15,2.25597319e-13 L15,9 L20,9 L20.0052977,9.00577935 Z" id="Combined-Shape"></path>
-                      </g>
-                    </g>
-                  </svg>
-                </a>
-              </span>
-              <a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a>
-            </p>) ++
           <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>

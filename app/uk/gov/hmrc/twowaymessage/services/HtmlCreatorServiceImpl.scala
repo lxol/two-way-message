@@ -89,7 +89,7 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
 
   private def format2wsMessageForCustomer(item: ConversationItem, metadata: ItemMetadata): String = {
     Xhtml.toXhtml(getHeader(metadata,item.subject) ++ <p class="faded-text--small">{getCustomerDateText(item)}</p>
-      ++ getContentDiv(item.content) ++ getReplyLink(metadata, item).getOrElse(NodeSeq.Empty))
+      ++ getContentDiv(item.content))
   }
 
   private def format2wsMessageForAdviser(item: ConversationItem): String = {
@@ -115,40 +115,6 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
         }
       case None => <div/>
     }
-  }
-
-  private def getReplyLink(metadata: ItemMetadata, conversationItem: ConversationItem):Option[Elem] = {
-    if (metadata.isLatestMessage && metadata.hasLink) {
-      val enquiryType = conversationItem.body
-        .flatMap {
-          _.enquiryType
-        }
-        .getOrElse("")
-      val formActionUrl = s"/two-way-message-frontend/message/customer/$enquiryType/" + conversationItem.id + "/reply#reply-input-label"
-      conversationItem.body.flatMap(_.`type` match {
-        case MessageType.Adviser =>
-          val link = <a href={formActionUrl}>Send another message about this</a>
-          Some(<p>{getReplyIcon(formActionUrl) ++ link}</p>)
-        case _ => None
-      })
-    } else {
-      None
-    }
-  }
-
-  private def getReplyIcon(formActionUrl: String): Node = {
-    Utility.trim(<span>
-      <a style="text-decoration:none;" href={formActionUrl}>
-        <svg style="vertical-align:text-top;padding-right:5px;" width="21px" height="20px" viewBox="0 0 33 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <title>Reply</title>
-          <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <g id="icon-reply" fill="#000000" fill-rule="nonzero">
-              <path d="M20.0052977,9.00577935 C27.0039418,9.21272548 32.6139021,14.9512245 32.6139021,22 C32.6139021,25.5463753 31.1938581,28.7610816 28.8913669,31.1065217 C29.2442668,30.1082895 29.4380446,29.1123203 29.4380446,28.1436033 C29.4380446,21.8962314 25.9572992,21.1011463 20.323108,21 L15,21 L15,30 L-1.42108547e-14,15 L15,2.25597319e-13 L15,9 L20,9 L20.0052977,9.00577935 Z" id="Combined-Shape"></path>
-            </g>
-          </g>
-        </svg>
-      </a>
-    </span>)
   }
 
   private def getCustomerDateText(message: ConversationItem): String = {
