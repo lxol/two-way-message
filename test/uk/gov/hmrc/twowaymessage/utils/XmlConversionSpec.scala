@@ -40,6 +40,12 @@ class XmlConversionSpec extends WordSpec with UnitSpec {
       val result = XmlConversion.stringToXmlNodes("<test>test1</test><test>test2</test>")
       result.get shouldBe <test>test1</test><test>test2</test>
     }
+
+    "return an XML node containing special characters when passed an XML string containing special characters" in {
+      val result = XmlConversion.stringToXmlNodes("<test>°¦©®҂֍֍֎؎؏۞۩۽’“—</test>")
+      result.get.head shouldBe <test>°¦©®҂֍֍֎؎؏۞۩۽’“—</test>
+    }
+
   }
 
 }

@@ -25,23 +25,23 @@ object MessageUtil {
   import scala.util.Random
 
   implicit val deserialiser: Reads[MessageId] = Json.reads[MessageId]
-  def generateContent(): String = {
+  def generateContent: String = {
     val stringLength = 20
     BaseEncoding.base64().encode(s"Hello world! - ${Random.nextString(stringLength)}".getBytes())
   }
 
-  def generateSimpleContent(): String = {
+  def generateSimpleContent: String = {
     "Hello world!"
   }
 
   case class MessageId(id: String)
 
-  def buildValidCustomerMessage(): JsObject = {
+  def buildValidCustomerMessage: JsObject = {
     JsObject(Seq(
       "contactDetails" ->
         JsObject(Seq("email" -> JsString("someEmail@test.com"))),
       "subject" -> JsString("subject"),
-      "content" -> JsString(generateContent()),
+      "content" -> JsString(generateContent),
       "replyTo" -> JsString("replyTo")
     ))
   }
@@ -49,27 +49,27 @@ object MessageUtil {
   def buildInvalidCustomerMessage: JsObject = {
     JsObject(Seq(
       "email" -> JsString("test@test.com"),
-      "content" -> JsString(generateContent()),
+      "content" -> JsString(generateContent),
       "replyTo" -> JsString("replyTo")
     ))
   }
 
-  def buildValidReplyMessage(): JsObject = {
+  def buildValidReplyMessage: JsObject = {
     JsObject(Seq(
-      "content" -> JsString(generateContent())
+      "content" -> JsString(generateContent)
     ))
   }
 
-  def buildValidReplyMessageWithTopic(): JsObject = {
+  def buildValidReplyMessageWithTopic: JsObject = {
     JsObject(Seq(
-      "content" -> JsString(generateContent()),
+      "content" -> JsString(generateContent),
       "topic"   -> JsString("some-topic")
     ))
   }
 
   def buildInvalidReplyMessage(): JsObject = {
     JsObject(Seq(
-      "c" -> JsString(generateContent())
+      "c" -> JsString(generateContent)
     ))
   }
 

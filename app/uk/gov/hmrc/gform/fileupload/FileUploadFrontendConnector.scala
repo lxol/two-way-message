@@ -24,11 +24,10 @@ import uk.gov.hmrc.gform.sharedmodel.config.ContentType
 import uk.gov.hmrc.gform.sharedmodel.form.{ EnvelopeId, FileId }
 import uk.gov.hmrc.gform.wshttp.GformWSHttp
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-class FileUploadFrontendConnector @Inject()(config: FUConfig, wSHttp: GformWSHttp) {
+class FileUploadFrontendConnector @Inject()(config: FUConfig, wSHttp: GformWSHttp)(implicit ec: ExecutionContext) {
 
   def upload(envelopeId: EnvelopeId, fileId: FileId, fileName: String, body: ByteString, contentType: ContentType)(
     implicit hc: HeaderCarrier): Future[Unit] = {

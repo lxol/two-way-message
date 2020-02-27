@@ -69,9 +69,8 @@ class HtmlCreatorServiceSpec
       LocalDate.parse("2019-06-13"),
       Some(
         "<p>Dear TestUser</p><p>Thank you for your message of 13 June 2019.</p><p>To recap your question, " +
-          "I think you're asking for help with</p><p>I believe this answers your question and hope you are satisfied with the response. " +
-          "There's no need to send a reply. " +
-          "But if you think there's something important missing, just ask another question about this below.</p>" +
+          "I think you're asking for help with</p><p>I believe this answers your question and hope you are satisfied with the response.</p>" +
+          "<p>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>" +
           "<p>Regards<br>Matthew Groom<br>HMRC digital team</p>")
     ),
     ConversationItem(
@@ -105,9 +104,11 @@ class HtmlCreatorServiceSpec
               <p>Dear TestUser</p>
               <p>Thank you for your message of 13 June 2019.</p>
               <p>To recap your question, I think you're asking for help with</p>
-              <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p>
+              <p>I believe this answers your question and hope you are satisfied with the response.</p>
+              <p>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
               <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
             </div>) ++
+          <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/income-tax-enquiries-for-individuals-pensioners-and-employees" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>
           <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
@@ -128,7 +129,8 @@ class HtmlCreatorServiceSpec
               <p>Dear TestUser</p>
               <p>Thank you for your message of 13 June 2019.</p>
               <p>To recap your question, I think you're asking for help with</p>
-              <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p>
+              <p>I believe this answers your question and hope you are satisfied with the response.</p>
+              <p>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
               <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
             </div>) ++
             <hr/>

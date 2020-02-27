@@ -89,7 +89,7 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
 
   private def format2wsMessageForCustomer(item: ConversationItem, metadata: ItemMetadata): String = {
     Xhtml.toXhtml(getHeader(metadata,item.subject) ++ <p class="faded-text--small">{getCustomerDateText(item)}</p>
-      ++ getContentDiv(item.content))
+      ++ getContentDiv(item.content) ++ getContactLink(metadata, item))
   }
 
   private def format2wsMessageForAdviser(item: ConversationItem): String = {
@@ -106,14 +106,36 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
     }
   }
 
+  private def fixHtmlString(htmlString: String): String = {
+    // makes line breaks XHTML valid
+    val lineBreakFix = ("<br>","<br/>")
+    // preserves space in front of links
+    val linkSpaceFix = ("<a","&#160;<a")
+    htmlString.replaceAllLiterally(lineBreakFix._1,lineBreakFix._2)
+      .replaceAllLiterally(linkSpaceFix._1,linkSpaceFix._2)
+  }
+
   private def getContentDiv(maybeContent: Option[String]): Node = {
     maybeContent match {
       case Some(content) =>
-        XmlConversion.stringToXmlNodes(content.replaceAllLiterally("<br>", "<br/>")) match {
+        XmlConversion.stringToXmlNodes(fixHtmlString(content)) match {
           case Success(nodes) => Utility.trim(<div>{nodes}</div>)
           case Failure(_) => <div>There was a problem reading the message content</div>
         }
       case None => <div/>
+    }
+  }
+
+  private def getContactLink(metadata: ItemMetadata, conversationItem: ConversationItem): Option[Elem] = {
+    if(metadata.isLatestMessage && metadata.hasLink) {
+      conversationItem.body.flatMap(_.`type` match {
+        case MessageType.Adviser =>
+          val contactUrl = servicesConfig.getString("contact-hmrc-url")
+          Some(<a href={contactUrl} target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>)
+        case _ => None
+      })
+    } else {
+      None
     }
   }
 

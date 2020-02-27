@@ -114,12 +114,16 @@ class TwoWayMessageServiceImpl @Inject()(
   override def findMessagesBy(messageId: String)(
     implicit hc: HeaderCarrier): Future[Either[String, List[ConversationItem]]] =
     messageConnector.getMessages(messageId).flatMap { response =>
-      response.json
-        .validate[List[ConversationItem]]
-        .fold(
-          errors => Future.successful(Left(Json stringify JsError.toJson(errors))),
-          msgList => Future.successful(Right(msgList))
-        )
+      response.status match {
+        case OK =>
+          response.json
+            .validate[List[ConversationItem]]
+            .fold(
+              errors => Future.successful(Left(Json stringify JsError.toJson(errors))),
+              msgList => Future.successful(Right(msgList))
+            )
+        case _ => Future.successful(Left("Error retrieving messages"))
+      }
     }
 
   override def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
