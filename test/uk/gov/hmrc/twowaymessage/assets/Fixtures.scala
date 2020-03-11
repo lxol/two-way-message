@@ -178,11 +178,12 @@ trait Fixtures {
               <hr/>
               <div class="govuk-body-l" id="indented">
                 <p class="faded-text--small">13 June 2019 by HMRC:</p> <div>
-                <p>Dear TestUser</p> <p>Thank you for your message of 13 June 2019.</p> <p>To recap your question, I think you're asking for help with</p> <p>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</p> <p>Regards
-                  <br/>
-                  Matthew Groom
-                  <br/>
-                  HMRC digital team</p>
+                <p>Dear TestUser</p>
+                <p>Thank you for your message of 13 June 2019.</p>
+                <p>To recap your question, I think you're asking for help with</p>
+                <p>I believe this answers your question and hope you are satisfied with the response.</p>
+                <p> If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
+                <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
               </div> <hr/> <p class="faded-text--small">13 June 2019 by the customer:</p> <div>
                 <p>Hello, my friend!</p>
               </div>

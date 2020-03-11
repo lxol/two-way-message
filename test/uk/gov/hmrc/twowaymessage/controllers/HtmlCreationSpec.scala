@@ -88,7 +88,7 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
           Some("P800"))),
       LocalDate.parse("2019-06-13"),
       Some(Base64.getEncoder.encodeToString(
-        "Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below. <br/>Regards<br/>Matthew Groom<br/>HMRC digital team.".getBytes))
+        "Dear TestUser<br>Thank you for your message of 13 June 2019.<br>To recap your question, I think you're asking for help with<br>I believe this answers your question and hope you are satisfied with the response.<br>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.".getBytes))
     ),
     ConversationItem(
       "5d021fbe5b0000200151779c",
@@ -124,9 +124,10 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       status(result) shouldBe Status.OK
       bodyOf(result) shouldBe Xhtml.toXhtml(
         <p class="faded-text--small">13 June 2019 by HMRC:</p> ++
-        Utility.trim(<div>Dear TestUser Thank you for your message of 13 June 2019.<br/>
+        Utility.trim(<div>Dear TestUser<br/> Thank you for your message of 13 June 2019.<br/>
           To recap your question, I think you're asking for help with<br/>
-          I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>
+          I believe this answers your question and hope you are satisfied with the response.<br/>
+          If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.<br/>
           Regards<br/>
           Matthew Groom<br/>
           HMRC digital team.</div>) ++
@@ -154,12 +155,14 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       bodyOf(result) shouldBe Xhtml.toXhtml(
         <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
           <p class="faded-text--small">This message was sent to you on 13 June 2019</p> ++
-          Utility.trim(<div>Dear TestUser Thank you for your message of 13 June 2019.<br/>
+          Utility.trim(<div>Dear TestUser<br/>Thank you for your message of 13 June 2019.<br/>
             To recap your question, I think you're asking for help with<br/>
-            I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>
+            I believe this answers your question and hope you are satisfied with the response.<br/>
+            If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.<br/>
             Regards<br/>
             Matthew Groom<br/>
             HMRC digital team.</div>) ++
+          <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/income-tax-enquiries-for-individuals-pensioners-and-employees" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>
           <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>

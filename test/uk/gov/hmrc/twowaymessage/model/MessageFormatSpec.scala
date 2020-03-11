@@ -143,7 +143,7 @@ class MessageFormatSpec extends WordSpec with Fixtures with Matchers {
       "id": "5a3e51c6-f657-48dc-a132-2e72151a8e6c",
       "source": "2WSM"
     },
-    "content": "RGVhciBUZXN0VXNlciBUaGFuayB5b3UgZm9yIHlvdXIgbWVzc2FnZSBvZiAxMyBKdW5lIDIwMTkuPC9icj5UbyByZWNhcCB5b3VyIHF1ZXN0aW9uLCBJIHRoaW5rIHlvdSdyZSBhc2tpbmcgZm9yIGhlbHAgd2l0aDwvYnI+SSBiZWxpZXZlIHRoaXMgYW5zd2VycyB5b3VyIHF1ZXN0aW9uIGFuZCBob3BlIHlvdSBhcmUgc2F0aXNmaWVkIHdpdGggdGhlIHJlc3BvbnNlLiBUaGVyZSdzIG5vIG5lZWQgdG8gc2VuZCBhIHJlcGx5LiBCdXQgaWYgeW91IHRoaW5rIHRoZXJlJ3Mgc29tZXRoaW5nIGltcG9ydGFudCBtaXNzaW5nLCBqdXN0IGFzayBhbm90aGVyIHF1ZXN0aW9uIGFib3V0IHRoaXMgYmVsb3cuPC9icj5SZWdhcmRzPC9icj5NYXR0aGV3IEdyb29tPC9icj5uSE1SQyBkaWdpdGFsIHRlYW0u",
+    "content": "RGVhciBUZXN0VXNlciBUaGFuayB5b3UgZm9yIHlvdXIgbWVzc2FnZSBvZiAxMyBKdW5lIDIwMTkuPGJyPlRvIHJlY2FwIHlvdXIgcXVlc3Rpb24sIEkgdGhpbmsgeW91J3JlIGFza2luZyBmb3IgaGVscCB3aXRoPGJyPkkgYmVsaWV2ZSB0aGlzIGFuc3dlcnMgeW91ciBxdWVzdGlvbiBhbmQgaG9wZSB5b3UgYXJlIHNhdGlzZmllZCB3aXRoIHRoZSByZXNwb25zZS48YnI+SWYgeW91IHRoaW5rIHRoZXJlIGlzIHNvbWV0aGluZyBpbXBvcnRhbnQgbWlzc2luZywgdXNlIHRoZSBsaW5rIGF0IHRoZSBlbmQgb2YgdGhpcyBtZXNzYWdlIHRvIGZpbmQgb3V0IGhvdyB0byBjb250YWN0IEhNUkMuPGJyPlJlZ2FyZHM8YnI+TWF0dGhldyBHcm9vbTxicj5uSE1SQyBkaWdpdGFsIHRlYW0u",
     "id":"5d02201b5b0000360151779e"
   }""")
 
@@ -159,7 +159,7 @@ class MessageFormatSpec extends WordSpec with Fixtures with Matchers {
           Some("p800"),
           Some(Adviser("123")))),
         LocalDate.parse("2019-06-13"),
-        Some("Dear TestUser Thank you for your message of 13 June 2019.</br>To recap your question, I think you're asking for help with</br>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.</br>Regards</br>Matthew Groom</br>nHMRC digital team.")
+        Some("Dear TestUser Thank you for your message of 13 June 2019.<br>To recap your question, I think you're asking for help with<br>I believe this answers your question and hope you are satisfied with the response.<br>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.<br>Regards<br>Matthew Groom<br>nHMRC digital team.")
       ))
     }
   }

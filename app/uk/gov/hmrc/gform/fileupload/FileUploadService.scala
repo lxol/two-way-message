@@ -29,15 +29,14 @@ import uk.gov.hmrc.gform.sharedmodel.formtemplate.destinations.Destinations.DmsS
 import uk.gov.hmrc.gform.submission.{ PdfAndXmlSummaries, Submission, SubmissionRef }
 import uk.gov.hmrc.gform.time.TimeProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class FileUploadService @Inject()(
   fileUploadConnector: FileUploadConnector,
   fileUploadFrontendConnector: FileUploadFrontendConnector,
-  timeModule: TimeProvider = new TimeProvider) {
+  timeModule: TimeProvider = new TimeProvider)(implicit ec: ExecutionContext) {
 
   def createEnvelope(formTypeId: FormTemplateId)(implicit hc: HeaderCarrier): Future[EnvelopeId] = {
     val f = fileUploadConnector.createEnvelope(formTypeId)
@@ -106,8 +105,8 @@ object FileUploadService {
 
   //forbidden keys. make sure they aren't used in templates
   object FileIds {
-    val pdf = FileId("pdf")
-    val xml = FileId("xmlDocument")
-    val data = FileId("xmlSubmission")
+    val pdf: FileId = FileId("pdf")
+    val xml: FileId = FileId("xmlDocument")
+    val data: FileId = FileId("xmlSubmission")
   }
 }

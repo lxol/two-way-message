@@ -26,7 +26,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HttpEntity.Strict
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import play.mvc.Http
 import play.twirl.api.Html
@@ -96,11 +96,10 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
             Some("P800"))),
         LocalDate.parse("2019-06-13"),
         Some(
-          "Dear TestUser Thank you for your message of 13 June 2019.</br>To recap your question, " +
-            "I think you're asking for help with</br>I believe this answers your question and hope you are satisfied with the response. " +
-            "There's no need to send a reply. " +
-            "But if you think there's something important missing, just ask another question about this below." +
-            "</br>Regards</br>Matthew Groom</br>HMRC digital team.")
+          "Dear TestUser Thank you for your message of 13 June 2019.<br>To recap your question, " +
+            "I think you're asking for help with<br>I believe this answers your question and hope you are satisfied with the response. " +
+            "If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC." +
+            "<br>Regards<br>Matthew Groom<br>HMRC digital team.")
       ))
 
     "return 201 (Created) when a message is successfully created by the message service" in {
@@ -323,6 +322,16 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val messagesResult = await(messageService.findMessagesBy("1234567890"))
       messagesResult.right should not be (None)
     }
+
+    "return error if there is a problem connecting to the message service" in {
+      when(
+        mockMessageConnector
+          .getMessages(any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(HttpResponse(Http.Status.INTERNAL_SERVER_ERROR)))
+      val messageResult = await(messageService.findMessagesBy("1234567890"))
+      messageResult.left.get should be("Error retrieving messages")
+    }
+
     SharedMetricRegistries.clear
   }
 
@@ -486,8 +495,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       Some(
         "Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, " +
           "I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. " +
-          "There's no need to send a reply. " +
-          "But if you think there's something important missing, just ask another question about this below." +
+          "If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC." +
           "<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.")
     ),
     ConversationItem(
@@ -509,7 +517,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
   </h1><p class="faded-text--small">
     This message was sent to you on 13 June 2019
   </p><p>
-    Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. There's no need to send a reply. But if you think there's something important missing, just ask another question about this below.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
+    Dear TestUser Thank you for your message of 13 June 2019.<br/>To recap your question, I think you're asking for help with<br/>I believe this answers your question and hope you are satisfied with the response. If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.<br/>Regards<br/>Matthew Groom<br/>HMRC digital team.
   </p><a href="/two-way-message-frontend/message/customer/P800/5d02201b5b0000360151779e/reply#reply-input-label">Send another message about this</a><h2
   class="govuk-heading-xl margin-top-small margin-bottom-small">
     Matt Test 1

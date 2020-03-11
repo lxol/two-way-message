@@ -24,11 +24,10 @@ import play.api.libs.streams.Accumulator
 import play.api.libs.ws.{ BodyWritable, WSClient, WSRequest, WSResponse }
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class Proxy @Inject()(wsClient: WSClient) {
+class Proxy @Inject()(wsClient: WSClient)(implicit ec: ExecutionContext) {
 
   /**
     * This creates action which proxies incoming request to remote service.
