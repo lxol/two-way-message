@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.hooks.{ HttpHook, HttpHooks }
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.http.ws._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 trait HttpClient extends HttpGet with HttpPut with HttpPost with HttpDelete with HttpPatch
 
 trait Hooks extends HttpHooks {
@@ -41,7 +41,7 @@ class GformWSHttp @Inject()(
   config: Configuration,
   val httpAuditing: HttpAuditing,
   val wsClient: WSClient,
-  override protected val actorSystem: ActorSystem)
+  override protected val actorSystem: ActorSystem)(implicit ec: ExecutionContext)
     extends HttpClient with WSHttp {
 
   override lazy val configuration: Option[Config] = Option(config.underlying)

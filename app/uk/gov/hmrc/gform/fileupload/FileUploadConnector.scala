@@ -24,11 +24,11 @@ import uk.gov.hmrc.gform.sharedmodel.formtemplate.FormTemplateId
 import uk.gov.hmrc.gform.time.TimeProvider
 import uk.gov.hmrc.gform.wshttp.GformWSHttp
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
-class FileUploadConnector @Inject()(config: FUConfig, wSHttp: GformWSHttp, timeProvider: TimeProvider) {
+class FileUploadConnector @Inject()(config: FUConfig, wSHttp: GformWSHttp, timeProvider: TimeProvider)(
+  implicit ec: ExecutionContext) {
   val helper = new Helper(config, timeProvider)
 
   def createEnvelope(formTemplateId: FormTemplateId)(implicit hc: HeaderCarrier): Future[EnvelopeId] = {

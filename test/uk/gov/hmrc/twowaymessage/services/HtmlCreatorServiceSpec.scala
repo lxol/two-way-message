@@ -20,38 +20,37 @@ import com.codahale.metrics.SharedMetricRegistries
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{ Injector, bind }
+import play.api.test.Helpers._
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.xml.{Utility, Xhtml}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.xml.{ Utility, Xhtml }
 
-class HtmlCreatorServiceSpec
-    extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar with UnitSpec {
+class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 
-  implicit val mockExecutionContext = mock[ExecutionContext]
-  implicit val mockHeaderCarrier = mock[HeaderCarrier]
+  implicit val mockExecutionContext: ExecutionContext = mock[ExecutionContext]
+  implicit val mockHeaderCarrier: HeaderCarrier = mock[HeaderCarrier]
 
-  lazy val mockhttpClient = mock[HttpClient]
-  lazy val mockServiceConfig = mock[ServicesConfig]
+  lazy val mockhttpClient: HttpClient = mock[HttpClient]
+  lazy val mockServiceConfig: ServicesConfig = mock[ServicesConfig]
 
-  val mockTwoWayMessageService = mock[TwoWayMessageService]
+  val mockTwoWayMessageService: TwoWayMessageService = mock[TwoWayMessageService]
 
-  val injector = new GuiceApplicationBuilder()
+  val injector: Injector = new GuiceApplicationBuilder()
     .overrides(bind[TwoWayMessageService].to(mockTwoWayMessageService))
     .injector()
 
-  implicit val htmlCreatorService = injector.instanceOf[HtmlCreatorServiceImpl]
+  implicit val htmlCreatorService: HtmlCreatorServiceImpl = injector.instanceOf[HtmlCreatorServiceImpl]
 
   val latestMessageId = "5d02201b5b0000360151779e"
 
@@ -96,11 +95,12 @@ class HtmlCreatorServiceSpec
         .thenReturn(Future.successful(Right(listOfConversationItems)))
       val result =
         await(htmlCreatorService.createConversation(latestMessageId, listOfConversationItems, RenderType.CustomerLink))
-      result shouldBe
-        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
+      result mustBe
+        Right(
+          Html.apply(
+            Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
           <p class="faded-text--small">This message was sent to you on 13 June 2019</p> ++
-          Utility.trim(
-            <div>
+              Utility.trim(<div>
               <p>Dear TestUser</p>
               <p>Thank you for your message of 13 June 2019.</p>
               <p>To recap your question, I think you're asking for help with</p>
@@ -108,7 +108,7 @@ class HtmlCreatorServiceSpec
               <p>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
               <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
             </div>) ++
-          <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/income-tax-enquiries-for-individuals-pensioners-and-employees" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>
+              <a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/income-tax-enquiries-for-individuals-pensioners-and-employees" target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>
           <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
@@ -122,10 +122,11 @@ class HtmlCreatorServiceSpec
         .thenReturn(Future.successful(Right(listOfConversationItems)))
       val result =
         await(htmlCreatorService.createConversation(latestMessageId, listOfConversationItems, RenderType.Adviser))
-      result shouldBe
-        Right(Html(Xhtml.toXhtml(<p class="faded-text--small">13 June 2019 by HMRC:</p> ++
-          Utility.trim(
-            <div>
+      result mustBe
+        Right(
+          Html(
+            Xhtml.toXhtml(<p class="faded-text--small">13 June 2019 by HMRC:</p> ++
+              Utility.trim(<div>
               <p>Dear TestUser</p>
               <p>Thank you for your message of 13 June 2019.</p>
               <p>To recap your question, I think you're asking for help with</p>
@@ -133,7 +134,7 @@ class HtmlCreatorServiceSpec
               <p>If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
               <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
             </div>) ++
-            <hr/>
+              <hr/>
           <p class="faded-text--small">13 June 2019 by the customer:</p>
           <div><p>Hello, my friend!</p></div>)))
     }
@@ -142,7 +143,7 @@ class HtmlCreatorServiceSpec
 
   "createSingleMessageHtml" should {
 
-    def conversationItem(subject:String):ConversationItem = ConversationItem(
+    def conversationItem(subject: String): ConversationItem = ConversationItem(
       "5d021fbe5b0000200151779c",
       subject,
       Some(
@@ -158,24 +159,29 @@ class HtmlCreatorServiceSpec
 
     "create one HTML message for the first message" in {
       val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("Matt Test 1")))
-      result shouldBe
-        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
+      result mustBe
+        Right(
+          Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h1>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
           <div>Hello, my friend!</div>)))
     }
 
     "create one HTML message with escaped HTML subject text for the first message" in {
       val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("&lt;h1&gt;A &amp; B&lt;/h1&gt;")))
-      result shouldBe
-        Right(Html.apply(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
+      result mustBe
+        Right(
+          Html.apply(Xhtml.toXhtml(
+            <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
           <div>Hello, my friend!</div>)))
     }
 
     "create one HTML message with non-escaped HTML subject for the first message" in {
       val result = await(htmlCreatorService.createSingleMessageHtml(conversationItem("<h1>A & B</h1>")))
-      result shouldBe
-        Right(Html(Xhtml.toXhtml(<h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
+      result mustBe
+        Right(
+          Html(Xhtml.toXhtml(
+            <h1 class="govuk-heading-xl margin-top-small margin-bottom-small">&lt;h1&gt;A &amp; B&lt;/h1&gt;</h1>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
           <div>Hello, my friend!</div>)))
     }
@@ -184,28 +190,33 @@ class HtmlCreatorServiceSpec
 
   "createHtmlForPdf" should {
 
-    val subjectWithEscapedChars = "&lt;b&gt;This is another test to see if this &gt; that &amp; that &lt; this&lt;/b&gt;"
+    val subjectWithEscapedChars =
+      "&lt;b&gt;This is another test to see if this &gt; that &amp; that &lt; this&lt;/b&gt;"
 
     "create a complete HTML document" in {
       val subject = "Some subject"
-      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,"Some subject"))
-      result shouldBe
-      Right(expectedPdfHtml(subject))
+      val result = await(
+        htmlCreatorService.createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, "Some subject"))
+      result mustBe
+        Right(expectedPdfHtml(subject))
     }
 
     "correctly render escaped HTML in the message subject" in {
-      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithEscapedChars))
-      result shouldBe
+      val result = await(
+        htmlCreatorService
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithEscapedChars))
+      result mustBe
         Right(expectedPdfHtml(subjectWithEscapedChars))
     }
 
     "correctly escape unescaped HTML in the message subject" in {
       val subjectWithUnescapedChars = "<b>This is another test to see if this > that & that < this</b>"
-      val result = await(htmlCreatorService.createHtmlForPdf(latestMessageId,"AB234567C",listOfConversationItems,subjectWithUnescapedChars))
-      result shouldBe
+      val result = await(
+        htmlCreatorService
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithUnescapedChars))
+      result mustBe
         Right(expectedPdfHtml(subjectWithEscapedChars))
     }
   }
-
 
 }

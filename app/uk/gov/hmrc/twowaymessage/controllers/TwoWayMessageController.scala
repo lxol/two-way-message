@@ -22,7 +22,8 @@ import play.api.libs.json._
 import play.api.mvc.{Action, _}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Name, Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.gform.gformbackend.GformConnector
@@ -52,8 +53,8 @@ class TwoWayMessageController @Inject()(
   def createMessage(enquiryType: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised(Enrolment("HMRC-NI")).retrieve(Retrievals.nino and Retrievals.name) {
-      case Some(ninoId) ~ name => validateAndPostMessage(enquiryType, Nino(ninoId), request.body, name)
-      case None ~ name =>
+      case Some(ninoId) ~ Some(name) => validateAndPostMessage(enquiryType, Nino(ninoId), request.body, name)
+      case None ~ Some(name) =>
         Logger.info("No nino found for user")
         Future.successful(Forbidden(Json.toJson("Not authenticated")))
     } recover handleError
