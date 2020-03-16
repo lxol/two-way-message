@@ -83,7 +83,7 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
           None,
           Some("p800"))),
       LocalDate.parse("2019-06-13"),
-      Some("<p>Hello, my friend!</p>")
+      Some("<p>Hello&nbsp;this&nbsp;is&nbsp;a&nbsp;test!</p>")
     )
   )
 
@@ -112,7 +112,7 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
           <hr/>
           <h2 class="govuk-heading-xl margin-top-small margin-bottom-small">Matt Test 1</h2>
           <p class="faded-text--small">You sent this message on 13 June 2019</p>
-          <div><p>Hello, my friend!</p></div>)))
+          <div><p>Hello&#160;this&#160;is&#160;a&#160;test!</p></div>)))
     }
 
     "create HTML content for an advisor" in {
@@ -136,7 +136,7 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
             </div>) ++
               <hr/>
           <p class="faded-text--small">13 June 2019 by the customer:</p>
-          <div><p>Hello, my friend!</p></div>)))
+          <div><p>Hello&#160;this&#160;is&#160;a&#160;test!</p></div>)))
     }
     SharedMetricRegistries.clear()
   }

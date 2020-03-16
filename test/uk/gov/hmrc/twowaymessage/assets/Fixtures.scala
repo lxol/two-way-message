@@ -185,7 +185,7 @@ trait Fixtures {
                 <p> If you think there is something important missing, use the link at the end of this message to find out how to contact HMRC.</p>
                 <p>Regards<br/>Matthew Groom<br/>HMRC digital team</p>
               </div> <hr/> <p class="faded-text--small">13 June 2019 by the customer:</p> <div>
-                <p>Hello, my friend!</p>
+                <p>Hello&#160;this&#160;is&#160;a&#160;test!</p>
               </div>
               </div>
               <hr/>

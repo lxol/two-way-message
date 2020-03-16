@@ -111,8 +111,10 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
     val lineBreakFix = ("<br>","<br/>")
     // preserves space in front of links
     val linkSpaceFix = ("<a","&#160;<a")
+    val nonBreakingSpaceFix = ("&nbsp;","&#160;")
     htmlString.replaceAllLiterally(lineBreakFix._1,lineBreakFix._2)
       .replaceAllLiterally(linkSpaceFix._1,linkSpaceFix._2)
+      .replaceAllLiterally(nonBreakingSpaceFix._1,nonBreakingSpaceFix._2)
   }
 
   private def getContentDiv(maybeContent: Option[String]): Node = {
