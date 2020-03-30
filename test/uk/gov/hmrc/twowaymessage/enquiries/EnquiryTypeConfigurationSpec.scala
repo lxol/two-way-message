@@ -128,6 +128,62 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     }
   }
 
+  "Enquiry configuration for sa-general" should {
+
+    "have correct enquiry details" in {
+      enquiries("sa-general").get shouldBe EnquiryType(
+        name = "sa-general",
+        dmsFormId = "sa-general",
+        classificationType = "PSA-DFS Secure Messaging SA",
+        businessArea = "PT Operations",
+        responseTime = "5 days",
+        displayName = "Self Assessment"
+      )
+    }
+  }
+
+  "Enquiry configuration for ct-general" should {
+
+    "have correct enquiry details" in {
+      enquiries("ct-general").get shouldBe EnquiryType(
+        name = "ct-general",
+        dmsFormId = "ct-general",
+        classificationType = "PSA-DFS Secure Messaging SA",
+        businessArea = "PT Operations",
+        responseTime = "5 days",
+        displayName = "Corporation Tax"
+      )
+    }
+  }
+
+  "Enquiry configuration for vat-general" should {
+
+    "have correct enquiry details" in {
+      enquiries("vat-general").get shouldBe EnquiryType(
+        name = "vat-general",
+        dmsFormId = "vat-general",
+        classificationType = "PSA-DFS Secure Messaging SA",
+        businessArea = "PT Operations",
+        responseTime = "5 days",
+        displayName = "VAT"
+      )
+    }
+  }
+
+  "Enquiry configuration for epaye-general" should {
+
+    "have correct enquiry details" in {
+      enquiries("epaye-general").get shouldBe EnquiryType(
+        name = "epaye-general",
+        dmsFormId = "epaye-general",
+        classificationType = "PSA-DFS Secure Messaging SA",
+        businessArea = "PT Operations",
+        responseTime = "5 days",
+        displayName = "PAYE for employers"
+      )
+    }
+  }
+
   SharedMetricRegistries.clear()
 
 }
