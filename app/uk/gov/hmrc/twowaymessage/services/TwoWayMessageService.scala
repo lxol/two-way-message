@@ -23,16 +23,16 @@ import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.twirl.api.Html
+import scala.concurrent.Future
+import scala.language.implicitConversions
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
-
-import scala.concurrent.Future
-import scala.language.implicitConversions
 
 @ImplementedBy(classOf[TwoWayMessageServiceImpl])
 trait TwoWayMessageService {
@@ -43,7 +43,7 @@ trait TwoWayMessageService {
 
   def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]]
 
-  def post(enquiryType: String, nino: Nino, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
+  def post(enquiryType: String, taxIdentifier: TaxIdWithName, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
     implicit hc: HeaderCarrier): Future[Result]
 
   def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
@@ -64,7 +64,7 @@ trait TwoWayMessageService {
   def createJsonForMessage(
     refId: String,
     twoWayMessage: TwoWayMessage,
-    nino: Nino,
+    taxIdentifier: TaxIdWithName,
     enquiryType: String,
     name: Name): Message
 

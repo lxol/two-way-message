@@ -18,21 +18,19 @@ package uk.gov.hmrc.twowaymessage.model
 
 import play.api.libs.json.{Format, Json}
 
+import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
+
 object MessageMetadataFormat {
 
-  implicit val taxIdWithNameFormat: Format[TaxIdWithName] = Json.format[TaxIdWithName]
+  import MessageFormat._
 
   implicit val taxEntityFormat: Format[TaxEntity] = Json.format[TaxEntity]
 
   implicit val metadataDetailsFormat: Format[MetadataDetails] = Json.format[MetadataDetails]
 
-  implicit val taxpayerNameFormat: Format[TaxpayerName] = Json.format[TaxpayerName]
-
   implicit val messageMetadataFormat: Format[MessageMetadata] = Json.format[MessageMetadata]
 
 }
-
-case class TaxIdWithName(name: String, value: String)
 
 case class TaxEntity(regime: String, identifier: TaxIdWithName, email: Option[String] = None)
 

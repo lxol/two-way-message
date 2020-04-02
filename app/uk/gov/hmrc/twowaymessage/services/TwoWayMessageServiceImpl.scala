@@ -24,8 +24,11 @@ import play.api.libs.json.{ JsError, Json }
 import play.api.mvc.Result
 import play.api.mvc.Results.Created
 import play.twirl.api.Html
+import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
+import uk.gov.hmrc.domain._
 import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
 import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
@@ -37,8 +40,6 @@ import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
-
-import scala.concurrent.{ ExecutionContext, Future }
 
 class TwoWayMessageServiceImpl @Inject()(
   messageConnector: MessageConnector,
@@ -63,11 +64,11 @@ class TwoWayMessageServiceImpl @Inject()(
 
   override def post(
     enquiryType: String,
-    nino: Nino,
+    taxIdentifier: TaxIdWithName,
     twoWayMessage: TwoWayMessage,
     dmsMetaData: DmsMetadata,
     name: Name)(implicit hc: HeaderCarrier): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, nino, enquiryType, name)
+    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, taxIdentifier, enquiryType, name)
     messageConnector.postMessage(body) flatMap { response =>
       handleResponse(twoWayMessage.subject, response, dmsMetaData)
     } recover handleError
@@ -201,7 +202,7 @@ class TwoWayMessageServiceImpl @Inject()(
   def createJsonForMessage(
     refId: String,
     twoWayMessage: TwoWayMessage,
-    nino: Nino,
+    taxIdentifier: TaxIdWithName,
     enquiryType: String,
     name: Name): Message = {
 
@@ -209,7 +210,7 @@ class TwoWayMessageServiceImpl @Inject()(
     Message(
       ExternalRef(refId, "2WSM"),
       Recipient(
-        TaxIdentifier(nino.name, nino.value),
+        taxIdentifier,
         twoWayMessage.contactDetails.email,
         Option(
           TaxpayerName(forename = name.name, surname = name.lastName, line1 = deriveAddressedName(name))
@@ -233,7 +234,7 @@ class TwoWayMessageServiceImpl @Inject()(
     Message(
       ExternalRef(refId, "2WSM"),
       Recipient(
-        TaxIdentifier(metadata.recipient.identifier.name, metadata.recipient.identifier.value),
+        metadata.recipient.identifier,
         metadata.recipient.email.getOrElse(""),
         metadata.taxpayerName
       ),

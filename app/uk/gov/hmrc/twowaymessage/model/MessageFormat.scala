@@ -20,6 +20,8 @@ import org.apache.commons.codec.binary.Base64
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JodaReads, JodaWrites, Json, Reads, _}
+import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
+import uk.gov.hmrc.domain._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 
@@ -29,9 +31,50 @@ object MessageFormat {
     new String(Base64.decodeBase64(input.getBytes("UTF-8")))
   }
 
-  implicit val taxpayerNameWrites: Format[TaxpayerName] = Json.format[TaxpayerName]
+  implicit val taxpayerNameFormat: Format[TaxpayerName] = Json.format[TaxpayerName]
 
-  implicit val taxIdentifierFormat: Format[TaxIdentifier] = Json.format[TaxIdentifier]
+  implicit val identifierReads: Reads[TaxIdWithName] =
+    ((__ \ "name").readNullable[String] and (__ \ "value").readNullable[String]).tupled
+      .flatMap[TaxIdWithName] {
+        case (Some("sautr"), Some(value)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(SaUtr(value))
+          }
+        case (Some("nino"), Some(value)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(Nino(value))
+          }
+        case (Some("ctutr"), Some(value)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(CtUtr(value))
+          }
+        case (Some("HMRC-OBTDS-ORG"), Some(value)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(HmrcObtdsOrg(value))
+          }
+        case (Some("HMRC-MTD-VAT"), Some(value)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(HmrcMtdVat(value))
+          }
+        case (_, None) =>
+          Reads[TaxIdWithName] { _ =>
+            JsError("recipient.taxIdentifier.name: missing tax identifier")
+          }
+        case (Some(name), _) =>
+          Reads[TaxIdWithName] { _ =>
+            JsError("recipient.taxIdentifier.name: unknown tax identifier name")
+          }
+        case (None, _) =>
+          Reads[TaxIdWithName] { _ =>
+            JsError("recipient.taxIdentifier.name: missing tax identifier name")
+          }
+      }
+
+  implicit val identifierWrites = new Writes[TaxIdWithName] {
+    override def writes(taxId: TaxIdWithName): JsValue = JsObject(Seq("name" -> JsString(taxId.name), "value" -> JsString(taxId.value)))
+  }
+
+  implicit val format: Format[TaxIdWithName] = Format(identifierReads, identifierWrites)
 
   implicit val recipientFormat: Format[Recipient] = Json.format[Recipient]
 
@@ -91,9 +134,9 @@ object MessageType extends Enumeration {
   val Customer = Value("2wsm-customer")
 }
 
-case class Recipient(taxIdentifier: TaxIdentifier, email: String, name: Option[TaxpayerName] = Option.empty)
+case class Recipient(taxIdentifier: TaxIdWithName, email: String, name: Option[TaxpayerName] = Option.empty)
 
-case class TaxIdentifier(name: String, value: String)
+//case class TaxIdentifier(name: String, value: String)
 
 case class Message(
   externalRef: ExternalRef,

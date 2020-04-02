@@ -31,7 +31,9 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsSuccess, Json}
 import play.api.test.Helpers._
-//import reactivemongo.bson.BSONObjectID
+import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.domain.TaxIds._
+import uk.gov.hmrc.domain._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -39,8 +41,6 @@ import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.{Message, _}
-
-import scala.concurrent.ExecutionContext
 
 class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 
@@ -61,10 +61,10 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
       "2WSM-CUSTOMER"
     ),
     Recipient(
-      TaxIdentifier(
-        "HMRC-NI",
-        "AB123456C"
-      ),
+      new TaxIdentifier with SimpleName {
+        override val name: String = "HMRC-NI"
+        override def value: String = "AB123456C"
+      },
       "someEmail@test.com"
     ),
     MessageType.Customer,
@@ -99,7 +99,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
           |   "recipient": {
           |      "regime": "REGIME",
           |      "identifier": {
-          |         "name":"HMRC-NI",
+          |         "name":"nino",
           |         "value":"AB123456C"
           |      },
           |      "email":"someEmail@test.com"

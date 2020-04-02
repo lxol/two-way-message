@@ -20,16 +20,19 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, _}
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.auth.core.AuthProvider.{ GovernmentGateway, PrivilegedApplication }
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
+import uk.gov.hmrc.twowaymessage.connectors.AuthIdentifiersConnector
 import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, SubmissionDetails}
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
@@ -37,25 +40,33 @@ import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
 import uk.gov.hmrc.twowaymessage.model._
 import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, RenderType, TwoWayMessageService}
 
-import scala.concurrent.{ExecutionContext, Future}
-
 @Singleton
 class TwoWayMessageController @Inject()(
   twms: TwoWayMessageService,
   hcs:  HtmlCreatorService,
   val authConnector: AuthConnector,
   val gformConnector: GformConnector,
+  authIdentifiersConnector: AuthIdentifiersConnector,
   val enquiries: Enquiry,
   val htmlCreatorService:HtmlCreatorService)(implicit ec: ExecutionContext)
     extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
   // Customer creating a two-way message
+
   def createMessage(enquiryType: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-    authorised(Enrolment("HMRC-NI")).retrieve(Retrievals.nino and Retrievals.name) {
-      case Some(ninoId) ~ Some(name) => validateAndPostMessage(enquiryType, Nino(ninoId), request.body, name)
-      case None ~ Some(name) =>
-        Logger.info("No nino found for user")
+    authorised().retrieve(Retrievals.allEnrolments and Retrievals.name) {
+      case enrolments ~ Some(name) =>
+        authIdentifiersConnector
+          .enquiryTaxId(enrolments, enquiryType)
+          .map { taxId =>
+            validateAndPostMessage(enquiryType, taxId, request.body, name)
+          }
+          .getOrElse(
+            Future.successful(Forbidden(Json.toJson("Not authenticated")))
+          )
+      case _ =>
+        Logger.info("Unexpected auth retrievals.")
         Future.successful(Forbidden(Json.toJson("Not authenticated")))
     } recover handleError
   }
@@ -105,15 +116,15 @@ class TwoWayMessageController @Inject()(
   }
 
   // Validates the customer's message payload and then posts the message
-  def validateAndPostMessage(enquiryType: String, nino: Nino, requestBody: JsValue, name: Name)(
+  def validateAndPostMessage(enquiryType: String, taxIdentifier: TaxIdWithName, requestBody: JsValue, name: Name)(
     implicit hc: HeaderCarrier): Future[Result] =
     requestBody.validate[TwoWayMessage] match {
       case _: JsSuccess[_] =>
         enquiries(enquiryType) match {
           case Some(enquiryId) =>
             val dmsMetaData =
-              DmsMetadata(enquiryId.dmsFormId, nino.nino, enquiryId.classificationType, enquiryId.businessArea)
-            twms.post(enquiryType, nino, requestBody.as[TwoWayMessage], dmsMetaData, name)
+              DmsMetadata(enquiryId.dmsFormId, taxIdentifier.name, enquiryId.classificationType, enquiryId.businessArea)
+            twms.post(enquiryType, taxIdentifier, requestBody.as[TwoWayMessage], dmsMetaData, name)
           case None =>
             Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> s"Invalid EnquityId: $enquiryType")))
         }
@@ -146,8 +157,15 @@ class TwoWayMessageController @Inject()(
   def createCustomerResponse(enquiryType: String, replyTo: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-      authorised(Enrolment("HMRC-NI")) {
-        validateAndPostCustomerResponse(request.body, replyTo)
+      authorised().retrieve(Retrievals.allEnrolments) { enrolments =>
+        authIdentifiersConnector
+          .enquiryTaxId(enrolments, enquiryType)
+          .map { taxId =>
+            validateAndPostCustomerResponse(request.body, replyTo)
+          }
+          .getOrElse(
+            Future.successful(Forbidden(Json.toJson("Not authenticated")))
+          )
       } recover handleError
   }
 
@@ -178,7 +196,7 @@ class TwoWayMessageController @Inject()(
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-      authorised(Enrolment("HMRC-NI") or AuthProviders(PrivilegedApplication)) {
+      authorised(AuthProviders(GovernmentGateway, PrivilegedApplication)) {
 
         def createMsg(typ: RenderType.ReplyType): Future[Result] = {
           twms.findMessagesBy(id).flatMap {

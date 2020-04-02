@@ -17,15 +17,21 @@
 package uk.gov.hmrc.twowaymessage.assets
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.twowaymessage.model.{Message, _}
-
 import scala.xml.{Unparsed, Utility, Xhtml}
+import uk.gov.hmrc.domain.TaxIds._
+import uk.gov.hmrc.domain._
+import uk.gov.hmrc.twowaymessage.model.{Message, _}
 
 trait Fixtures {
 
   val testMessage = Message(
     ExternalRef("some-random-id", "2WSM"),
-    Recipient(TaxIdentifier("nino", "AB123456C"), "email@test.com"),
+    Recipient(
+      new TaxIdentifier with SimpleName {
+        override val name: String = "nino"
+        override def value: String = "AB123456C"
+      },
+      "email@test.com"),
     MessageType.Adviser,
     "QUESTION",
     "some base64-encoded-html",
