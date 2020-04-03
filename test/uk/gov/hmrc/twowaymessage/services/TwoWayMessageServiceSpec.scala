@@ -375,10 +375,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         ExternalRef("some-random-id", "2WSM"),
         Recipient(
           Nino("AB123456C"),
-        //    new TaxIdentifier with SimpleName {
-        //      override val name: String = "nino"
-        //      override def value: String = "AB123456C"
-        //    },
           "email@test.com"),
         MessageType.Adviser,
         "QUESTION",
@@ -390,10 +386,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         "mongo-id",
         TaxEntity("regime",
           Nino("AB123456C"),
-           // new TaxIdentifier with SimpleName {
-           //   override val name: String = "nino"
-           //   override def value: String = "AB123456C"
-           // },
           Some("email@test.com")),
         "QUESTION",
         MetadataDetails(
@@ -410,7 +402,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         .createJsonForReply(None, "some-random-id", MessageType.Adviser, FormId.Reply, metadata, reply, "reply-to-id")
       println(s"*****ACTUAL: ${actual}")
       println(s"*****EXPECTED: ${expected}")
-      // assert(actual.equals(expected))
       actual should be(expected)
     }
 
