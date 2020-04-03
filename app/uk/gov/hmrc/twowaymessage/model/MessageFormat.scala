@@ -56,13 +56,22 @@ object MessageFormat {
           Reads[TaxIdWithName] { _ =>
             JsSuccess(HmrcMtdVat(value))
           }
+        case (Some("empRef"), Some(v)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(
+              new TaxIdentifier with SimpleName {
+                override val name: String = "empRef"
+                override def value: String = v
+              }
+            )
+          }
         case (_, None) =>
           Reads[TaxIdWithName] { _ =>
             JsError("recipient.taxIdentifier.name: missing tax identifier")
           }
         case (Some(name), _) =>
           Reads[TaxIdWithName] { _ =>
-            JsError("recipient.taxIdentifier.name: unknown tax identifier name")
+            JsError(s"recipient.taxIdentifier.name: unknown tax identifier name ${name}")
           }
         case (None, _) =>
           Reads[TaxIdWithName] { _ =>
@@ -135,8 +144,6 @@ object MessageType extends Enumeration {
 }
 
 case class Recipient(taxIdentifier: TaxIdWithName, email: String, name: Option[TaxpayerName] = Option.empty)
-
-//case class TaxIdentifier(name: String, value: String)
 
 case class Message(
   externalRef: ExternalRef,
