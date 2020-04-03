@@ -32,6 +32,8 @@ import play.mvc.Http
 import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.domain.TaxIds._
+import uk.gov.hmrc.domain._
 import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
 import uk.gov.hmrc.gform.gformbackend.GformConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -151,11 +153,15 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
   "TwoWayMessageService.postAdviserReply" should {
 
+
     val messageMetadata = MessageMetadata(
       "5c18eb166f0000110204b160",
       TaxEntity(
         "REGIME",
-        TaxIdWithName("HMRC-NI", "AB123456C"),
+        new TaxIdentifier with SimpleName {
+          override val name: String = "nino"
+          override def value: String = "AB123456C"
+        },
         Some("someEmail@test.com")
       ),
       "SUBJECT",
@@ -231,7 +237,10 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       id = "5c18eb166f0000110204b160",
       recipient = TaxEntity(
         "REGIME",
-        TaxIdWithName("HMRC-NI", "AB123456C"),
+        new TaxIdentifier with SimpleName {
+          override val name: String = "nino"
+          override def value: String = "AB123456C"
+        },
         Some("someEmail@test.com")
       ),
       subject = "SUBJECT",
@@ -343,7 +352,12 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val expected =
         Message(
           ExternalRef("123412342314", "2WSM"),
-          Recipient(TaxIdentifier("nino", "AB123456C"), "email@test.com", Option(taxpayerName)),
+          Recipient(
+           new TaxIdentifier with SimpleName {
+             override val name: String = "nino"
+             override def value: String = "AB123456C"
+           },
+          "email@test.com", Option(taxpayerName)),
           MessageType.Customer,
           "QUESTION",
           "some base64-encoded-html",
@@ -359,7 +373,9 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     "be correct for a two-way message replied to by an adviser" in {
       val expected = Message(
         ExternalRef("some-random-id", "2WSM"),
-        Recipient(TaxIdentifier("nino", "AB123456C"), "email@test.com"),
+        Recipient(
+          Nino("AB123456C"),
+          "email@test.com"),
         MessageType.Adviser,
         "QUESTION",
         "some base64-encoded-html",
@@ -368,7 +384,9 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
       val metadata = MessageMetadata(
         "mongo-id",
-        TaxEntity("regime", TaxIdWithName("nino", "AB123456C"), Some("email@test.com")),
+        TaxEntity("regime",
+          Nino("AB123456C"),
+          Some("email@test.com")),
         "QUESTION",
         MetadataDetails(
           threadId = Some("thread-id"),
@@ -382,7 +400,9 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val reply = TwoWayMessageReply("some base64-encoded-html")
       val actual = messageService
         .createJsonForReply(None, "some-random-id", MessageType.Adviser, FormId.Reply, metadata, reply, "reply-to-id")
-      assert(actual.equals(expected))
+      println(s"*****ACTUAL: ${actual}")
+      println(s"*****EXPECTED: ${expected}")
+      actual should be(expected)
     }
 
     "when deriving users name when full name is there, then it should be expected" in {
