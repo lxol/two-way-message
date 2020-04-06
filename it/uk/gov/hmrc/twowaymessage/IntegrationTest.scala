@@ -198,10 +198,8 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec {
 
   "html render" should {
 
-    "createConversation" in {
-
+    "Creating a conversation" in {
       val regex = raw"(<div>)".r
-
       val messageId = getValidNinoMessageId
 
       val responseAdviser = httpClient
@@ -243,11 +241,12 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec {
     }
   }
 
-  "TwoWayMessageController getEnquiryTypeDetails" should {
+  "Get enquiry type details" should {
+
     "return 200" in {
       val response = httpClient
         .url(resource(s"/two-way-message/message/admin/p800/details"))
-        .withHttpHeaders(AuthUtil.buildStrideToken)
+        .withHttpHeaders(AuthUtil.buildNinoUserToken)
         .get()
         .futureValue
       response.status shouldBe 200
@@ -256,7 +255,7 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec {
     "return 404" in {
       val response = httpClient
         .url(resource(s"/two-way-message/message/admin/XXXXXX/details"))
-        .withHttpHeaders(AuthUtil.buildStrideToken)
+        .withHttpHeaders(AuthUtil.buildNinoUserToken)
         .get()
         .futureValue
       response.status shouldBe 404

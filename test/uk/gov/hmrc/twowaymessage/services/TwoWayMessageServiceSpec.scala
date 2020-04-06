@@ -400,8 +400,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val reply = TwoWayMessageReply("some base64-encoded-html")
       val actual = messageService
         .createJsonForReply(None, "some-random-id", MessageType.Adviser, FormId.Reply, metadata, reply, "reply-to-id")
-      println(s"*****ACTUAL: ${actual}")
-      println(s"*****EXPECTED: ${expected}")
       actual should be(expected)
     }
 

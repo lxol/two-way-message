@@ -52,7 +52,6 @@ class TwoWayMessageController @Inject()(
     extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
   // Customer creating a two-way message
-
   def createMessage(enquiryType: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised().retrieve(Retrievals.allEnrolments and Retrievals.name) {
@@ -185,10 +184,24 @@ class TwoWayMessageController @Inject()(
   }
 
   def getEnquiryTypeDetails(enquiryTypeString: String): Action[AnyContent] = Action.async { implicit request =>
-    enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(enquiry.displayName, enquiry.responseTime)) match {
-      case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
-      case _          => Future.successful(NotFound)
-    }
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    authorised().retrieve(Retrievals.allEnrolments and Retrievals.name) {
+      case enrolments ~ Some(name) =>
+        authIdentifiersConnector
+          .enquiryTaxId(enrolments, enquiryTypeString)
+          .map { taxId =>
+            enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(enquiry.displayName, enquiry.responseTime)) match {
+              case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
+              case _          => Future.successful(NotFound)
+            }
+          }
+          .getOrElse(
+            Future.successful(Forbidden(Json.toJson("Not authenticated")))
+          )
+      case _ =>
+        Logger.info("Unexpected auth retrievals.")
+        Future.successful(Forbidden(Json.toJson("Not authenticated")))
+    } recover handleError
   }
 
 
