@@ -134,8 +134,8 @@ class EnquiryTypeConfigurationSpec extends WordSpec
       enquiries("sa-general").get shouldBe EnquiryType(
         name = "sa-general",
         dmsFormId = "sa-general",
-        classificationType = "PSA-DFS Secure Messaging SA",
-        businessArea = "PT Operations",
+        classificationType = "DMB-SA-Secure Messaging",
+        businessArea = "DMB",
         responseTime = "5 days",
         displayName = "Self Assessment"
       )
@@ -148,8 +148,8 @@ class EnquiryTypeConfigurationSpec extends WordSpec
       enquiries("ct-general").get shouldBe EnquiryType(
         name = "ct-general",
         dmsFormId = "ct-general",
-        classificationType = "PSA-DFS Secure Messaging SA",
-        businessArea = "PT Operations",
+        classificationType = "DMB-CT-Secure Messaging",
+        businessArea = "DMB",
         responseTime = "5 days",
         displayName = "Corporation Tax"
       )
@@ -162,8 +162,8 @@ class EnquiryTypeConfigurationSpec extends WordSpec
       enquiries("vat-general").get shouldBe EnquiryType(
         name = "vat-general",
         dmsFormId = "vat-general",
-        classificationType = "PSA-DFS Secure Messaging SA",
-        businessArea = "PT Operations",
+        classificationType = "DMB-VAT-Secure Messaging",
+        businessArea = "DMB",
         responseTime = "5 days",
         displayName = "VAT"
       )
@@ -176,8 +176,8 @@ class EnquiryTypeConfigurationSpec extends WordSpec
       enquiries("epaye-general").get shouldBe EnquiryType(
         name = "epaye-general",
         dmsFormId = "epaye-general",
-        classificationType = "PSA-DFS Secure Messaging SA",
-        businessArea = "PT Operations",
+        classificationType = "DMB-PAYE-Secure Messaging",
+        businessArea = "DMB",
         responseTime = "5 days",
         displayName = "PAYE for employers"
       )
