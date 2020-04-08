@@ -185,14 +185,14 @@ class TwoWayMessageController @Inject()(
 
   def getEnquiryTypeDetails(enquiryTypeString: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-    authorised().retrieve(Retrievals.allEnrolments and Retrievals.name) {
-      case enrolments ~ Some(name) =>
+    authorised().retrieve(Retrievals.allEnrolments) {
+      case enrolments =>
         authIdentifiersConnector
           .enquiryTaxId(enrolments, enquiryTypeString)
-          .map { taxId =>
+          .map { _ =>
             enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(enquiry.displayName, enquiry.responseTime)) match {
-              case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
-              case _          => Future.successful(NotFound)
+              case Some(enquiryType)  => Future.successful(Ok(Json.toJson(enquiryType)))
+              case _                  => Future.successful(NotFound)
             }
           }
           .getOrElse(

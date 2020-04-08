@@ -348,8 +348,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     enquiryTypeDisplayNameMap.foreach(scenario => {
       s"return 200 when ${scenario.enquiryType} enquiry type is requested" in {
         val name = Name(Option("firstname"), Option("surename"))
-        mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-          Future.successful(new ~(Enrolments(scenario.enrolments), Some(name))))
+        mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.successful(Enrolments(scenario.enrolments)))
         val result = testTwoWayMessageController.getEnquiryTypeDetails(scenario.enquiryType)(FakeRequest())
         await(result).header.status mustBe Status.OK
         Json.parse(contentAsString(result)) mustBe
@@ -360,24 +359,21 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
       }
 
       s"return 401 (UNAUTHORIZED) when AuthConnector returns an exception that extends NoActiveSession for ${scenario.enquiryType} enquiry type" in {
-        mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-          Future.failed(MissingBearerToken()))
+        mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.failed(MissingBearerToken()))
         val result = testTwoWayMessageController.getEnquiryTypeDetails(scenario.enquiryType)(FakeRequest())
         await(result).header.status mustBe Status.UNAUTHORIZED
       }
 
       s"return 403 (FORBIDDEN) when AuthConnector doesn't return the correct enrolment for the given enquiry type: ${scenario.enquiryType}" in {
         val name = Name(Option("unknown"), Option("user"))
-        mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-          Future.successful(new ~(Enrolments(Set()), Some(name))))
+        mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.successful(Enrolments(Set())))
         val result = testTwoWayMessageController.getEnquiryTypeDetails(scenario.enquiryType)(FakeRequest())
         await(result).header.status mustBe Status.FORBIDDEN
       }
 
       s"return 403 (FORBIDDEN) when getEnquiryTypeDetails is called with the incorrect queue id instead of ${scenario.enquiryType} for the enrolment" in {
         val name = Name(Option("unknown"), Option("user"))
-        mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-          Future.successful(new ~(Enrolments(scenario.enrolments), Some(name))))
+        mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.successful(Enrolments(scenario.enrolments)))
         val result = testTwoWayMessageController.getEnquiryTypeDetails(scenario.invalidEnquiryType)(FakeRequest())
         await(result).header.status mustBe Status.FORBIDDEN
       }
@@ -385,8 +381,8 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 404 when incorrect enquiryType is requested" in {
       val name = Name(Option("firstname"), Option("surename"))
-      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-        Future.successful(new ~(Enrolments(Set(enrol("HMRC-NI", "nino", "AB123456C"))), Some(name))))
+      mockAuthorise(retrievals = Retrievals.allEnrolments)(
+        Future.successful(Enrolments(Set(enrol("HMRC-NI", "nino", "AB123456C")))))
       val result = testTwoWayMessageController.getEnquiryTypeDetails("i am not valid")(FakeRequest())
       await(result).header.status mustBe Status.NOT_FOUND
     }
