@@ -88,11 +88,11 @@ class IntegrationTest extends WordSpec with Matchers with ServiceSpec {
       response.status shouldBe 400
     }
 
-    "return Forbidden (403) when valid bearer token with SaUtr credentials and valid JSON payload but no Nino" in {
+    "return Forbidden (403) when valid bearer token with SaUtr credentials and valid JSON payload but no HMRC-MTD-VAT" in {
       val message = MessageUtil.buildValidCustomerMessage
 
       val response = httpClient
-        .url(resource("/two-way-message/message/customer/p800/submit"))
+        .url(resource("/two-way-message/message/customer/vat-general/submit"))
         .withHttpHeaders(AuthUtil.buildSaUserToken)
         .post(message)
         .futureValue

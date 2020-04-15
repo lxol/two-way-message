@@ -99,6 +99,14 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
       result.header.status mustBe Status.FORBIDDEN
     }
 
+    "return 403 (FORBIDDEN) when AuthConnector has sautr but no Nino" in {
+      val name = Name(Option("unknown"), Option("user"))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set(enrol("IR-SA", "sautr", "1234567890"))), Some(name))))
+      val result = await(testTwoWayMessageController.createMessage("p800")(fakeRequest1))
+      result.header.status mustBe Status.FORBIDDEN
+    }
+
     "return 403 (FORBIDDEN) when createMessage is presented with an invalid queue id" in {
       val name = Name(Option("unknown"), Option("user"))
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
@@ -275,6 +283,85 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     SharedMetricRegistries.clear
   }
 
+  "The TwoWayMessageController.createMessage method for epaye-jrs" should {
+
+    "return 201 (CREATED) when a message is successfully created by the message service with a valid EmpRef" in {
+      val empRef = new TaxIdentifier with SimpleName {
+            override val name: String = "empRef"
+            override def value: String = "12345/67890"
+          }
+      val name = Name(Option("firstname"), Option("surename"))
+
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set(enrolEmpRef("IR-PAYE", "12345", "67890"))), Some(name))))
+
+      when(
+        mockMessageService
+          .post(anyString, any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
+            any[HeaderCarrier]))
+        .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(testTwoWayMessageController.createMessage("epaye-jrs")(fakeRequest1))
+      result.header.status mustBe Status.CREATED
+    }
+
+    "return 403 (FORBIDDEN) when AuthConnector doesn't return a EPAYE" in {
+      val name = Name(Option("unknown"), Option("user"))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set()), Some(name))))
+      val result = await(testTwoWayMessageController.createMessage("epaye-jrs")(fakeRequest1))
+      result.header.status mustBe Status.FORBIDDEN
+    }
+
+    "return 403 (FORBIDDEN) when createMessage is presented with an invalid queue id" in {
+      val name = Name(Option("unknown"), Option("user"))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set(enrolEmpRef("IR-PAYE", "12345", "67890"))), Some(name))))
+      val result = await(testTwoWayMessageController.createMessage("ct-general")(fakeRequest1))
+      result.header.status mustBe Status.FORBIDDEN
+    }
+
+    SharedMetricRegistries.clear
+  }
+
+  "The TwoWayMessageController.createMessage method for vat-general/HMCE-VATDEC-ORG" should {
+
+    "return 201 (CREATED) when a message is successfully created by the message service with a valid HMCE-VATDEC-ORG" in {
+      val vatdec = new TaxIdentifier with SimpleName {
+            override val name: String = "HMCE-VATDEC-ORG"
+            override def value: String = "1234567890"
+          }
+      val name = Name(Option("firstname"), Option("surename"))
+
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set(enrol("HMCE-VATDEC-ORG", "VATRegNo", "1234567890"))), Some(name))))
+
+      when(
+        mockMessageService
+          .post(anyString, any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
+            any[HeaderCarrier]))
+        .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
+      val result = await(testTwoWayMessageController.createMessage("vat-general")(fakeRequest1))
+      result.header.status mustBe Status.CREATED
+    }
+
+    "return 403 (FORBIDDEN) when AuthConnector doesn't return HMCE-VATDEC-ORG entitlements" in {
+      val name = Name(Option("unknown"), Option("user"))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set()), Some(name))))
+      val result = await(testTwoWayMessageController.createMessage("vat-general")(fakeRequest1))
+      result.header.status mustBe Status.FORBIDDEN
+    }
+
+    "return 403 (FORBIDDEN) when createMessage is presented with an invalid queue id" in {
+      val name = Name(Option("unknown"), Option("user"))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
+        Future.successful(new ~(Enrolments(Set(enrol("HMCE-VATDEC-ORG", "VATRegNo", "1234567890"))), Some(name))))
+      val result = await(testTwoWayMessageController.createMessage("ct-general")(fakeRequest1))
+      result.header.status mustBe Status.FORBIDDEN
+    }
+
+    SharedMetricRegistries.clear
+  }
   "The TwoWayMessageController.createCustomerResponse method" should {
 
     "return 201 (CREATED) when a message is successfully created by the message service with a valid Nino" in {

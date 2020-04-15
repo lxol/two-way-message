@@ -184,6 +184,20 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     }
   }
 
+  "Enquiry configuration for epaye-jrs" should {
+
+    "have correct enquiry details" in {
+      enquiries("epaye-jrs").get shouldBe EnquiryType(
+        name = "epaye-jrs",
+        dmsFormId = "epaye-general",
+        classificationType = "DMB-PAYE-Secure Messaging",
+        businessArea = "DMB",
+        responseTime = "5 days",
+        displayName = "PAYE for employers"
+      )
+    }
+  }
+
   SharedMetricRegistries.clear()
 
 }

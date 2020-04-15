@@ -46,10 +46,34 @@ class AuthIdentifiersConnector @Inject() (
           case Enrolment("IR-CT", Seq(identifier), "Activated", _) => CtUtr(identifier.value)
         }
       case "vat-general" =>
-        enrolments.enrolments.collectFirst {
-          case Enrolment("HMRC-MTD-VAT", Seq(identifier), "Activated", _) => HmrcMtdVat(identifier.value)
+        enrolments.enrolments
+          .collectFirst {
+            case Enrolment("HMRC-MTD-VAT", Seq(identifier), "Activated", _) => HmrcMtdVat(identifier.value)
+          } orElse enrolments.enrolments.collectFirst {
+          case Enrolment("HMCE-VATDEC-ORG", Seq(identifier), "Activated", _) =>
+            new TaxIdentifier with SimpleName {
+              override val name: String = "HMCE-VATDEC-ORG"
+              override def value: String = identifier.value
+            }
         }
       case "epaye-general" =>
+        enrolments.enrolments.collectFirst {
+          case Enrolment(
+              "IR-PAYE",
+              Seq(
+                EnrolmentIdentifier("TaxOfficeNumber", officeNum),
+                EnrolmentIdentifier("TaxOfficeReference", officeRef)
+              ),
+              "Activated",
+              _
+              ) =>
+            new TaxIdentifier with SimpleName {
+              override val name: String = "empRef"
+              override def value: String = EmpRef(officeNum, officeRef).value
+            }
+        }
+
+      case "epaye-jrs" =>
         enrolments.enrolments.collectFirst {
           case Enrolment(
               "IR-PAYE",

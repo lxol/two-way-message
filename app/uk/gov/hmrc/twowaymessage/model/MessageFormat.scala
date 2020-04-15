@@ -65,6 +65,15 @@ object MessageFormat {
               }
             )
           }
+        case (Some("HMCE-VATDEC-ORG"), Some(v)) =>
+          Reads[TaxIdWithName] { _ =>
+            JsSuccess(
+              new TaxIdentifier with SimpleName {
+                override val name: String = "HMCE-VATDEC-ORG"
+                override def value: String = v
+              }
+            )
+          }
         case (_, None) =>
           Reads[TaxIdWithName] { _ =>
             JsError("recipient.taxIdentifier.name: missing tax identifier")
