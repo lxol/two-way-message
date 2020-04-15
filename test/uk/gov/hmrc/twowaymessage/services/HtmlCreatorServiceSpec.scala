@@ -242,7 +242,7 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
     "create a complete HTML document" in {
       val subject = "Some subject"
       val result = await(
-        htmlCreatorService.createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), "Some subject", enquiries("P800").get))
+        htmlCreatorService.createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), "Some subject", enquiries("P800").get, None))
       result mustBe
         Right(expectedPdfHtml(subject, "Received from: P800 secure message", "National insurance number"))
     }
@@ -250,7 +250,7 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
     "correctly render escaped HTML in the message subject" in {
       val result = await(
         htmlCreatorService
-          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), subjectWithEscapedChars, enquiries("P800").get))
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), subjectWithEscapedChars, enquiries("P800").get, None))
       result mustBe
         Right(expectedPdfHtml(subjectWithEscapedChars, "Received from: P800 secure message", "National insurance number"))
     }
@@ -259,9 +259,19 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
       val subjectWithUnescapedChars = "<b>This is another test to see if this > that & that < this</b>"
       val result = await(
         htmlCreatorService
-          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), subjectWithUnescapedChars, enquiries("P800").get))
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems("p800"), subjectWithUnescapedChars, enquiries("P800").get, None))
       result mustBe
         Right(expectedPdfHtml(subjectWithEscapedChars, "Received from: P800 secure message", "National insurance number"))
+    }
+
+    "show a contact telephone number when available" in {
+      val subject = "Some subject"
+      val contactDetails = ContactDetails("",Some("01234567890"))
+      val result = await(
+        htmlCreatorService.createHtmlForPdf(
+          latestMessageId, "AB234567C", listOfConversationItems("p800"), "Some subject", enquiries("P800").get, Some(contactDetails)))
+      result mustBe
+        Right(expectedPdfHtml(subject, "Received from: P800 secure message", "National insurance number", includeContactTelephone = true))
     }
   }
 

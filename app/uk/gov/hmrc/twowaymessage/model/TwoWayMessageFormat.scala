@@ -27,7 +27,7 @@ object TwoWayMessageFormat {
   implicit val twoWayMessageReplyReads: Reads[TwoWayMessageReply] = Json.reads[TwoWayMessageReply]
 }
 
-case class ContactDetails(email: String)
+case class ContactDetails(email: String, telephone: Option[String])
 
 case class TwoWayMessage(
   contactDetails: ContactDetails,

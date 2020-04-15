@@ -20,7 +20,10 @@ import com.google.inject.ImplementedBy
 import play.twirl.api.Html
 import scala.concurrent.Future
 import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
-import uk.gov.hmrc.twowaymessage.model.ConversationItem
+import uk.gov.hmrc.twowaymessage.model.{ ContactDetails, ConversationItem }
+
+import scala.concurrent.Future
+
 
 @ImplementedBy(classOf[HtmlCreatorServiceImpl])
 trait HtmlCreatorService {
@@ -29,9 +32,10 @@ trait HtmlCreatorService {
 
   def createSingleMessageHtml(conversationItem: ConversationItem): Future[Either[String,Html]]
 
-  def createHtmlForPdf(latestMessageId: String, customerId: String, messages: List[ConversationItem], subject: String, enquiryType: EnquiryType): Future[Either[String,String]]
-}
+  def createHtmlForPdf(latestMessageId: String, customerId: String, messages: List[ConversationItem], subject: String,
+                       enquiryType: EnquiryType, contactDetails: Option[ContactDetails]): Future[Either[String,String]]
 
+}
 
 object RenderType {
 

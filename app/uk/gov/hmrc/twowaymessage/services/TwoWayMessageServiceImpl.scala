@@ -70,7 +70,7 @@ class TwoWayMessageServiceImpl @Inject()(
     name: Name)(implicit hc: HeaderCarrier): Future[Result] = {
     val body = createJsonForMessage(randomUUID.toString, twoWayMessage, taxIdentifier, enquiryType.name, name)
     messageConnector.postMessage(body) flatMap { response =>
-      handleResponse(twoWayMessage.subject, response, dmsMetaData, enquiryType)
+      handleResponse(twoWayMessage.subject, response, dmsMetaData, enquiryType, Some(twoWayMessage.contactDetails))
     } recover handleError
   }
 
@@ -101,7 +101,7 @@ class TwoWayMessageServiceImpl @Inject()(
         twoWayMessageReply,
         replyTo)
       postMessageResponse <- messageConnector.postMessage(body)
-      dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData, enquiryId)
+      dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData, enquiryId, None)
     } yield dmsHandleResponse) recover handleError
 
   override def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
@@ -153,7 +153,7 @@ class TwoWayMessageServiceImpl @Inject()(
       handleResponse
     } recover handleError
 
-  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata, enquiryType: EnquiryType)(
+  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata, enquiryType: EnquiryType, contactDetails: Option[ContactDetails])(
     implicit hc: HeaderCarrier): Future[Result] =
     response.status match {
       case CREATED =>
@@ -162,7 +162,7 @@ class TwoWayMessageServiceImpl @Inject()(
             findMessagesBy(identifier.id).flatMap {
               case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
               case Right(list) =>
-                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject, enquiryType).flatMap {
+                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject, enquiryType, contactDetails).flatMap {
                   case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
                   case Right(html) => createDmsSubmission(html, response, dmsMetaData)
                 }
