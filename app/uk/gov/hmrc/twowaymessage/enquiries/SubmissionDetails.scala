@@ -18,7 +18,7 @@ package uk.gov.hmrc.twowaymessage.enquiries
 
 import play.api.libs.json.{Json, Writes}
 
-case class SubmissionDetails(displayName: String, responseTime: String)
+case class SubmissionDetails(displayName: String, responseTime: String, taxIdName: String, taxId: String)
 
 object SubmissionDetails {
   implicit val submissionDetailsWrites: Writes[SubmissionDetails] = Json.writes[SubmissionDetails]

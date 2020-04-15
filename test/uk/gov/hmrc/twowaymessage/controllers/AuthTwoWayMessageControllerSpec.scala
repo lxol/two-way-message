@@ -213,7 +213,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
       val name = Name(Option("firstname"), Option("surename"))
 
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-        Future.successful(new ~(Enrolments(Set(enrol("HMRC-MTD-VAT", "HmrcMtdVat", "1234567890"))), Some(name))))
+        Future.successful(new ~(Enrolments(Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890"))), Some(name))))
 
       when(
         mockMessageService
@@ -235,7 +235,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     "return 403 (FORBIDDEN) when createMessage is presented with an invalid queue id" in {
       val name = Name(Option("unknown"), Option("user"))
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-        Future.successful(new ~(Enrolments(Set(enrol("HMRC-MTD-VAT", "HmrcMtdVat", "1234567890"))), Some(name))))
+        Future.successful(new ~(Enrolments(Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890"))), Some(name))))
       val result = await(testTwoWayMessageController.createMessage("ct-general")(fakeRequest1))
       result.header.status mustBe Status.FORBIDDEN
     }
@@ -415,21 +415,27 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
   "The TwoWayMessageController.getEnquiryTypeDetails method" should {
 
-    case class EnquiryTypeDetailsScenario(enquiryType: String, enrolments: Set[Enrolment], expectedDisplayName: String, invalidEnquiryType: String)
+    case class EnquiryTypeDetailsScenario(enquiryType: String,
+                                          enrolments: Set[Enrolment],
+                                          expectedDisplayName: String,
+                                          invalidEnquiryType: String,
+                                          taxIdName: String,
+                                          taxId: String)
 
     val hmrcNiEnrol = enrol("HMRC-NI", "nino", "AB123456C")
     val enquiryTypeDisplayNameMap = List(
-      EnquiryTypeDetailsScenario("p800", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-overpayment", Set(hmrcNiEnrol), "P800 overpayment enquiry", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-paid", Set(hmrcNiEnrol), "P800 overpayment paid enquiry", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-processing", Set(hmrcNiEnrol), "P800 overpayment processing enquiry", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-sent", Set(hmrcNiEnrol), "P800 overpayment sent enquiry", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-not-available", Set(hmrcNiEnrol), "P800 overpayment not available enquiry", "epaye-general"),
-      EnquiryTypeDetailsScenario("p800-underpayment", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general"),
-      EnquiryTypeDetailsScenario("sa-general", Set(enrol("IR-SA", "sautr", "1234567890")), "Self Assessment", "epaye-general"),
-      EnquiryTypeDetailsScenario("ct-general", Set(enrol("IR-CT", "ctutr", "1234")), "Corporation Tax", "epaye-general"),
-      EnquiryTypeDetailsScenario("vat-general", Set(enrol("HMRC-MTD-VAT", "HmrcMtdVat", "1234567890")), "VAT", "epaye-general"),
-      EnquiryTypeDetailsScenario("epaye-general", Set(enrolEmpRef("IR-PAYE", "12345", "67890")), "PAYE for employers", "p800")
+      EnquiryTypeDetailsScenario("p800", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-overpayment", Set(hmrcNiEnrol), "P800 overpayment enquiry", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-paid", Set(hmrcNiEnrol), "P800 overpayment paid enquiry", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-processing", Set(hmrcNiEnrol), "P800 overpayment processing enquiry", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-sent", Set(hmrcNiEnrol), "P800 overpayment sent enquiry", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-not-available", Set(hmrcNiEnrol), "P800 overpayment not available enquiry", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("p800-underpayment", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general", "nino", "AB123456C"),
+      EnquiryTypeDetailsScenario("sa-general", Set(enrol("IR-SA", "sautr", "1234567890")), "Self Assessment", "epaye-general", "sautr", "1234567890"),
+      EnquiryTypeDetailsScenario("ct-general", Set(enrol("IR-CT", "ctutr", "1234")), "Corporation Tax", "epaye-general", "ctutr", "1234"),
+      EnquiryTypeDetailsScenario("vat-general", Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890")), "VAT", "epaye-general", "HMRC-MTD-VAT", "1234567890"),
+      EnquiryTypeDetailsScenario("epaye-general", Set(enrolEmpRef("IR-PAYE", "12345", "67890")), "PAYE for employers", "p800", "empRef", "12345/67890"),
+      EnquiryTypeDetailsScenario("epaye-jrs", Set(enrolEmpRef("IR-PAYE", "12183", "23190")), "PAYE for employers", "p800", "empRef", "12183/23190")
     )
 
     enquiryTypeDisplayNameMap.foreach(scenario => {
@@ -441,7 +447,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
         Json.parse(contentAsString(result)) mustBe
           Json.parse(s"""{
                        |"displayName":"${scenario.expectedDisplayName}",
-                       |"responseTime":"5 days"
+                       |"responseTime":"5 days",
+                       |"taxIdName":"${scenario.taxIdName}",
+                       |"taxId":"${scenario.taxId}"
                        |}""".stripMargin)
       }
 

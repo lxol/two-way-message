@@ -189,8 +189,13 @@ class TwoWayMessageController @Inject()(
       case enrolments =>
         authIdentifiersConnector
           .enquiryTaxId(enrolments, enquiryTypeString)
-          .map { _ =>
-            enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(enquiry.displayName, enquiry.responseTime)) match {
+          .map { taxIdWithName =>
+            enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(
+              enquiry.displayName,
+              enquiry.responseTime,
+              taxIdWithName.name,
+              taxIdWithName.value)
+            ) match {
               case Some(enquiryType)  => Future.successful(Ok(Json.toJson(enquiryType)))
               case _                  => Future.successful(NotFound)
             }
