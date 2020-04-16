@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
 import uk.gov.hmrc.twowaymessage.model._
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -49,6 +50,8 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
   val injector: Injector = new GuiceApplicationBuilder()
     .overrides(bind[TwoWayMessageService].to(mockTwoWayMessageService))
     .injector()
+
+  val enquiries: Enquiry = injector.instanceOf[Enquiry]
 
   implicit val htmlCreatorService: HtmlCreatorServiceImpl = injector.instanceOf[HtmlCreatorServiceImpl]
 
@@ -196,26 +199,26 @@ class HtmlCreatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Fixt
     "create a complete HTML document" in {
       val subject = "Some subject"
       val result = await(
-        htmlCreatorService.createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, "Some subject"))
+        htmlCreatorService.createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, "Some subject", enquiries("P800").get))
       result mustBe
-        Right(expectedPdfHtml(subject))
+        Right(expectedPdfHtml(subject, "Received from: P800 secure message", "National insurance number"))
     }
 
     "correctly render escaped HTML in the message subject" in {
       val result = await(
         htmlCreatorService
-          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithEscapedChars))
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithEscapedChars, enquiries("P800").get))
       result mustBe
-        Right(expectedPdfHtml(subjectWithEscapedChars))
+        Right(expectedPdfHtml(subjectWithEscapedChars, "Received from: P800 secure message", "National insurance number"))
     }
 
     "correctly escape unescaped HTML in the message subject" in {
       val subjectWithUnescapedChars = "<b>This is another test to see if this > that & that < this</b>"
       val result = await(
         htmlCreatorService
-          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithUnescapedChars))
+          .createHtmlForPdf(latestMessageId, "AB234567C", listOfConversationItems, subjectWithUnescapedChars, enquiries("P800").get))
       result mustBe
-        Right(expectedPdfHtml(subjectWithEscapedChars))
+        Right(expectedPdfHtml(subjectWithEscapedChars, "Received from: P800 secure message", "National insurance number"))
     }
   }
 

@@ -30,6 +30,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
 import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 import uk.gov.hmrc.twowaymessage.model._
@@ -43,7 +44,7 @@ trait TwoWayMessageService {
 
   def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]]
 
-  def post(enquiryType: String, taxIdentifier: TaxIdWithName, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
+  def post(enquiryType: EnquiryType, taxIdentifier: TaxIdWithName, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
     implicit hc: HeaderCarrier): Future[Result]
 
   def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(

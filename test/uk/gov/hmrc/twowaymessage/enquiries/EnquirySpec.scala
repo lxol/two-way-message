@@ -27,7 +27,9 @@ class EnquirySpec extends WordSpec with Matchers {
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "")))
+        displayName = "",
+        pdfPageTitle  = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number")))
 
   "for a 'P800' enquiry" should {
 
@@ -56,6 +58,20 @@ class EnquirySpec extends WordSpec with Matchers {
       enquiries("p800") match {
         case None            => fail("Invalid enquiry key")
         case Some(meteadata) => meteadata.classificationType shouldBe ("PSA-DFS Secure Messaging SA")
+      }
+    }
+
+    "find a pdfPageTitle for 'P800'" in {
+      enquiries("p800") match {
+        case None            => fail("Invalid enquiry key")
+        case Some(meteadata) => meteadata.pdfPageTitle shouldBe ("Received from: P800 secure message")
+      }
+    }
+
+    "find a pdfTaxIdTitle for 'P800'" in {
+      enquiries("p800") match {
+        case None            => fail("Invalid enquiry key")
+        case Some(meteadata) => meteadata.pdfTaxIdTitle shouldBe ("National insurance number")
       }
     }
   }

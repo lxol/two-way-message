@@ -36,7 +36,9 @@ class EnquiryModule(val environment: Environment, val configuration: Configurati
               classificationType = c.get[String]("classificationType"),
               businessArea = c.get[String]("businessArea"),
               responseTime = c.get[String]("responseTime"),
-              displayName = c.get[String]("displayName")
+              displayName = c.get[String]("displayName"),
+              pdfPageTitle = c.get[String]("pdfPageTitle"),
+              pdfTaxIdTitle = c.get[String]("pdfTaxIdTitle")
             )
             t.name -> t
           }

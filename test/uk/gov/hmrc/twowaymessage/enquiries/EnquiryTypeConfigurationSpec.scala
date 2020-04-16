@@ -39,7 +39,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 underpayment"
+        displayName = "P800 underpayment",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -53,7 +55,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 overpayment enquiry"
+        displayName = "P800 overpayment enquiry",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -67,7 +71,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 overpayment paid enquiry"
+        displayName = "P800 overpayment paid enquiry",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -81,7 +87,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 overpayment processing enquiry"
+        displayName = "P800 overpayment processing enquiry",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -95,7 +103,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 overpayment sent enquiry"
+        displayName = "P800 overpayment sent enquiry",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -109,7 +119,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 overpayment not available enquiry"
+        displayName = "P800 overpayment not available enquiry",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -123,7 +135,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "PSA-DFS Secure Messaging SA",
         businessArea = "PT Operations",
         responseTime = "5 days",
-        displayName = "P800 underpayment"
+        displayName = "P800 underpayment",
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
       )
     }
   }
@@ -137,7 +151,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "DMB-SA-Secure Messaging",
         businessArea = "DMB",
         responseTime = "5 days",
-        displayName = "Self Assessment"
+        displayName = "Self Assessment",
+        pdfPageTitle = "Received from: SA secure question",
+        pdfTaxIdTitle = "UTR"
       )
     }
   }
@@ -151,7 +167,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "DMB-CT-Secure Messaging",
         businessArea = "DMB",
         responseTime = "5 days",
-        displayName = "Corporation Tax"
+        displayName = "Corporation Tax",
+        pdfPageTitle = "Received from: CT secure question",
+        pdfTaxIdTitle = "UTR"
       )
     }
   }
@@ -165,7 +183,10 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "DMB-VAT-Secure Messaging",
         businessArea = "DMB",
         responseTime = "5 days",
-        displayName = "VAT"
+        displayName = "VAT",
+        pdfPageTitle = "Received from: VAT secure question",
+        pdfTaxIdTitle = "Vat number"
+
       )
     }
   }
@@ -179,8 +200,10 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "DMB-PAYE-Secure Messaging",
         businessArea = "DMB",
         responseTime = "5 days",
-        displayName = "PAYE for employers"
-      )
+        displayName = "PAYE for employers",
+        pdfPageTitle = "Received from: EPAYE secure question",
+        pdfTaxIdTitle = "EmpRef number"
+        )
     }
   }
 
@@ -193,7 +216,9 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         classificationType = "DMB-PAYE-Secure Messaging",
         businessArea = "DMB",
         responseTime = "5 days",
-        displayName = "PAYE for employers"
+        displayName = "PAYE for employers",
+        pdfPageTitle = "Received from: EPAYE secure question",
+        pdfTaxIdTitle = "EmpRef number"
       )
     }
   }

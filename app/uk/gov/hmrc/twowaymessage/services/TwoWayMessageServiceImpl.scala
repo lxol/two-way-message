@@ -63,14 +63,14 @@ class TwoWayMessageServiceImpl @Inject()(
       })
 
   override def post(
-    enquiryType: String,
+    enquiryType: EnquiryType,
     taxIdentifier: TaxIdWithName,
     twoWayMessage: TwoWayMessage,
     dmsMetaData: DmsMetadata,
     name: Name)(implicit hc: HeaderCarrier): Future[Result] = {
-    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, taxIdentifier, enquiryType, name)
+    val body = createJsonForMessage(randomUUID.toString, twoWayMessage, taxIdentifier, enquiryType.name, name)
     messageConnector.postMessage(body) flatMap { response =>
-      handleResponse(twoWayMessage.subject, response, dmsMetaData)
+      handleResponse(twoWayMessage.subject, response, dmsMetaData, enquiryType)
     } recover handleError
   }
 
@@ -101,7 +101,7 @@ class TwoWayMessageServiceImpl @Inject()(
         twoWayMessageReply,
         replyTo)
       postMessageResponse <- messageConnector.postMessage(body)
-      dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData)
+      dmsHandleResponse   <- handleResponse(metadata.get.subject, postMessageResponse, dmsMetaData, enquiryId)
     } yield dmsHandleResponse) recover handleError
 
   override def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
@@ -153,7 +153,7 @@ class TwoWayMessageServiceImpl @Inject()(
       handleResponse
     } recover handleError
 
-  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
+  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata, enquiryType: EnquiryType)(
     implicit hc: HeaderCarrier): Future[Result] =
     response.status match {
       case CREATED =>
@@ -162,7 +162,7 @@ class TwoWayMessageServiceImpl @Inject()(
             findMessagesBy(identifier.id).flatMap {
               case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
               case Right(list) =>
-                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject).flatMap {
+                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject, enquiryType).flatMap {
                   case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
                   case Right(html) => createDmsSubmission(html, response, dmsMetaData)
                 }
