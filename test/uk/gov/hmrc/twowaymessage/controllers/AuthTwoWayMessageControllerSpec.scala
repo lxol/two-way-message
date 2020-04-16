@@ -436,7 +436,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
       EnquiryTypeDetailsScenario("ct-general", Set(enrol("IR-CT", "ctutr", "1234")), "Corporation Tax", "epaye-general", "ctutr", "1234"),
       EnquiryTypeDetailsScenario("vat-general", Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890")), "VAT", "epaye-general", "HMRC-MTD-VAT", "1234567890"),
       EnquiryTypeDetailsScenario("epaye-general", Set(enrolEmpRef("IR-PAYE", "12345", "67890")), "PAYE for employers", "p800", "empRef", "12345/67890"),
-      EnquiryTypeDetailsScenario("epaye-jrs", Set(enrolEmpRef("IR-PAYE", "12183", "23190")), "PAYE for employers", "p800", "empRef", "12183/23190")
+      EnquiryTypeDetailsScenario("epaye-jrs", Set(enrolEmpRef("IR-PAYE", "12183", "23190")), "PAYE for employers Job Retention Scheme", "p800", "empRef", "12183/23190")
     )
 
     enquiryTypeDisplayNameMap.foreach(scenario => {

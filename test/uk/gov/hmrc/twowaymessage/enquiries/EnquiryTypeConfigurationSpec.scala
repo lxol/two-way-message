@@ -212,13 +212,13 @@ class EnquiryTypeConfigurationSpec extends WordSpec
     "have correct enquiry details" in {
       enquiries("epaye-jrs").get shouldBe EnquiryType(
         name = "epaye-jrs",
-        dmsFormId = "epaye-general",
-        classificationType = "DMB-PAYE-Secure Messaging",
-        businessArea = "DMB",
+        dmsFormId = "epaye-jrs",
+        classificationType = "Job Retention - TWSM",
+        businessArea = "Universal",
         responseTime = "5 days",
-        displayName = "PAYE for employers",
-        pdfPageTitle = "Received from: EPAYE secure question",
-        pdfTaxIdTitle = "EmpRef number"
+        displayName = "PAYE for employers Job Retention Scheme",
+        pdfPageTitle = "Received from: EPAYE Job Retention Scheme",
+        pdfTaxIdTitle = "Employer PAYE reference"
       )
     }
   }
