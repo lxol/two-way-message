@@ -114,7 +114,7 @@ trait Fixtures {
            | ]
          """.stripMargin
 
-  def expectedPdfHtml(subject: String, pdfPageTitle: String, pdfTaxIdTitle: String): String = {
+  def expectedPdfHtml(subject: String, pdfPageTitle: String, pdfTaxIdTitle: String, includeContactTelephone: Boolean = false): String = {
     val doctype = "<!DOCTYPE html>"
     val css = """body,header {display:block;margin:0;font-family:Arial,sans-serif;font-size:1.5em;color:black;}
                  | .govuk-header-question {font-size:2.25rem;text-align:center;}
@@ -133,7 +133,7 @@ trait Fixtures {
                  | #header_top {border-bottom:none;}
                  | #header {background:black;color:white;}
                  | #header_bottom {clear:both;border-bottom-color:black;}
-                 | #taxIdValue {padding-right:20px;}
+                 | #taxIdValue,#telephone {padding-right:20px;}
                  | #internal {font-family:Arial,sans-serif;font-size:1.5rem;float:right}
                  | #indented {padding-left: 20px;}
                  | #subject {padding-right: 10px;}""".stripMargin.split("\n").mkString
@@ -173,6 +173,14 @@ trait Fixtures {
         <span class="govuk-font-weight-bold" id="taxIdValue">{Unparsed(pdfTaxIdTitle)}</span>
                 AB234567C</p>
               <hr/>
+              {
+                if(includeContactTelephone){
+                  <p class="govuk-body-l">
+                    <span class="govuk-font-weight-bold" id="telephone">Contact telephone:</span>
+                    01234567890</p>
+                  <hr/>
+                }
+              }
               <h2 class="govuk-heading-l">To reply to this message, copy this link:</h2>
               <p class="govuk-body-l">
                 <a href="http://localhost:8991/two-way-message-adviser-frontend/message/5d02201b5b0000360151779e/reply">http://localhost:8991/two-way-message-adviser-frontend/message/5d02201b5b0000360151779e/reply</a>

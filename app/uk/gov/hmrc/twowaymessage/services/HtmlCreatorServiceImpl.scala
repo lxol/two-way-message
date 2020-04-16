@@ -26,7 +26,7 @@ import scala.xml._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
-import uk.gov.hmrc.twowaymessage.model.{ConversationItem, ItemMetadata, MessageType}
+import uk.gov.hmrc.twowaymessage.model.{ContactDetails, ConversationItem, ItemMetadata, MessageType}
 import uk.gov.hmrc.twowaymessage.utils.HtmlUtil._
 import uk.gov.hmrc.twowaymessage.utils.XmlConversion
 
@@ -51,18 +51,24 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
   override def createHtmlForPdf(latestMessageId: String,
                                 customerId: String, messages:
                                 List[ConversationItem],
-                                subject: String, enquiryType: EnquiryType): Future[Either[String,String]] = {
+                                subject: String, enquiryType: EnquiryType, contactDetails: Option[ContactDetails]): Future[Either[String,String]] = {
     val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
     val url = s"$frontendUrl/message/$latestMessageId/reply"
     createConversation(latestMessageId, messages, RenderType.Adviser) map {
       case Left(error) => Left(error)
       case Right(html) =>
-        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, Html(escapeForXhtml(subject)), html, enquiryType.pdfPageTitle, enquiryType.pdfTaxIdTitle).body) match {
+        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, getContactTelephone(contactDetails), Html(escapeForXhtml(subject)), html, enquiryType.pdfPageTitle, enquiryType.pdfTaxIdTitle).body) match {
           case Success(xml) => Right("<!DOCTYPE html>" + Xhtml.toXhtml(Utility.trim(xml.head)))
           case Failure(e) => Left("Unable to generate HTML for PDF due to: " + e.getMessage)
         }
     }
   }
+
+  private def getContactTelephone(contactDetails: Option[ContactDetails]): String =
+    contactDetails match {
+      case Some(details) => details.telephone.getOrElse("")
+      case None          => ""
+    }
 
   private def createConversationList(messages: List[ConversationItem], replyType: RenderType.ReplyType): List[String] =
     replyType match {
