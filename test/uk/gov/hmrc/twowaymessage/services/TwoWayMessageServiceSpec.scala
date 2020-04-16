@@ -41,6 +41,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.connectors.MessageConnector
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model._
@@ -65,6 +66,8 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     .injector()
 
   val messageService = injector.instanceOf[TwoWayMessageService]
+
+  val enquiries: Enquiry = injector.instanceOf[Enquiry]
 
   val twoWayMessageReplyExample = TwoWayMessage(
     ContactDetails("someEmail@test.com"),
@@ -130,13 +133,13 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
       )
       when(
-        mockHtmlCreationService.createHtmlForPdf(any[String], any[String], any[List[ConversationItem]], any[String])
+        mockHtmlCreationService.createHtmlForPdf(any[String], any[String], any[List[ConversationItem]], any[String], any[EnquiryType])
       ).thenReturn(
         Future.successful(Right(<html/>.mkString))
       )
 
       val name = Name(Option("firstname"), Option("surname"))
-      val messageResult = await(messageService.post("p800", nino, twoWayMessageExample, dmsMetadataExample, name))
+      val messageResult = await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
       messageResult.header.status shouldBe 201
     }
 
@@ -144,7 +147,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       when(mockMessageConnector.postMessage(any[Message])(any[HeaderCarrier]))
         .thenReturn(Future.successful(HttpResponse(Http.Status.BAD_REQUEST)))
       val name = Name(Option("firstname"), Option("surname"))
-      val messageResult = await(messageService.post("p800", nino, twoWayMessageExample, dmsMetadataExample, name))
+      val messageResult = await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
       messageResult.header.status shouldBe 502
     }
 

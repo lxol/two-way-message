@@ -20,7 +20,7 @@
 
 @import uk.gov.hmrc.twowaymessage.model.TwoWayMessage
 
-@(url: String, nino: String, subject: Html, content: Html)
+@(url: String, taxIdValue: String, subject: Html, content: Html, pdfPageTitle: String, pdfTaxIdTitle: String)
 <html lang="en" class="govuk-template">
     <head>
         <title>GOV.UK - The best place to find government services and information</title>
@@ -43,7 +43,7 @@
                 #header_top {border-bottom:none;}
                 #header {background:black;color:white;}
                 #header_bottom {clear:both;border-bottom-color:black;}
-                #nino {padding-right:20px;}
+                #taxIdValue {padding-right:20px;}
                 #internal {font-family:Arial,sans-serif;font-size:1.5rem;float:right}
                 #indented {padding-left: 20px;}
                 #subject {padding-right: 10px;}
@@ -65,7 +65,7 @@
                 </div>
             </div>
             <div id="header_bottom" class="govuk-header__container govuk-width-container">
-                <div class="govuk-header-question">P800 Secure message question</div>
+                <div class="govuk-header-question">@pdfPageTitle</div>
             </div>
         </header>
         <div class="govuk-width-container">
@@ -73,7 +73,7 @@
                 <h1 class="govuk-heading-xl">Summary</h1>
                 <h2 class="govuk-heading-l">Customer details</h2>
                 <hr />
-                <p class="govuk-body-l"><span id="nino" class="govuk-font-weight-bold">National insurance number</span>@nino</p>
+                <p class="govuk-body-l"><span id="taxIdValue" class="govuk-font-weight-bold">@pdfTaxIdTitle</span>@taxIdValue</p>
                 <hr />
                 <h2 class="govuk-heading-l">To reply to this message, copy this link:</h2>
                 <p class="govuk-body-l"><a href="@url">@url</a></p>
@@ -87,3 +87,4 @@
         </div>
     </body>
 </html>
+

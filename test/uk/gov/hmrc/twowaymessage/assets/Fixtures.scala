@@ -114,7 +114,7 @@ trait Fixtures {
            | ]
          """.stripMargin
 
-  def expectedPdfHtml(subject: String): String = {
+  def expectedPdfHtml(subject: String, pdfPageTitle: String, pdfTaxIdTitle: String): String = {
     val doctype = "<!DOCTYPE html>"
     val css = """body,header {display:block;margin:0;font-family:Arial,sans-serif;font-size:1.5em;color:black;}
                  | .govuk-header-question {font-size:2.25rem;text-align:center;}
@@ -133,7 +133,7 @@ trait Fixtures {
                  | #header_top {border-bottom:none;}
                  | #header {background:black;color:white;}
                  | #header_bottom {clear:both;border-bottom-color:black;}
-                 | #nino {padding-right:20px;}
+                 | #taxIdValue {padding-right:20px;}
                  | #internal {font-family:Arial,sans-serif;font-size:1.5rem;float:right}
                  | #indented {padding-left: 20px;}
                  | #subject {padding-right: 10px;}""".stripMargin.split("\n").mkString
@@ -161,7 +161,7 @@ trait Fixtures {
               </div>
             </div>
             <div class="govuk-header__container govuk-width-container" id="header_bottom">
-              <div class="govuk-header-question">P800 Secure message question</div>
+        <div class="govuk-header-question">{Unparsed(pdfPageTitle)}</div>
             </div>
           </header>
           <div class="govuk-width-container">
@@ -170,7 +170,7 @@ trait Fixtures {
               <h2 class="govuk-heading-l">Customer details</h2>
               <hr/>
               <p class="govuk-body-l">
-                <span class="govuk-font-weight-bold" id="nino">National insurance number</span>
+        <span class="govuk-font-weight-bold" id="taxIdValue">{Unparsed(pdfTaxIdTitle)}</span>
                 AB234567C</p>
               <hr/>
               <h2 class="govuk-heading-l">To reply to this message, copy this link:</h2>

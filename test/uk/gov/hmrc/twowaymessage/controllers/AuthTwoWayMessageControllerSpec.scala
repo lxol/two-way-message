@@ -40,6 +40,7 @@ import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
+import uk.gov.hmrc.twowaymessage.enquiries.EnquiryType
 import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
@@ -84,7 +85,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("p800")(fakeRequest1))
@@ -143,7 +144,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, org.mockito.ArgumentMatchers.eq(sautr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(sautr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("sa-general")(fakeRequest1))
@@ -180,7 +181,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, org.mockito.ArgumentMatchers.eq(ctutr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(ctutr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("ct-general")(fakeRequest1))
@@ -217,7 +218,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, org.mockito.ArgumentMatchers.eq(hmrcMtdVat), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(hmrcMtdVat), any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("vat-general")(fakeRequest1))
@@ -257,7 +258,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("epaye-general")(fakeRequest1))
@@ -297,7 +298,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("epaye-jrs")(fakeRequest1))
@@ -337,7 +338,7 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(anyString, any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          .post(any[EnquiryType], any[TaxIdentifier with SimpleName], any[TwoWayMessage], any[DmsMetadata], any[Name])(
             any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("vat-general")(fakeRequest1))

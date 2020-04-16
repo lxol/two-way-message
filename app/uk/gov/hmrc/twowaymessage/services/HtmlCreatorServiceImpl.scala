@@ -20,15 +20,15 @@ import javax.inject.Inject
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import play.twirl.api.Html
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.twowaymessage.model.{ConversationItem, ItemMetadata, MessageType}
-import uk.gov.hmrc.twowaymessage.utils.HtmlUtil._
-import uk.gov.hmrc.twowaymessage.utils.XmlConversion
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import scala.xml._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
+import uk.gov.hmrc.twowaymessage.model.{ConversationItem, ItemMetadata, MessageType}
+import uk.gov.hmrc.twowaymessage.utils.HtmlUtil._
+import uk.gov.hmrc.twowaymessage.utils.XmlConversion
 
 class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends HtmlCreatorService {
 
@@ -51,13 +51,13 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
   override def createHtmlForPdf(latestMessageId: String,
                                 customerId: String, messages:
                                 List[ConversationItem],
-                                subject: String): Future[Either[String,String]] = {
+                                subject: String, enquiryType: EnquiryType): Future[Either[String,String]] = {
     val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
     val url = s"$frontendUrl/message/$latestMessageId/reply"
     createConversation(latestMessageId, messages, RenderType.Adviser) map {
       case Left(error) => Left(error)
       case Right(html) =>
-        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, Html(escapeForXhtml(subject)), html).body) match {
+        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, Html(escapeForXhtml(subject)), html, enquiryType.pdfPageTitle, enquiryType.pdfTaxIdTitle).body) match {
           case Success(xml) => Right("<!DOCTYPE html>" + Xhtml.toXhtml(Utility.trim(xml.head)))
           case Failure(e) => Left("Unable to generate HTML for PDF due to: " + e.getMessage)
         }

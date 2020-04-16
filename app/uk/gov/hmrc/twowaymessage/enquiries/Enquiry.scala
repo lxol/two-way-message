@@ -26,5 +26,7 @@ case class EnquiryType(
                         val classificationType: String,
                         val businessArea: String,
                         val responseTime: String,
-                        val displayName: String
+                        val displayName: String,
+                        val pdfPageTitle: String,
+                        val pdfTaxIdTitle: String
                       )

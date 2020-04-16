@@ -123,7 +123,7 @@ class TwoWayMessageController @Inject()(
           case Some(enquiryId) =>
             val dmsMetaData =
               DmsMetadata(enquiryId.dmsFormId, taxIdentifier.name, enquiryId.classificationType, enquiryId.businessArea)
-            twms.post(enquiryType, taxIdentifier, requestBody.as[TwoWayMessage], dmsMetaData, name)
+            twms.post(enquiryId, taxIdentifier, requestBody.as[TwoWayMessage], dmsMetaData, name)
           case None =>
             Future.successful(BadRequest(Json.obj("error" -> 400, "message" -> s"Invalid EnquityId: $enquiryType")))
         }
