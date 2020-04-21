@@ -153,8 +153,12 @@ class TwoWayMessageServiceImpl @Inject()(
       handleResponse
     } recover handleError
 
-  private def handleResponse(subject: String, response: HttpResponse, dmsMetaData: DmsMetadata, enquiryType: EnquiryType, contactDetails: Option[ContactDetails])(
-    implicit hc: HeaderCarrier): Future[Result] =
+  private def handleResponse(
+    subject: String,
+    response: HttpResponse,
+    dmsMetaData: DmsMetadata,
+    enquiryType: EnquiryType,
+    contactDetails: Option[ContactDetails])(implicit hc: HeaderCarrier): Future[Result] =
     response.status match {
       case CREATED =>
         response.json.validate[Identifier].asOpt match {
@@ -162,10 +166,12 @@ class TwoWayMessageServiceImpl @Inject()(
             findMessagesBy(identifier.id).flatMap {
               case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
               case Right(list) =>
-                htmlCreatorService.createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject, enquiryType, contactDetails).flatMap {
-                  case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
-                  case Right(html) => createDmsSubmission(html, response, dmsMetaData)
-                }
+                htmlCreatorService
+                  .createHtmlForPdf(identifier.id, dmsMetaData.customerId, list, subject, enquiryType, contactDetails)
+                  .flatMap {
+                    case Left(error) => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, error))
+                    case Right(html) => createDmsSubmission(html, response, dmsMetaData)
+                  }
             }
           case None => Future.successful(errorResponse(INTERNAL_SERVER_ERROR, "Failed to create enquiry reference"))
         }

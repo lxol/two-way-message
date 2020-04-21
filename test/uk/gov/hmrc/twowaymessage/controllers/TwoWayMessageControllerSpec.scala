@@ -82,10 +82,9 @@ class TwoWayMessageControllerSpec
     "return 201 (Created) when a message is successfully created in the message service " in {
       val nino = Nino("AB123456C")
       val name = Name(Option("Firstname"), Option("Surname"))
-      when(
-        mockMessageService
-          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
-            any[HeaderCarrier]))
+      when(mockMessageService
+        .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(controller.validateAndPostMessage("p800", nino, twoWayMessageGood, name))
       result.header.status shouldBe Status.CREATED
@@ -118,15 +117,15 @@ class TwoWayMessageControllerSpec
     "return 200 (Ok) when metadata for a valid message id is requested correctly" in {
       val dummyMetadata = MessageMetadata(
         "123",
-        TaxEntity("abc",
-          new TaxIdentifier with SimpleName {
-            override val name: String = "a"
-            override def value: String = "b"
-          }),
-          "subject",
+        TaxEntity("abc", new TaxIdentifier with SimpleName {
+          override val name: String = "a"
+          override def value: String = "b"
+        }),
+        "subject",
         MetadataDetails(None, None, None),
         None,
-        Some("08 May 2019"))
+        Some("08 May 2019")
+      )
       when(mockMessageService.getMessageMetadata(any[String])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Some(dummyMetadata)))
       val result = await(controller.getRecipientMetadata("123")(FakeRequest()))

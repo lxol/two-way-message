@@ -28,8 +28,9 @@ class EnquirySpec extends WordSpec with Matchers {
         businessArea = "PT Operations",
         responseTime = "5 days",
         displayName = "",
-        pdfPageTitle  = "Received from: P800 secure message",
-        pdfTaxIdTitle = "National insurance number")))
+        pdfPageTitle = "Received from: P800 secure message",
+        pdfTaxIdTitle = "National insurance number"
+      )))
 
   "for a 'P800' enquiry" should {
 

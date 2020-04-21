@@ -44,8 +44,12 @@ trait TwoWayMessageService {
 
   def getMessageMetadata(messageId: String)(implicit hc: HeaderCarrier): Future[Option[MessageMetadata]]
 
-  def post(enquiryType: EnquiryType, taxIdentifier: TaxIdWithName, twoWayMessage: TwoWayMessage, dmsMetaData: DmsMetadata, name: Name)(
-    implicit hc: HeaderCarrier): Future[Result]
+  def post(
+    enquiryType: EnquiryType,
+    taxIdentifier: TaxIdWithName,
+    twoWayMessage: TwoWayMessage,
+    dmsMetaData: DmsMetadata,
+    name: Name)(implicit hc: HeaderCarrier): Future[Result]
 
   def postAdviserReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result]

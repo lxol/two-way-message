@@ -17,10 +17,10 @@
 package uk.gov.hmrc.twowaymessage
 
 import com.google.common.io.BaseEncoding
-import play.api.libs.json.{JsObject, JsString}
+import play.api.libs.json.{ JsObject, JsString }
 
 object MessageUtil {
-  import play.api.libs.json.{Json, Reads}
+  import play.api.libs.json.{ Json, Reads }
 
   import scala.util.Random
 
@@ -30,47 +30,46 @@ object MessageUtil {
     BaseEncoding.base64().encode(s"Hello world! - ${Random.nextString(stringLength)}".getBytes())
   }
 
-  def generateSimpleContent: String = {
+  def generateSimpleContent: String =
     "Hello world!"
-  }
 
   case class MessageId(id: String)
 
-  def buildValidCustomerMessage: JsObject = {
-    JsObject(Seq(
-      "contactDetails" ->
-        JsObject(Seq("email" -> JsString("someEmail@test.com"))),
-      "subject" -> JsString("subject"),
-      "content" -> JsString(generateContent),
-      "replyTo" -> JsString("replyTo")
-    ))
-  }
+  def buildValidCustomerMessage: JsObject =
+    JsObject(
+      Seq(
+        "contactDetails" ->
+          JsObject(Seq("email" -> JsString("someEmail@test.com"))),
+        "subject" -> JsString("subject"),
+        "content" -> JsString(generateContent),
+        "replyTo" -> JsString("replyTo")
+      ))
 
-  def buildInvalidCustomerMessage: JsObject = {
-    JsObject(Seq(
-      "email" -> JsString("test@test.com"),
-      "content" -> JsString(generateContent),
-      "replyTo" -> JsString("replyTo")
-    ))
-  }
+  def buildInvalidCustomerMessage: JsObject =
+    JsObject(
+      Seq(
+        "email"   -> JsString("test@test.com"),
+        "content" -> JsString(generateContent),
+        "replyTo" -> JsString("replyTo")
+      ))
 
-  def buildValidReplyMessage: JsObject = {
-    JsObject(Seq(
-      "content" -> JsString(generateContent)
-    ))
-  }
+  def buildValidReplyMessage: JsObject =
+    JsObject(
+      Seq(
+        "content" -> JsString(generateContent)
+      ))
 
-  def buildValidReplyMessageWithTopic: JsObject = {
-    JsObject(Seq(
-      "content" -> JsString(generateContent),
-      "topic"   -> JsString("some-topic")
-    ))
-  }
+  def buildValidReplyMessageWithTopic: JsObject =
+    JsObject(
+      Seq(
+        "content" -> JsString(generateContent),
+        "topic"   -> JsString("some-topic")
+      ))
 
-  def buildInvalidReplyMessage(): JsObject = {
-    JsObject(Seq(
-      "c" -> JsString(generateContent)
-    ))
-  }
+  def buildInvalidReplyMessage(): JsObject =
+    JsObject(
+      Seq(
+        "c" -> JsString(generateContent)
+      ))
 
 }

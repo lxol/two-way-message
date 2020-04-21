@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.twowaymessage.controllers
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.{Action, _}
-import scala.concurrent.{ExecutionContext, Future}
+import play.api.mvc.{ Action, _ }
+import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.auth.core.AuthProvider.{ GovernmentGateway, PrivilegedApplication }
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ Name, ~ }
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 import uk.gov.hmrc.gform.dms.DmsMetadata
@@ -33,22 +33,22 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.WithJsonBody
 import uk.gov.hmrc.twowaymessage.connectors.AuthIdentifiersConnector
-import uk.gov.hmrc.twowaymessage.enquiries.{Enquiry, SubmissionDetails}
+import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, SubmissionDetails }
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model.TwoWayMessageFormat._
 import uk.gov.hmrc.twowaymessage.model._
-import uk.gov.hmrc.twowaymessage.services.{HtmlCreatorService, RenderType, TwoWayMessageService}
+import uk.gov.hmrc.twowaymessage.services.{ HtmlCreatorService, RenderType, TwoWayMessageService }
 
 @Singleton
 class TwoWayMessageController @Inject()(
   twms: TwoWayMessageService,
-  hcs:  HtmlCreatorService,
+  hcs: HtmlCreatorService,
   val authConnector: AuthConnector,
   val gformConnector: GformConnector,
   authIdentifiersConnector: AuthIdentifiersConnector,
   val enquiries: Enquiry,
-  val htmlCreatorService:HtmlCreatorService)(implicit ec: ExecutionContext)
+  val htmlCreatorService: HtmlCreatorService)(implicit ec: ExecutionContext)
     extends InjectedController with WithJsonBody with AuthorisedFunctions {
 
   // Customer creating a two-way message
@@ -90,7 +90,7 @@ class TwoWayMessageController @Inject()(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     twms.findMessagesBy(messageId).map {
       case Right(messages) => Ok(Json.toJson(messages))
-      case Left(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
+      case Left(errors)    => BadRequest(Json.obj("error" -> 400, "message" -> errors))
     }
   }
 
@@ -98,7 +98,7 @@ class TwoWayMessageController @Inject()(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     twms.findMessagesBy(messagesId).map {
       case Right(messages) => Ok(JsNumber(messages.size))
-      case Left(errors)  => BadRequest(Json.obj("error" -> 400, "message" -> errors))
+      case Left(errors)    => BadRequest(Json.obj("error" -> 400, "message" -> errors))
     }
   }
 
@@ -190,14 +190,10 @@ class TwoWayMessageController @Inject()(
         authIdentifiersConnector
           .enquiryTaxId(enrolments, enquiryTypeString)
           .map { taxIdWithName =>
-            enquiries(enquiryTypeString).map(enquiry => SubmissionDetails(
-              enquiry.displayName,
-              enquiry.responseTime,
-              taxIdWithName.name,
-              taxIdWithName.value)
-            ) match {
-              case Some(enquiryType)  => Future.successful(Ok(Json.toJson(enquiryType)))
-              case _                  => Future.successful(NotFound)
+            enquiries(enquiryTypeString).map(enquiry =>
+              SubmissionDetails(enquiry.displayName, enquiry.responseTime, taxIdWithName.name, taxIdWithName.value)) match {
+              case Some(enquiryType) => Future.successful(Ok(Json.toJson(enquiryType)))
+              case _                 => Future.successful(NotFound)
             }
           }
           .getOrElse(
@@ -209,55 +205,49 @@ class TwoWayMessageController @Inject()(
     } recover handleError
   }
 
+  def getContentBy(id: String, msgType: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-  def getContentBy(id: String, msgType: String): Action[AnyContent] = Action.async {
-    implicit request =>
-      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    authorised(AuthProviders(GovernmentGateway, PrivilegedApplication)) {
 
-      authorised(AuthProviders(GovernmentGateway, PrivilegedApplication)) {
-
-        def createMsg(typ: RenderType.ReplyType): Future[Result] = {
-          twms.findMessagesBy(id).flatMap {
-            case Right(msgList) => getHtmlResponse(id,msgList,typ)
-            case Left(err) =>
-              Logger.warn(s"Error retrieving messages: $err")
-              Future.successful(BadGateway(err))
-          }
+      def createMsg(typ: RenderType.ReplyType): Future[Result] =
+        twms.findMessagesBy(id).flatMap {
+          case Right(msgList) => getHtmlResponse(id, msgList, typ)
+          case Left(err) =>
+            Logger.warn(s"Error retrieving messages: $err")
+            Future.successful(BadGateway(err))
         }
 
-        msgType match {
-          case "Customer" => createMsg(RenderType.CustomerLink)
-          case "Adviser" => createMsg(RenderType.Adviser)
-          case _ => Future.successful(BadRequest)
-        }
+      msgType match {
+        case "Customer" => createMsg(RenderType.CustomerLink)
+        case "Adviser"  => createMsg(RenderType.Adviser)
+        case _          => Future.successful(BadRequest)
+      }
 
-      } recover handleError
+    } recover handleError
   }
 
-  private def getHtmlResponse(id:String, msgList: List[ConversationItem], typ: RenderType.ReplyType): Future[Result] = {
+  private def getHtmlResponse(id: String, msgList: List[ConversationItem], typ: RenderType.ReplyType): Future[Result] =
     htmlCreatorService.createConversation(id, msgList, typ).map {
       case Right(html) => Ok(html)
       case Left(error) =>
         Logger.warn(s"HtmlCreatorService conversion error: $error")
         InternalServerError(error)
     }
+
+  def getLatestMessage(messageId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    twms.getLastestMessage(messageId).map {
+      case Left(error) => BadGateway(error)
+      case Right(html) => Ok(html)
+    }
   }
 
-  def getLatestMessage(messageId: String): Action[AnyContent] = Action.async {
-    implicit request =>
-      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-      twms.getLastestMessage(messageId).map{
-        case Left(error)  => BadGateway(error)
-        case Right(html)  => Ok(html)
-      }
-  }
-
-  def getPreviousMessages(messageId: String): Action[AnyContent] = Action.async {
-    implicit request =>
-      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-      twms.getPreviousMessages(messageId).map{
-        case Left(error) => BadGateway(error)
-        case Right(html) => Ok(html)
-      }
+  def getPreviousMessages(messageId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    twms.getPreviousMessages(messageId).map {
+      case Left(error) => BadGateway(error)
+      case Right(html) => Ok(html)
+    }
   }
 }

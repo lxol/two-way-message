@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
 
 @Singleton
-class AuthIdentifiersConnector @Inject() (
+class AuthIdentifiersConnector @Inject()(
   val authConnector: core.AuthConnector,
   val enquiries: Enquiry
 ) extends AuthorisedFunctions {

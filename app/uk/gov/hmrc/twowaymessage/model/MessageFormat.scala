@@ -19,7 +19,7 @@ package uk.gov.hmrc.twowaymessage.model
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JodaReads, JodaWrites, Json, Reads, _}
+import play.api.libs.json.{ JodaReads, JodaWrites, Json, Reads, _ }
 import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 import uk.gov.hmrc.domain._
 import uk.gov.hmrc.twowaymessage.model.FormId.FormId
@@ -27,9 +27,8 @@ import uk.gov.hmrc.twowaymessage.model.MessageType.MessageType
 
 object MessageFormat {
 
-  def decodeBase64String(input: String): String = {
+  def decodeBase64String(input: String): String =
     new String(Base64.decodeBase64(input.getBytes("UTF-8")))
-  }
 
   implicit val taxpayerNameFormat: Format[TaxpayerName] = Json.format[TaxpayerName]
 
@@ -80,7 +79,7 @@ object MessageFormat {
           }
         case (Some(name), _) =>
           Reads[TaxIdWithName] { _ =>
-            JsError(s"recipient.taxIdentifier.name: unknown tax identifier name ${name}")
+            JsError(s"recipient.taxIdentifier.name: unknown tax identifier name $name")
           }
         case (None, _) =>
           Reads[TaxIdWithName] { _ =>
@@ -89,7 +88,8 @@ object MessageFormat {
       }
 
   implicit val identifierWrites = new Writes[TaxIdWithName] {
-    override def writes(taxId: TaxIdWithName): JsValue = JsObject(Seq("name" -> JsString(taxId.name), "value" -> JsString(taxId.value)))
+    override def writes(taxId: TaxIdWithName): JsValue =
+      JsObject(Seq("name" -> JsString(taxId.name), "value" -> JsString(taxId.value)))
   }
 
   implicit val format: Format[TaxIdWithName] = Format(identifierReads, identifierWrites)
@@ -98,7 +98,8 @@ object MessageFormat {
 
   implicit val externalRefFormat: Format[ExternalRef] = Json.format[ExternalRef]
 
-  implicit val dateFormat: Format[LocalDate] = Format[LocalDate](JodaReads.jodaLocalDateReads("yyyy-MM-dd"), JodaWrites.jodaLocalDateWrites("yyyy-MM-dd"))
+  implicit val dateFormat: Format[LocalDate] =
+    Format[LocalDate](JodaReads.jodaLocalDateReads("yyyy-MM-dd"), JodaWrites.jodaLocalDateWrites("yyyy-MM-dd"))
 
   implicit val formIdFormat: Format[FormId] =
     Format(
@@ -126,13 +127,8 @@ object MessageFormat {
       (__ \ "body").readNullable[ConversationItemDetails] and
       (__ \ "validFrom").read[LocalDate] and
       (__ \ "content").readNullable[String]
-    ){(id, subject, body, validFrom, content) =>
-    ConversationItem(
-      id,
-      subject,
-      body,
-      validFrom,
-      content.map(content => decodeBase64String(content)))
+  ) { (id, subject, body, validFrom, content) =>
+    ConversationItem(id, subject, body, validFrom, content.map(content => decodeBase64String(content)))
   }
 }
 
@@ -162,10 +158,15 @@ case class Message(
   content: String,
   details: Details)
 
-case class TaxpayerName(title: Option[String] = None, forename: Option[String] = None,
-                           secondForename: Option[String] = None, surname: Option[String] = None, honours:
-                        Option[String] = None, line1: Option[String] = None, line2: Option[String] = None,
-                        line3: Option[String] = None )
+case class TaxpayerName(
+  title: Option[String] = None,
+  forename: Option[String] = None,
+  secondForename: Option[String] = None,
+  surname: Option[String] = None,
+  honours: Option[String] = None,
+  line1: Option[String] = None,
+  line2: Option[String] = None,
+  line3: Option[String] = None)
 
 case class ExternalRef(id: String, source: String)
 
@@ -191,7 +192,7 @@ case class ConversationItemDetails(
   enquiryType: Option[String] = None,
   adviser: Option[Adviser] = None)
 
-case class ConversationItem (
+case class ConversationItem(
   id: String,
   subject: String,
   body: Option[ConversationItemDetails],
@@ -204,5 +205,3 @@ case class ItemMetadata(
   hasLink: Boolean = true,
   hasSmallSubject: Boolean = false
 )
-
-

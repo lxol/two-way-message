@@ -19,10 +19,10 @@ package uk.gov.hmrc.twowaymessage.connector.mocks
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, Suite}
+import org.scalatest.{ BeforeAndAfterEach, Suite }
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,15 +33,14 @@ trait MockAuthConnector extends BeforeAndAfterEach with MockitoSugar {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  def mockAuthorise[T](predicate: Predicate = EmptyPredicate, retrievals: Retrieval[T] = EmptyRetrieval)
-                      (response: Future[T]): Unit =
+  def mockAuthorise[T](predicate: Predicate = EmptyPredicate, retrievals: Retrieval[T] = EmptyRetrieval)(
+    response: Future[T]): Unit =
     when(
       mockAuthConnector.authorise(
         ArgumentMatchers.eq(predicate),
         ArgumentMatchers.eq(retrievals)
       )(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[ExecutionContext])
     ) thenReturn response
-
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -55,8 +54,11 @@ trait MockAuthConnector extends BeforeAndAfterEach with MockitoSugar {
     Enrolment(enrolmentName, Seq(), "Activated")
 
   def enrolEmpRef(enrolmentName: String, officeNum: String, officeRef: String): Enrolment =
-    Enrolment(enrolmentName, Seq(
-      EnrolmentIdentifier("TaxOfficeNumber", officeNum),
-      EnrolmentIdentifier("TaxOfficeReference", officeRef)
-    ), "Activated")
+    Enrolment(
+      enrolmentName,
+      Seq(
+        EnrolmentIdentifier("TaxOfficeNumber", officeNum),
+        EnrolmentIdentifier("TaxOfficeReference", officeRef)
+      ),
+      "Activated")
 }

@@ -29,7 +29,7 @@ import play.api.Mode
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{ JsSuccess, Json }
 import play.api.test.Helpers._
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.domain.TaxIds._
@@ -40,9 +40,10 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
 import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
-import uk.gov.hmrc.twowaymessage.model.{Message, _}
+import uk.gov.hmrc.twowaymessage.model.{ Message, _ }
 
-class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
+class MessageConnectorSpec
+    extends WordSpec with WithWireMock with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 
   lazy val mockhttpClient = mock[HttpClient]
   implicit lazy val mockHeaderCarrier = new HeaderCarrier()
@@ -138,7 +139,7 @@ class MessageConnectorSpec extends WordSpec with WithWireMock with Matchers with
 
       val messageId = "5d12eb115f0000000205c150"
       givenThat(
-        get(urlEqualTo(s"/messages-list/${messageId}"))
+        get(urlEqualTo(s"/messages-list/$messageId"))
           .willReturn(
             aResponse()
               .withStatus(Status.OK)

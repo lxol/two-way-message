@@ -23,9 +23,10 @@ import uk.gov.hmrc.gform.wshttp.GformWSHttp
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class PdfGeneratorConnector @Inject()(servicesConfig: ServicesConfig, wSHttp: GformWSHttp)(implicit ec: ExecutionContext) {
+class PdfGeneratorConnector @Inject()(servicesConfig: ServicesConfig, wSHttp: GformWSHttp)(
+  implicit ec: ExecutionContext) {
 
   //TODO: use stream
   def generatePDF(payload: Map[String, Seq[String]], headers: Seq[(String, String)])(
@@ -45,5 +46,6 @@ class PdfGeneratorConnector @Inject()(servicesConfig: ServicesConfig, wSHttp: Gf
   }
 
   private val serviceName = "pdf-generator"
-  lazy val baseURL: String = servicesConfig.baseUrl(serviceName) + servicesConfig.getConfString(s"$serviceName.base-path", "")
+  lazy val baseURL: String = servicesConfig.baseUrl(serviceName) + servicesConfig
+    .getConfString(s"$serviceName.base-path", "")
 }

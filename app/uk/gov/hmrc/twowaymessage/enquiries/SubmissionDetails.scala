@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{ Json, Writes }
 
 case class SubmissionDetails(displayName: String, responseTime: String, taxIdName: String, taxId: String)
 
