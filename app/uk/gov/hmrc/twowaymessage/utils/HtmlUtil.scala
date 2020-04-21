@@ -18,12 +18,10 @@ package uk.gov.hmrc.twowaymessage.utils
 
 object HtmlUtil {
 
-  def escapeForHtml(text: String): String = {
-    text.replaceAll("<","&lt;").replaceAll(">","&gt;")
-  }
+  def escapeForHtml(text: String): String =
+    text.replaceAll("<", "&lt;").replaceAll(">", "&gt;")
 
-  def escapeForXhtml(text: String): String = {
-    escapeForHtml(text).replaceAll("&\\s","&amp; ")
-  }
+  def escapeForXhtml(text: String): String =
+    escapeForHtml(text).replaceAll("&\\s", "&amp; ")
 
 }

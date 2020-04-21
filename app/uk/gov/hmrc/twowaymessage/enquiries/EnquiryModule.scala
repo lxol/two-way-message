@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.twowaymessage.enquiries
 
-import com.google.inject.{AbstractModule, Provides}
+import com.google.inject.{ AbstractModule, Provides }
 import javax.inject.Singleton
-import play.api.{Configuration, Environment}
+import play.api.{ Configuration, Environment }
 
 class EnquiryModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {
 

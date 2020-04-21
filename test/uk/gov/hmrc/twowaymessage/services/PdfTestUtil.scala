@@ -24,16 +24,19 @@ object PdfTestUtil {
 
     import io.github.cloudify.scala.spdf._
 
-    val pdf: Pdf = Pdf("/usr/local/bin/wkhtmltopdf", new PdfConfig {
-      orientation := Portrait
-      pageSize := "A4"
-      marginTop := "1in"
-      marginBottom := "1in"
-      marginLeft := "1in"
-      marginRight := "1in"
-      disableExternalLinks := true
-      disableInternalLinks := true
-    })
+    val pdf: Pdf = Pdf(
+      "/usr/local/bin/wkhtmltopdf",
+      new PdfConfig {
+        orientation := Portrait
+        pageSize := "A4"
+        marginTop := "1in"
+        marginBottom := "1in"
+        marginLeft := "1in"
+        marginRight := "1in"
+        disableExternalLinks := true
+        disableInternalLinks := true
+      }
+    )
 
     val outputFile: File = new File(inputFileName)
     pdf.run(html, outputFile)

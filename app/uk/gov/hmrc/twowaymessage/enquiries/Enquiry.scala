@@ -21,12 +21,12 @@ class Enquiry(enquiries: Map[String, EnquiryType]) {
 }
 
 case class EnquiryType(
-                        val name: String,
-                        val dmsFormId: String,
-                        val classificationType: String,
-                        val businessArea: String,
-                        val responseTime: String,
-                        val displayName: String,
-                        val pdfPageTitle: String,
-                        val pdfTaxIdTitle: String
-                      )
+  val name: String,
+  val dmsFormId: String,
+  val classificationType: String,
+  val businessArea: String,
+  val responseTime: String,
+  val displayName: String,
+  val pdfPageTitle: String,
+  val pdfTaxIdTitle: String
+)

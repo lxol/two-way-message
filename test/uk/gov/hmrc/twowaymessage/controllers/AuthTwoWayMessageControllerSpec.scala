@@ -24,24 +24,24 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.{Injector, bind}
+import play.api.inject.{ Injector, bind }
 import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 import play.api.test.Helpers._
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import uk.gov.hmrc.auth.core.AuthProvider.{ GovernmentGateway, PrivilegedApplication }
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.authorise.{ EmptyPredicate, Predicate }
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
-import uk.gov.hmrc.domain.{ Nino, SaUtr, CtUtr, HmrcMtdVat, HmrcObtdsOrg, EmpRef, SimpleName, TaxIdentifier }
+import uk.gov.hmrc.auth.core.retrieve.{ Name, ~ }
+import uk.gov.hmrc.domain.{ CtUtr, EmpRef, HmrcMtdVat, HmrcObtdsOrg, Nino, SaUtr, SimpleName, TaxIdentifier }
 import uk.gov.hmrc.gform.dms.DmsMetadata
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.twowaymessage.assets.TestUtil
 import uk.gov.hmrc.twowaymessage.connector.mocks.MockAuthConnector
 import uk.gov.hmrc.twowaymessage.enquiries.EnquiryType
-import uk.gov.hmrc.twowaymessage.model.{TwoWayMessage, TwoWayMessageReply}
+import uk.gov.hmrc.twowaymessage.model.{ TwoWayMessage, TwoWayMessageReply }
 import uk.gov.hmrc.twowaymessage.services.TwoWayMessageService
 
 import scala.concurrent.Future
@@ -60,13 +60,13 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
   val authPredicate: Predicate = EmptyPredicate
 
   val twoWayMessageGood: JsValue = Json.parse("""
-                                       |    {
-                                       |      "contactDetails": {
-                                       |         "email":"someEmail@test.com"
-                                       |      },
-                                       |      "subject":"QUESTION",
-                                       |      "content":"SGVsbG8gV29ybGQ="
-                                       |    }""".stripMargin)
+                                                |    {
+                                                |      "contactDetails": {
+                                                |         "email":"someEmail@test.com"
+                                                |      },
+                                                |      "subject":"QUESTION",
+                                                |      "content":"SGVsbG8gV29ybGQ="
+                                                |    }""".stripMargin)
 
   val fakeRequest1 = FakeRequest(
     Helpers.POST,
@@ -83,10 +83,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
         Future.successful(new ~(Enrolments(Set(enrol("HMRC-NI", "nino", "AB123456C"))), Some(name))))
 
-      when(
-        mockMessageService
-          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
-            any[HeaderCarrier]))
+      when(mockMessageService
+        .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(nino), any[TwoWayMessage], any[DmsMetadata], any[Name])(
+          any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("p800")(fakeRequest1))
       result.header.status mustBe Status.CREATED
@@ -117,15 +116,13 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     }
 
     "return 401 (UNAUTHORIZED) when AuthConnector returns an exception that extends NoActiveSession" in {
-      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-        Future.failed(MissingBearerToken()))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(Future.failed(MissingBearerToken()))
       val result = await(testTwoWayMessageController.createMessage("p800")(fakeRequest1))
       result.header.status mustBe Status.UNAUTHORIZED
     }
 
     "return 403 (FORBIDDEN) when AuthConnector returns an exception that doesn't extend NoActiveSession" in {
-      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
-        Future.failed(InsufficientEnrolments()))
+      mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(Future.failed(InsufficientEnrolments()))
       val result = await(testTwoWayMessageController.createMessage("p800")(fakeRequest1))
       result.header.status mustBe Status.FORBIDDEN
     }
@@ -144,8 +141,12 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(sautr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
-            any[HeaderCarrier]))
+          .post(
+            any[EnquiryType],
+            org.mockito.ArgumentMatchers.eq(sautr),
+            any[TwoWayMessage],
+            any[DmsMetadata],
+            any[Name])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("sa-general")(fakeRequest1))
       result.header.status mustBe Status.CREATED
@@ -181,8 +182,12 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(ctutr), any[TwoWayMessage], any[DmsMetadata], any[Name])(
-            any[HeaderCarrier]))
+          .post(
+            any[EnquiryType],
+            org.mockito.ArgumentMatchers.eq(ctutr),
+            any[TwoWayMessage],
+            any[DmsMetadata],
+            any[Name])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("ct-general")(fakeRequest1))
       result.header.status mustBe Status.CREATED
@@ -218,8 +223,12 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
       when(
         mockMessageService
-          .post(any[EnquiryType], org.mockito.ArgumentMatchers.eq(hmrcMtdVat), any[TwoWayMessage], any[DmsMetadata], any[Name])(
-            any[HeaderCarrier]))
+          .post(
+            any[EnquiryType],
+            org.mockito.ArgumentMatchers.eq(hmrcMtdVat),
+            any[TwoWayMessage],
+            any[DmsMetadata],
+            any[Name])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Created(Json.toJson("id" -> UUID.randomUUID().toString))))
       val result = await(testTwoWayMessageController.createMessage("vat-general")(fakeRequest1))
       result.header.status mustBe Status.CREATED
@@ -248,9 +257,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 201 (CREATED) when a message is successfully created by the message service with a valid EmpRef" in {
       val empRef = new TaxIdentifier with SimpleName {
-            override val name: String = "empRef"
-            override def value: String = "12345/67890"
-          }
+        override val name: String = "empRef"
+        override def value: String = "12345/67890"
+      }
       val name = Name(Option("firstname"), Option("surename"))
 
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
@@ -288,9 +297,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 201 (CREATED) when a message is successfully created by the message service with a valid EmpRef" in {
       val empRef = new TaxIdentifier with SimpleName {
-            override val name: String = "empRef"
-            override def value: String = "12345/67890"
-          }
+        override val name: String = "empRef"
+        override def value: String = "12345/67890"
+      }
       val name = Name(Option("firstname"), Option("surename"))
 
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
@@ -328,9 +337,9 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
     "return 201 (CREATED) when a message is successfully created by the message service with a valid HMCE-VATDEC-ORG" in {
       val vatdec = new TaxIdentifier with SimpleName {
-            override val name: String = "HMCE-VATDEC-ORG"
-            override def value: String = "1234567890"
-          }
+        override val name: String = "HMCE-VATDEC-ORG"
+        override def value: String = "1234567890"
+      }
       val name = Name(Option("firstname"), Option("surename"))
 
       mockAuthorise(retrievals = Retrievals.allEnrolments and Retrievals.name)(
@@ -378,15 +387,13 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
     }
 
     "return 401 (UNAUTHORIZED) when AuthConnector returns an exception that extends NoActiveSession" in {
-      mockAuthorise(retrievals = Retrievals.allEnrolments)(
-        Future.failed(MissingBearerToken()))
+      mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.failed(MissingBearerToken()))
       val result = await(testTwoWayMessageController.createCustomerResponse("p800", "replyTo")(fakeRequest1))
       result.header.status mustBe Status.UNAUTHORIZED
     }
 
     "return 403 (FORBIDDEN) when AuthConnector returns an exception that doesn't extend NoActiveSession" in {
-      mockAuthorise(retrievals = Retrievals.allEnrolments)(
-        Future.failed(InsufficientEnrolments()))
+      mockAuthorise(retrievals = Retrievals.allEnrolments)(Future.failed(InsufficientEnrolments()))
       val result: Result =
         await(testTwoWayMessageController.createCustomerResponse("queueName", "replyTo")(fakeRequest1))
       result.header.status mustBe Status.FORBIDDEN
@@ -416,27 +423,94 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
 
   "The TwoWayMessageController.getEnquiryTypeDetails method" should {
 
-    case class EnquiryTypeDetailsScenario(enquiryType: String,
-                                          enrolments: Set[Enrolment],
-                                          expectedDisplayName: String,
-                                          invalidEnquiryType: String,
-                                          taxIdName: String,
-                                          taxId: String)
+    case class EnquiryTypeDetailsScenario(
+      enquiryType: String,
+      enrolments: Set[Enrolment],
+      expectedDisplayName: String,
+      invalidEnquiryType: String,
+      taxIdName: String,
+      taxId: String)
 
     val hmrcNiEnrol = enrol("HMRC-NI", "nino", "AB123456C")
     val enquiryTypeDisplayNameMap = List(
       EnquiryTypeDetailsScenario("p800", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-overpayment", Set(hmrcNiEnrol), "P800 overpayment enquiry", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-paid", Set(hmrcNiEnrol), "P800 overpayment paid enquiry", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-processing", Set(hmrcNiEnrol), "P800 overpayment processing enquiry", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-sent", Set(hmrcNiEnrol), "P800 overpayment sent enquiry", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-not-available", Set(hmrcNiEnrol), "P800 overpayment not available enquiry", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("p800-underpayment", Set(hmrcNiEnrol), "P800 underpayment", "epaye-general", "nino", "AB123456C"),
-      EnquiryTypeDetailsScenario("sa-general", Set(enrol("IR-SA", "sautr", "1234567890")), "Self Assessment", "epaye-general", "sautr", "1234567890"),
-      EnquiryTypeDetailsScenario("ct-general", Set(enrol("IR-CT", "ctutr", "1234")), "Corporation Tax", "epaye-general", "ctutr", "1234"),
-      EnquiryTypeDetailsScenario("vat-general", Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890")), "VAT", "epaye-general", "HMRC-MTD-VAT", "1234567890"),
-      EnquiryTypeDetailsScenario("epaye-general", Set(enrolEmpRef("IR-PAYE", "12345", "67890")), "PAYE for employers", "p800", "empRef", "12345/67890"),
-      EnquiryTypeDetailsScenario("epaye-jrs", Set(enrolEmpRef("IR-PAYE", "12183", "23190")), "PAYE for employers Job Retention Scheme", "p800", "empRef", "12183/23190")
+      EnquiryTypeDetailsScenario(
+        "p800-overpayment",
+        Set(hmrcNiEnrol),
+        "P800 overpayment enquiry",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "p800-paid",
+        Set(hmrcNiEnrol),
+        "P800 overpayment paid enquiry",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "p800-processing",
+        Set(hmrcNiEnrol),
+        "P800 overpayment processing enquiry",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "p800-sent",
+        Set(hmrcNiEnrol),
+        "P800 overpayment sent enquiry",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "p800-not-available",
+        Set(hmrcNiEnrol),
+        "P800 overpayment not available enquiry",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "p800-underpayment",
+        Set(hmrcNiEnrol),
+        "P800 underpayment",
+        "epaye-general",
+        "nino",
+        "AB123456C"),
+      EnquiryTypeDetailsScenario(
+        "sa-general",
+        Set(enrol("IR-SA", "sautr", "1234567890")),
+        "Self Assessment",
+        "epaye-general",
+        "sautr",
+        "1234567890"),
+      EnquiryTypeDetailsScenario(
+        "ct-general",
+        Set(enrol("IR-CT", "ctutr", "1234")),
+        "Corporation Tax",
+        "epaye-general",
+        "ctutr",
+        "1234"),
+      EnquiryTypeDetailsScenario(
+        "vat-general",
+        Set(enrol("HMRC-MTD-VAT", "HMRC-MTD-VAT", "1234567890")),
+        "VAT",
+        "epaye-general",
+        "HMRC-MTD-VAT",
+        "1234567890"),
+      EnquiryTypeDetailsScenario(
+        "epaye-general",
+        Set(enrolEmpRef("IR-PAYE", "12345", "67890")),
+        "PAYE for employers",
+        "p800",
+        "empRef",
+        "12345/67890"),
+      EnquiryTypeDetailsScenario(
+        "epaye-jrs",
+        Set(enrolEmpRef("IR-PAYE", "12183", "23190")),
+        "PAYE for employers Job Retention Scheme",
+        "p800",
+        "empRef",
+        "12183/23190")
     )
 
     enquiryTypeDisplayNameMap.foreach(scenario => {
@@ -447,11 +521,11 @@ class AuthTwoWayMessageControllerSpec extends TestUtil with MockAuthConnector {
         await(result).header.status mustBe Status.OK
         Json.parse(contentAsString(result)) mustBe
           Json.parse(s"""{
-                       |"displayName":"${scenario.expectedDisplayName}",
-                       |"responseTime":"5 days",
-                       |"taxIdName":"${scenario.taxIdName}",
-                       |"taxId":"${scenario.taxId}"
-                       |}""".stripMargin)
+                        |"displayName":"${scenario.expectedDisplayName}",
+                        |"responseTime":"5 days",
+                        |"taxIdName":"${scenario.taxIdName}",
+                        |"taxId":"${scenario.taxId}"
+                        |}""".stripMargin)
       }
 
       s"return 401 (UNAUTHORIZED) when AuthConnector returns an exception that extends NoActiveSession for ${scenario.enquiryType} enquiry type" in {

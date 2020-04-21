@@ -17,15 +17,15 @@
 package uk.gov.hmrc.gform.dms
 
 import java.time._
-import java.util.{Base64, UUID}
+import java.util.{ Base64, UUID }
 
 import com.codahale.metrics.SharedMetricRegistries
-import com.google.inject.{AbstractModule, TypeLiteral}
+import com.google.inject.{ AbstractModule, TypeLiteral }
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{ JsValue, Json }
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.gform.Spec
@@ -33,7 +33,7 @@ import uk.gov.hmrc.gform.fileupload.FileUploadService
 import uk.gov.hmrc.gform.pdfgenerator.PdfGeneratorService
 import uk.gov.hmrc.gform.sharedmodel.form.EnvelopeId
 import uk.gov.hmrc.gform.sharedmodel.formtemplate.destinations.Destinations.DmsSubmission
-import uk.gov.hmrc.gform.sharedmodel.formtemplate.{Constant, FormTemplateId, TextExpression}
+import uk.gov.hmrc.gform.sharedmodel.formtemplate.{ Constant, FormTemplateId, TextExpression }
 import uk.gov.hmrc.gform.submission._
 import uk.gov.hmrc.gform.typeclasses.Rnd
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,7 +41,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.util.Random
 // @DoNotDiscover
-class DmsSubmissionControllerSpec extends Spec with GuiceOneAppPerSuite  {
+class DmsSubmissionControllerSpec extends Spec with GuiceOneAppPerSuite {
 
   lazy val validSubmission = DmsHtmlSubmission("", DmsMetadata("some-form-id", "some-customer-id", "", ""))
 
@@ -63,7 +63,7 @@ class DmsSubmissionControllerSpec extends Spec with GuiceOneAppPerSuite  {
 
   lazy val fixedRnd = new Rnd[Random] {
     val notVeryRandom = stub[Random]
-      (notVeryRandom.nextInt(_: Int)).when(*).returning(4)
+    (notVeryRandom.nextInt(_: Int)).when(*).returning(4)
 
     override def apply() = notVeryRandom
   }
@@ -77,7 +77,7 @@ class DmsSubmissionControllerSpec extends Spec with GuiceOneAppPerSuite  {
     .overrides(new TestGuiceModule())
     .injector()
 
-    SharedMetricRegistries.clear()
+  SharedMetricRegistries.clear()
   val testController = injector.instanceOf[DmsSubmissionController]
   "The DmsSubmissionController" should "create a file upload envelope" in {
     (mockFileUpload

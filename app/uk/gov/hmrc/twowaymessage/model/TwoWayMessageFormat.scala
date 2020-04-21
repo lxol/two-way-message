@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.model
 
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{ Json, Reads }
 
 object TwoWayMessageFormat {
 

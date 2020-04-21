@@ -18,8 +18,8 @@ package uk.gov.hmrc.gform
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest._
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.matchers.{BeMatcher, MatchResult, Matcher}
+import org.scalatest.concurrent.{ Eventually, ScalaFutures }
+import org.scalatest.matchers.{ BeMatcher, MatchResult, Matcher }
 import org.scalatest.prop.PropertyChecks
 import play.api.libs.json._
 

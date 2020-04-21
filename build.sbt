@@ -14,13 +14,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.SbtArtifactory
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
 import uk.gov.hmrc.ServiceManagerPlugin.serviceManagerSettings
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.{ExternalService, SbtBuildInfo, ShellPrompt}
-
 
 val appName = "two-way-message"
 
@@ -36,7 +36,17 @@ lazy val microservice = Project(appName, file("."))
       Resolver.bintrayRepo("hmrc","releases"),
       Resolver.bintrayRepo("jetbrains", "markdown"),
       "bintray-djspiewak-maven" at "https://dl.bintray.com/djspiewak/maven"
-    )
+    ),
+    inConfig(IntegrationTest)(scalafmtCoreSettings ++
+       Seq(
+         compileInputs in compile := Def.taskDyn {
+           val task = test in (resolvedScoped.value.scope in scalafmt.key)
+           val previousInputs = (compileInputs in compile).value
+           task.map(_ => previousInputs)
+         }.value
+       )
+    ),
+    scalafmtTestOnCompile in ThisBuild := true
   )
   .settings(
     majorVersion                     := 0,

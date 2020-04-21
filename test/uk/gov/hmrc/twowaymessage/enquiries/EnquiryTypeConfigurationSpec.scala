@@ -17,18 +17,16 @@
 package uk.gov.hmrc.twowaymessage.enquiries
 
 import com.codahale.metrics.SharedMetricRegistries
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 
-class EnquiryTypeConfigurationSpec extends WordSpec
-  with Matchers with GuiceOneAppPerSuite {
+class EnquiryTypeConfigurationSpec extends WordSpec with Matchers with GuiceOneAppPerSuite {
 
   val injector: Injector = new GuiceApplicationBuilder().injector()
 
   val enquiries: Enquiry = injector.instanceOf[Enquiry]
-
 
   "Enquiry configuration for p800" should {
 
@@ -186,7 +184,6 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         displayName = "VAT",
         pdfPageTitle = "Received from: VAT secure question",
         pdfTaxIdTitle = "Vat number"
-
       )
     }
   }
@@ -203,7 +200,7 @@ class EnquiryTypeConfigurationSpec extends WordSpec
         displayName = "PAYE for employers",
         pdfPageTitle = "Received from: EPAYE secure question",
         pdfTaxIdTitle = "EmpRef number"
-        )
+      )
     }
   }
 

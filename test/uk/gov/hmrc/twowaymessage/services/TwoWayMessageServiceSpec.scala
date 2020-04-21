@@ -21,12 +21,12 @@ import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HttpEntity.Strict
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{ JsString, Json }
 import play.api.test.Helpers._
 import play.mvc.Http
 import play.twirl.api.Html
@@ -34,9 +34,9 @@ import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.domain.TaxIds._
 import uk.gov.hmrc.domain._
-import uk.gov.hmrc.gform.dms.{DmsHtmlSubmission, DmsMetadata}
+import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
 import uk.gov.hmrc.gform.gformbackend.GformConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.twowaymessage.assets.Fixtures
@@ -46,7 +46,7 @@ import uk.gov.hmrc.twowaymessage.model.MessageFormat._
 import uk.gov.hmrc.twowaymessage.model.MessageMetadataFormat._
 import uk.gov.hmrc.twowaymessage.model._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with Fixtures with MockitoSugar {
 
@@ -70,7 +70,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
   val enquiries: Enquiry = injector.instanceOf[Enquiry]
 
   val twoWayMessageReplyExample = TwoWayMessage(
-    ContactDetails("someEmail@test.com",None),
+    ContactDetails("someEmail@test.com", None),
     "Question",
     "SGVsbG8gV29ybGQ=",
     Option.apply("replyId")
@@ -82,7 +82,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
     val nino = Nino("AB123456C")
     val twoWayMessageExample = TwoWayMessage(
-      ContactDetails("someEmail@test.com",None),
+      ContactDetails("someEmail@test.com", None),
       "Question",
       "SGVsbG8gV29ybGQ=",
       Option.empty
@@ -133,13 +133,20 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
         )
       )
       when(
-        mockHtmlCreationService.createHtmlForPdf(any[String], any[String], any[List[ConversationItem]], any[String], any[EnquiryType], any[Option[ContactDetails]])
+        mockHtmlCreationService.createHtmlForPdf(
+          any[String],
+          any[String],
+          any[List[ConversationItem]],
+          any[String],
+          any[EnquiryType],
+          any[Option[ContactDetails]])
       ).thenReturn(
         Future.successful(Right(<html/>.mkString))
       )
 
       val name = Name(Option("firstname"), Option("surname"))
-      val messageResult = await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
+      val messageResult =
+        await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
       messageResult.header.status shouldBe 201
     }
 
@@ -147,7 +154,8 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       when(mockMessageConnector.postMessage(any[Message])(any[HeaderCarrier]))
         .thenReturn(Future.successful(HttpResponse(Http.Status.BAD_REQUEST)))
       val name = Name(Option("firstname"), Option("surname"))
-      val messageResult = await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
+      val messageResult =
+        await(messageService.post(enquiries("p800").get, nino, twoWayMessageExample, dmsMetadataExample, name))
       messageResult.header.status shouldBe 502
     }
 
@@ -155,7 +163,6 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
   }
 
   "TwoWayMessageService.postAdviserReply" should {
-
 
     val messageMetadata = MessageMetadata(
       "5c18eb166f0000110204b160",
@@ -355,19 +362,18 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
       val expected =
         Message(
           ExternalRef("123412342314", "2WSM"),
-          Recipient(
-           new TaxIdentifier with SimpleName {
-             override val name: String = "nino"
-             override def value: String = "AB123456C"
-           },
-          "email@test.com", Option(taxpayerName)),
+          Recipient(new TaxIdentifier with SimpleName {
+            override val name: String = "nino"
+            override def value: String = "AB123456C"
+          }, "email@test.com", Option(taxpayerName)),
           MessageType.Customer,
           "QUESTION",
           "some base64-encoded-html",
           Details(FormId.Question, None, None, enquiryType = Some("p800"), waitTime = Some("5 days"))
         )
 
-      val originalMessage = TwoWayMessage(ContactDetails("email@test.com",None), "QUESTION", "some base64-encoded-html")
+      val originalMessage =
+        TwoWayMessage(ContactDetails("email@test.com", None), "QUESTION", "some base64-encoded-html")
       val nino = Nino("AB123456C")
       val name = Name(Option("firstname"), Option("surname"))
       val actual = messageService.createJsonForMessage("123412342314", originalMessage, nino, "p800", name)
@@ -376,9 +382,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
     "be correct for a two-way message replied to by an adviser" in {
       val expected = Message(
         ExternalRef("some-random-id", "2WSM"),
-        Recipient(
-          Nino("AB123456C"),
-          "email@test.com"),
+        Recipient(Nino("AB123456C"), "email@test.com"),
         MessageType.Adviser,
         "QUESTION",
         "some base64-encoded-html",
@@ -387,9 +391,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
 
       val metadata = MessageMetadata(
         "mongo-id",
-        TaxEntity("regime",
-          Nino("AB123456C"),
-          Some("email@test.com")),
+        TaxEntity("regime", Nino("AB123456C"), Some("email@test.com")),
         "QUESTION",
         MetadataDetails(
           threadId = Some("thread-id"),
@@ -429,7 +431,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
   }
 
   val htmlMessageExample = TwoWayMessage(
-    ContactDetails("someEmail@test.com",None),
+    ContactDetails("someEmail@test.com", None),
     "This looks wrong I need it changed",
     "SSB0aGluayB0aGF0IHRoZSBhc3Nlc3NtZW50IGZvciBsYXN0IHllYXIgaXMgaW5jb3JyZWN0LiBJdCBzaG93cyBteSBDb21wYW55IGNhciB3aXRoIEImUSBhbmQgaXQgYWxzbyBzaG93cyB0aGF0IEkgd2FzIHJlY2VpdmluZyBhIGZ1ZWwgYmVuZWZpdC4KCkkgZGlkIHN0aWxsIGhhdmUgbXkgRm9yZCBGb2N1cyBjb21wYW55IGNhciBsYXN0IHllYXIgYnV0IEImUSBjaGFuZ2VkIHRoZWlyIHBvbGljeSBvbiBmdWVsLiBXZSBub3cgc3VibWl0IGEgbW9udGhseSBzaGVldCBzaG93aW5nIGFsbCBvdXIgYnVzaW5lc3MgYW5kIHBlcnNvbmFsIG1pbGVhZ2UuIEImUSBwYXlyb2xsIHRoZW4gY2hhcmdlIHVzIGJhY2sgdGhlIHBlcmNlbnRhZ2Ugb2YgcGVyc29uYWwgbWlsZWFnZSBpbiBvdXIgbmV4dCBwYXkgc2xpcC4KCkImUSBjaGFuZ2VkIHRoZSBwb2xpY3kgaW4gQXByaWwgMjAxOC4KCkkgdGhpbmsgdGhpcyBtZWFucyB5b3Ugd2lsbCBvd2UgbWUgc29tZSBtb25leSBvbiB0YXggcmF0aGVyIHRoYW4gbXkgb3duaW5nIG1vbmV5IHRvIHlvdS4=",
     Option.empty

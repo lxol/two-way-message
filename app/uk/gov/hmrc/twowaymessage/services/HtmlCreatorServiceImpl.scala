@@ -20,17 +20,18 @@ import javax.inject.Inject
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import play.twirl.api.Html
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 import scala.xml._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.twowaymessage.enquiries.{ Enquiry, EnquiryType }
-import uk.gov.hmrc.twowaymessage.model.{ContactDetails, ConversationItem, ItemMetadata, MessageType}
+import uk.gov.hmrc.twowaymessage.model.{ ContactDetails, ConversationItem, ItemMetadata, MessageType }
 import uk.gov.hmrc.twowaymessage.utils.HtmlUtil._
 import uk.gov.hmrc.twowaymessage.utils.XmlConversion
 
-class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends HtmlCreatorService {
+class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit ec: ExecutionContext)
+    extends HtmlCreatorService {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -46,20 +47,34 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
   }
 
   override def createSingleMessageHtml(conversationItem: ConversationItem): Future[Either[String, Html]] =
-    Future.successful(Right(Html.apply(format2wsMessageForCustomer(conversationItem, ItemMetadata(isLatestMessage = true, hasLink = false)))))
+    Future.successful(Right(
+      Html.apply(format2wsMessageForCustomer(conversationItem, ItemMetadata(isLatestMessage = true, hasLink = false)))))
 
-  override def createHtmlForPdf(latestMessageId: String,
-                                customerId: String, messages:
-                                List[ConversationItem],
-                                subject: String, enquiryType: EnquiryType, contactDetails: Option[ContactDetails]): Future[Either[String,String]] = {
+  override def createHtmlForPdf(
+    latestMessageId: String,
+    customerId: String,
+    messages: List[ConversationItem],
+    subject: String,
+    enquiryType: EnquiryType,
+    contactDetails: Option[ContactDetails]): Future[Either[String, String]] = {
     val frontendUrl: String = servicesConfig.getString("pdf-admin-prefix")
     val url = s"$frontendUrl/message/$latestMessageId/reply"
     createConversation(latestMessageId, messages, RenderType.Adviser) map {
       case Left(error) => Left(error)
       case Right(html) =>
-        XmlConversion.stringToXmlNodes(uk.gov.hmrc.twowaymessage.views.html.two_way_message(url, customerId, getContactTelephone(contactDetails), Html(escapeForXhtml(subject)), html, enquiryType.pdfPageTitle, enquiryType.pdfTaxIdTitle).body) match {
+        XmlConversion.stringToXmlNodes(
+          uk.gov.hmrc.twowaymessage.views.html
+            .two_way_message(
+              url,
+              customerId,
+              getContactTelephone(contactDetails),
+              Html(escapeForXhtml(subject)),
+              html,
+              enquiryType.pdfPageTitle,
+              enquiryType.pdfTaxIdTitle)
+            .body) match {
           case Success(xml) => Right("<!DOCTYPE html>" + Xhtml.toXhtml(Utility.trim(xml.head)))
-          case Failure(e) => Left("Unable to generate HTML for PDF due to: " + e.getMessage)
+          case Failure(e)   => Left("Unable to generate HTML for PDF due to: " + e.getMessage)
         }
     }
   }
@@ -86,8 +101,8 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
           .sortWith(_.id > _.id)
           .headOption
           .map { hm =>
-            format2wsMessageForCustomer(hm, ItemMetadata(isLatestMessage = true, hasSmallSubject = true)) :: messages.tail.map(m =>
-              format2wsMessageForCustomer(m, ItemMetadata(isLatestMessage = false)))
+            format2wsMessageForCustomer(hm, ItemMetadata(isLatestMessage = true, hasSmallSubject = true)) :: messages.tail
+              .map(m => format2wsMessageForCustomer(m, ItemMetadata(isLatestMessage = false)))
           }
           .getOrElse(List.empty)
       case RenderType.Adviser => messages.sortWith(_.id > _.id).map(msg => format2wsMessageForAdviser(msg))
@@ -105,10 +120,8 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
           .getOrElse(NodeSeq.Empty)
     )
 
-  private def format2wsMessageForAdviser(item: ConversationItem): String = {
-    Xhtml.toXhtml(
-      <p class="faded-text--small">{getAdviserDatesText(item)}</p> ++ getContentDiv(item.content))
-  }
+  private def format2wsMessageForAdviser(item: ConversationItem): String =
+    Xhtml.toXhtml(<p class="faded-text--small">{getAdviserDatesText(item)}</p> ++ getContentDiv(item.content))
 
   private def getHeader(metadata: ItemMetadata, subject: String): Elem = {
     val headingClass = "govuk-heading-xl margin-top-small margin-bottom-small"
@@ -121,38 +134,38 @@ class HtmlCreatorServiceImpl @Inject()(servicesConfig: ServicesConfig)(implicit 
 
   private def fixHtmlString(htmlString: String): String = {
     // makes line breaks XHTML valid
-    val lineBreakFix = ("<br>","<br/>")
+    val lineBreakFix = ("<br>", "<br/>")
     // preserves space in front of links
-    val linkSpaceFix = ("<a","&#160;<a")
-    val nonBreakingSpaceFix = ("&nbsp;","&#160;")
-    htmlString.replaceAllLiterally(lineBreakFix._1,lineBreakFix._2)
-      .replaceAllLiterally(linkSpaceFix._1,linkSpaceFix._2)
-      .replaceAllLiterally(nonBreakingSpaceFix._1,nonBreakingSpaceFix._2)
+    val linkSpaceFix = ("<a", "&#160;<a")
+    val nonBreakingSpaceFix = ("&nbsp;", "&#160;")
+    htmlString
+      .replaceAllLiterally(lineBreakFix._1, lineBreakFix._2)
+      .replaceAllLiterally(linkSpaceFix._1, linkSpaceFix._2)
+      .replaceAllLiterally(nonBreakingSpaceFix._1, nonBreakingSpaceFix._2)
   }
 
-  private def getContentDiv(maybeContent: Option[String]): Node = {
+  private def getContentDiv(maybeContent: Option[String]): Node =
     maybeContent match {
       case Some(content) =>
         XmlConversion.stringToXmlNodes(fixHtmlString(content)) match {
           case Success(nodes) => Utility.trim(<div>{nodes}</div>)
-          case Failure(_) => <div>There was a problem reading the message content</div>
+          case Failure(_)     => <div>There was a problem reading the message content</div>
         }
       case None => <div/>
     }
-  }
 
-  private def getContactLink(metadata: ItemMetadata, conversationItem: ConversationItem): Option[Elem] = {
-    if(metadata.isLatestMessage && metadata.hasLink) {
+  private def getContactLink(metadata: ItemMetadata, conversationItem: ConversationItem): Option[Elem] =
+    if (metadata.isLatestMessage && metadata.hasLink) {
       conversationItem.body.flatMap(_.`type` match {
         case MessageType.Adviser =>
           val contactUrl = servicesConfig.getString("contact-hmrc-url")
-          Some(<a href={contactUrl} target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>)
+          Some(
+            <a href={contactUrl} target="_blank" rel="noopener noreferrer">Contact HMRC (opens in a new window or tab)</a>)
         case _ => None
       })
     } else {
       None
     }
-  }
 
   private def getReplyLink(metadata: ItemMetadata, conversationItem: ConversationItem): Option[Elem] =
     if (metadata.isLatestMessage && metadata.hasLink) {

@@ -180,7 +180,8 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
       when(
         mockMessageConnector
           .getMessages(any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems("epaye-general"))))))
+        .thenReturn(
+          Future.successful(HttpResponse(Http.Status.OK, Some(Json.toJson(listOfConversationItems("epaye-general"))))))
 
       val result =
         testTwoWayMessageController.getContentBy("5d02201b5b0000360151779e", "Customer")(fakeRequest1).run()
@@ -195,8 +196,7 @@ class HtmlCreationSpec extends TestUtil with MockAuthConnector {
             Regards<br/>
             Matthew Groom<br/>
             HMRC digital team.</div>) ++
-          Utility.trim(
-            <p>
+          Utility.trim(<p>
               <span>
                 <a style="text-decoration:none;" href="/two-way-message-frontend/message/customer/epaye-general/5d02201b5b0000360151779e/reply#reply-input-label">
                   <svg style="vertical-align:text-top;padding-right:5px;" width="21px" height="20px" viewBox="0 0 33 31" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">

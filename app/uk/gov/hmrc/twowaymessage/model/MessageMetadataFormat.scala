@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.twowaymessage.model
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 
 import uk.gov.hmrc.domain.TaxIds.TaxIdWithName
 
@@ -36,5 +36,10 @@ case class TaxEntity(regime: String, identifier: TaxIdWithName, email: Option[St
 
 case class MetadataDetails(threadId: Option[String], enquiryType: Option[String], adviser: Option[Adviser])
 
-case class MessageMetadata(id: String, recipient: TaxEntity, subject: String, details: MetadataDetails,
-                           taxpayerName: Option[TaxpayerName] = None, messageDate: Option[String] = None)
+case class MessageMetadata(
+  id: String,
+  recipient: TaxEntity,
+  subject: String,
+  details: MetadataDetails,
+  taxpayerName: Option[TaxpayerName] = None,
+  messageDate: Option[String] = None)
