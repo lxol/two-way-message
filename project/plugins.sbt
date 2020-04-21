@@ -19,6 +19,4 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 
 addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.16")
 
-addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.15")
-
 addSbtPlugin("uk.gov.hmrc" % "sbt-service-manager" % "0.4.0")
