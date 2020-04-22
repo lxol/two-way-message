@@ -57,7 +57,7 @@ trait TwoWayMessageService {
   def postCustomerReply(twoWayMessageReply: TwoWayMessageReply, replyTo: String)(
     implicit hc: HeaderCarrier): Future[Result]
 
-  def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata)(
+  def createDmsSubmission(html: String, response: HttpResponse, dmsMetaData: DmsMetadata, messageId: String)(
     implicit hc: HeaderCarrier): Future[Result]
 
   def getMessageContentBy(messageId: String)(implicit hc: HeaderCarrier): Future[Option[String]]

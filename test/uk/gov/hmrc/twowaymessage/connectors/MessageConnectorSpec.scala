@@ -90,6 +90,23 @@ class MessageConnectorSpec
     SharedMetricRegistries.clear
   }
 
+  "Message Connector postDmsStatus" should {
+    "return status 201" in {
+
+      val messageId = "5d12eb115f0000000205c150"
+      val envelopId = "5456b115f0000000205c1599"
+
+      givenThat(
+        post(urlEqualTo(s"/messages/$messageId/dms-status/$envelopId"))
+          .willReturn(
+            aResponse()
+              .withStatus(Status.OK)))
+
+      val httpResult = await(messageConnector.postDmsStatus(messageId, envelopId)(new HeaderCarrier()))
+      httpResult.status shouldBe (200)
+    }
+  }
+
   "GET message metadata via message connector" should {
 
     "returns 200 successfully for a valid replyTo message identifier" in {
