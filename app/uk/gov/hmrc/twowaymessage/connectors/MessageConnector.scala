@@ -43,8 +43,7 @@ class MessageConnector @Inject()(httpClient: HttpClient, servicesConfig: Service
   def getMessages(messageId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     httpClient.GET(s"$messageBaseUrl/messages-list/$messageId")
 
-  def postDmsStatus(messageId: String, envelopId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def postDmsStatus(messageId: String, envelopId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     httpClient.POST(s"$messageBaseUrl/messages/$messageId/dms-status/$envelopId", "")
-  }
 
 }

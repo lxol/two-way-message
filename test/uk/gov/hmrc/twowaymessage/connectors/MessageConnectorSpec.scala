@@ -98,9 +98,8 @@ class MessageConnectorSpec
 
       givenThat(
         post(urlEqualTo(s"/messages/$messageId/dms-status/$envelopId"))
-          .willReturn(
-            aResponse()
-              .withStatus(Status.OK)))
+          .willReturn(aResponse()
+            .withStatus(Status.OK)))
 
       val httpResult = await(messageConnector.postDmsStatus(messageId, envelopId)(new HeaderCarrier()))
       httpResult.status shouldBe (200)
