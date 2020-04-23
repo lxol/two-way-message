@@ -18,17 +18,22 @@ package uk.gov.hmrc.gform.gformbackend
 
 import javax.inject.{ Inject, Singleton }
 import uk.gov.hmrc.gform.dms.DmsHtmlSubmission
+import uk.gov.hmrc.gform.sharedmodel.form.EnvelopeId
 import uk.gov.hmrc.gform.wshttp.GformWSHttp
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ ExecutionContext, Future }
-
+import uk.gov.hmrc.http._
 @Singleton
 class GformConnector @Inject()(ws: GformWSHttp, servicesConfig: ServicesConfig) {
   lazy val baseUrl = servicesConfig.baseUrl("gform") + servicesConfig.getConfString("gform.path-prefix", "")
-  def submitToDmsViaGform(
-    submission: DmsHtmlSubmission)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    ws.POST(s"$baseUrl/dms/submit", submission)
 
+  implicit val uuidHttpReads: HttpReads[java.util.UUID] = new HttpReads[java.util.UUID] {
+    def read(method: String, url: String, response: HttpResponse): java.util.UUID =
+      java.util.UUID.fromString(response.body)
+  }
+  def submitToDmsViaGform(
+    submission: DmsHtmlSubmission)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[java.util.UUID] =
+    ws.POST[DmsHtmlSubmission, java.util.UUID](s"$baseUrl/dms/submit", submission)
 }

@@ -36,6 +36,7 @@ import uk.gov.hmrc.domain.TaxIds._
 import uk.gov.hmrc.domain._
 import uk.gov.hmrc.gform.dms.{ DmsHtmlSubmission, DmsMetadata }
 import uk.gov.hmrc.gform.gformbackend.GformConnector
+import uk.gov.hmrc.gform.sharedmodel.form.EnvelopeId
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -129,7 +130,7 @@ class TwoWayMessageServiceSpec extends WordSpec with Matchers with GuiceOneAppPe
           .submitToDmsViaGform(any[DmsHtmlSubmission])(any[HeaderCarrier], any[ExecutionContext])
       ).thenReturn(
         Future.successful(
-          HttpResponse(Http.Status.CREATED)
+          java.util.UUID.fromString("01234567-9ABC-DEF0-1234-56789ABCDEF0")
         )
       )
       when(
