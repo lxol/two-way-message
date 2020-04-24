@@ -31,7 +31,7 @@ class GformConnector @Inject()(ws: GformWSHttp, servicesConfig: ServicesConfig) 
 
   implicit val uuidHttpReads: HttpReads[java.util.UUID] = new HttpReads[java.util.UUID] {
     def read(method: String, url: String, response: HttpResponse): java.util.UUID =
-      java.util.UUID.fromString(response.body)
+      java.util.UUID.fromString(handleResponse(method, url)(response) body)
   }
   def submitToDmsViaGform(
     submission: DmsHtmlSubmission)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[java.util.UUID] =
