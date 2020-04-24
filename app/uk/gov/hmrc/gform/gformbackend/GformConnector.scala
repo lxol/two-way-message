@@ -29,9 +29,9 @@ import uk.gov.hmrc.http._
 class GformConnector @Inject()(ws: GformWSHttp, servicesConfig: ServicesConfig) {
   lazy val baseUrl = servicesConfig.baseUrl("gform") + servicesConfig.getConfString("gform.path-prefix", "")
 
-  implicit val uuidHttpReads: HttpReads[java.util.UUID] = new HttpReads[java.util.UUID] {
+  implicit val uuidHttpReads: HttpReads[java.util.UUID] = new HttpReads[java.util.UUID] with HttpErrorFunctions {
     def read(method: String, url: String, response: HttpResponse): java.util.UUID =
-      java.util.UUID.fromString(handleResponse(method, url)(response) body)
+      java.util.UUID.fromString(handleResponse(method, url)(response).body)
   }
   def submitToDmsViaGform(
     submission: DmsHtmlSubmission)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[java.util.UUID] =
