@@ -20,7 +20,7 @@ import java.util.UUID
 
 import play.api.libs.json._
 case class ErrResponse(
-       error: String,
+  error: String,
   details: Option[JsValue] = None,
   occurrenceId: String = UUID.randomUUID().toString)
 
