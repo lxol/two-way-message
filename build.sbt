@@ -45,8 +45,7 @@ lazy val microservice = Project(appName, file("."))
            task.map(_ => previousInputs)
          }.value
        )
-    ),
-    scalafmtTestOnCompile in ThisBuild := true
+    )
   )
   .settings(
     majorVersion                     := 0,
